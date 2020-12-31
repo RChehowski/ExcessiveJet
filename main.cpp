@@ -238,6 +238,8 @@ void read_attribute_RuntimeVisibleAnnotations(ClassFileBlob& blob, u2 attribute_
 
 #include "Opcodes.h"
 
+using Bytecode::Opcodes;
+
 void read_attribute_Code(ClassFileBlob& blob, u2 attribute_name_index, u4 attribute_length) noexcept
 {
     u2 MaxStack = (u2)0;
@@ -256,19 +258,17 @@ void read_attribute_Code(ClassFileBlob& blob, u2 attribute_name_index, u4 attrib
     for (u4 i = 0; i < CodeLength; ++i)
     {
         const Bytecode::Opcode Opcode = Bytecode::GetOpcodeForByte(Code[i]);
-
-        std::to_string()
-        std::cout << Bytecode::OpcodeToString(Opcode) << std::endl;
+        std::cout << std::to_string(Opcode) << std::endl;
 
         const u1* CodePoint = Code + i + 1;
 
-        switch (Opcode)
+        switch (Opcode.GetOperation())
         {
-            case Bytecode::Opcodes::ALOAD:
+            case Opcodes::ALOAD.GetOperation():
             {
                 break;
             }
-            case Bytecode::Opcodes::INVOKESPECIAL:
+            case Opcodes::INVOKESPECIAL.GetOperation():
             {
                 const u1 IndexByte1 = CodePoint[0];
                 const u1 IndexByte2 = CodePoint[1];
@@ -278,12 +278,12 @@ void read_attribute_Code(ClassFileBlob& blob, u2 attribute_name_index, u4 attrib
                 i += 2;
                 break;
             }
-            case Bytecode::Opcodes::LDC:
+            case Opcodes::LDC.GetOperation():
             {
                 i += 1;
                 break;
             }
-            case Bytecode::Opcodes::PUTFIELD:
+            case Opcodes::PUTFIELD.GetOperation():
             {
                 i += 2;
                 break;

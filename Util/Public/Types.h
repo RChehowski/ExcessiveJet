@@ -32,9 +32,6 @@ namespace Util
     using WideString = std::wstring;
 }
 
-#define __STRINGIFY(x) #x
-#define LITERAL_TO_STRING(x) __STRINGIFY(x)
-
 enum class ClassAccessFlags : uint16_t
 {
     // Declared public; may be accessed from outside its package.
