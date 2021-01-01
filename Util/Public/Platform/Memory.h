@@ -19,12 +19,12 @@ namespace Util
         template<class T>
         static T* MallocT(size_t Size, size_t Alignment = 1)
         {
-            return reinterpret_cast<T*>(Malloc(Size, Alignment));
+            return reinterpret_cast<T*>(Malloc(Size * sizeof(T), Alignment));
         }
 
         static void* Malloc(size_t Size, size_t Alignment = 1);
 
-        static void Free(void* Ptr);
+        static void Free(const void* Ptr);
 
 
         template<typename TDst, typename TSrc>

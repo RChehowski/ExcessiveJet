@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <string>
 
+#define __STRINGIFY(x) #x
+#define LITERAL_TO_STRING(x) __STRINGIFY(x)
 
 #ifdef _MSC_VER
     #define FORCEINLINE __forceinline

@@ -25,8 +25,8 @@ namespace Util
         return Ptr;
     }
 
-    void Memory::Free(void *const Ptr)
+    void Memory::Free(const void *const Ptr)
     {
-        free(Ptr);
+        free(const_cast<void*>(Ptr));
     }
 }

@@ -257,8 +257,8 @@ void read_attribute_Code(ClassFileBlob& blob, u2 attribute_name_index, u4 attrib
     std::ostringstream oss;
     for (u4 i = 0; i < CodeLength; ++i)
     {
-        const Bytecode::Opcode Opcode = Bytecode::GetOpcodeForByte(Code[i]);
-        std::cout << std::to_string(Opcode) << std::endl;
+        const Bytecode::Opcode& Opcode = Bytecode::GetOpcodeForByte(Code[i]);
+        std::cout << Opcode.ToString() << std::endl;
 
         const u1* CodePoint = Code + i + 1;
 
@@ -270,21 +270,22 @@ void read_attribute_Code(ClassFileBlob& blob, u2 attribute_name_index, u4 attrib
             }
             case Opcodes::INVOKESPECIAL.GetOperation():
             {
-                const u1 IndexByte1 = CodePoint[0];
-                const u1 IndexByte2 = CodePoint[1];
-
-                const u2 ConstantPoolIndex = (((u2)IndexByte1 << 8) & 0xFF00 | (u2)IndexByte2 & 0x00FF);
+                const u2 ConstantPoolIndex = (((u2)CodePoint[0] << 8) & 0xFF00 | (u2)CodePoint[1] & 0x00FF);
 
                 i += 2;
                 break;
             }
             case Opcodes::LDC.GetOperation():
             {
+                const u2 ConstantPoolIndex = (u2)CodePoint[0] & 0x00FF;
+
                 i += 1;
                 break;
             }
             case Opcodes::PUTFIELD.GetOperation():
             {
+                const u2 ConstantPoolIndex = (((u2)CodePoint[0] << 8) & 0xFF00 | (u2)CodePoint[1] & 0x00FF);
+
                 i += 2;
                 break;
             }
@@ -292,14 +293,74 @@ void read_attribute_Code(ClassFileBlob& blob, u2 attribute_name_index, u4 attrib
     }
     std::string Result = oss.str();
 
-    Bytecode::Opcode Opcode = Bytecode::GetOpcodeForByte(*Code);
-
     u2 ExceptionTableLength = (u2)0;
     blob >> ExceptionTableLength;
 
-    std::cout << "read_attribute_Deprecated";
+    for (u2 ExceptionTableIndex = 0; ExceptionTableIndex < ExceptionTableLength; ExceptionTableLength++)
+    {
+        u2 StartPc = (u2)0;
+        blob >> StartPc;
+
+        u2 EndPc = (u2)0;
+        blob >> EndPc;
+
+        u2 HandlerPc = (u2)0;
+        blob >> HandlerPc;
+
+        u2 CatchType = (u2)0;
+        blob >> CatchType;
+    }
+
+    u2 AttributesCount = (u2)0;
+    blob >> AttributesCount;
+
+    for (u2 AttributeIndex = 0; AttributeIndex < AttributesCount; ++AttributeIndex)
+    {
+        AttributeInfo Info;
+        blob >> Info;
+    }
+
+    std::cout << "func_ret";
 }
 
+void read_attribute_LineNumberTable(ClassFileBlob& blob, u2 attribute_name_index, u4 attribute_length) noexcept
+{
+    u2 LineNumberTableLength = (u2)0;
+    blob >> LineNumberTableLength;
+
+    for (u2 LineNumberTableIndex = 0; LineNumberTableIndex < LineNumberTableLength; ++LineNumberTableIndex)
+    {
+        u2 StartPc = (u2)0;
+        blob >> StartPc;
+
+        u2 LineNumber = (u2)0;
+        blob >> LineNumber;
+    }
+}
+
+void read_attribute_LocalVariableTable(ClassFileBlob& blob, u2 attribute_name_index, u4 attribute_length) noexcept
+{
+    u2 LocalVariableTableLength = (u2)0;
+    blob >> LocalVariableTableLength;
+
+    for (u2 LocalVariableTableIndex = 0; LocalVariableTableIndex < LocalVariableTableLength; ++LocalVariableTableIndex)
+    {
+        u2 StartPc = (u2)0;
+        blob >> StartPc;
+
+        u2 Length = (u2)0;
+        blob >> Length;
+
+        u2 NameIndex = (u2)0;
+        blob >> NameIndex;
+
+        u2 DescriptorIndex = (u2)0;
+        blob >> DescriptorIndex;
+
+        u2 Index = (u2)0;
+        blob >> Index;
+    }
+}
 
 typedef void (*ReadFunction)(ClassFileBlob&, u2, u4);
 typedef std::unordered_map<Util::StringUtf8, ReadFunction> FuncMap;
@@ -317,6 +378,14 @@ const FuncMap G_Map({
     {
         "Code",
         read_attribute_Code
+    },
+    {
+        "LineNumberTable",
+        read_attribute_LineNumberTable
+    },
+    {
+        "LocalVariableTable",
+        read_attribute_LocalVariableTable
     }
 });
 
