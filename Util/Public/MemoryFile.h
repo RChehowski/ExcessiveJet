@@ -10,6 +10,8 @@
 #include "Types.h"
 #include "Assert.h"
 
+#include "ByteOrder.h"
+
 namespace Util
 {
     enum class EMemoryFileOrigin : u1
@@ -23,51 +25,6 @@ namespace Util
         // End of file *
         End
     };
-
-    class CByteOrder
-    {
-        friend class CMemoryFileEndian;
-
-    public:
-        constexpr explicit CByteOrder(const char* InName) : Name(InName)
-        {
-        }
-
-        constexpr bool IsNative() const;
-
-    private:
-        const char* Name;
-    };
-
-    class CByteOrders
-    {
-    private:
-        static constexpr const CByteOrder _BigEndian = CByteOrder("Big Endian");
-        static constexpr const CByteOrder _LittleEndian = CByteOrder("Little Endian");
-
-    public:
-        static constexpr const CByteOrder* BigEndian()
-        {
-            return &_BigEndian;
-        }
-
-        static constexpr const CByteOrder* LittleEndian()
-        {
-            return &_LittleEndian;
-        }
-
-        static constexpr const CByteOrder* NativeEndian()
-        {
-            return IsLittleEndian() ? LittleEndian() : BigEndian();
-        }
-    };
-
-    constexpr bool CByteOrder::IsNative() const
-    {
-        return this == CByteOrders::NativeEndian();
-    }
-
-
 
     class CMemoryFile
     {
@@ -86,6 +43,17 @@ namespace Util
         FORCEINLINE bool IsValid() const
         {
             return (FileBytes != nullptr);
+        }
+
+        [[nodiscard]]
+        FORCEINLINE const CByteOrder* GetByteOrder() const
+        {
+            return ByteOrder;
+        }
+
+        FORCEINLINE void GetByteOrder(const CByteOrder* InByteOrder)
+        {
+            ByteOrder = InByteOrder;
         }
 
         void ReadBytes(void* Memory, usz Size);
@@ -165,12 +133,12 @@ namespace Util
     private:
         std::wstring FileName;
 
-        usz Position = (usz)0;
         usz FileSize = (usz)0;
+        uint8_t* FileBytes = nullptr;
+
+        usz Position = (usz)0;
 
         const CByteOrder* ByteOrder = CByteOrders::NativeEndian();
-
-        uint8_t* FileBytes = nullptr;
     };
 }
 
