@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <functional>
 #include <intrin.h>
-#include "CConstantPool.h"
+#include "ConstantPool.h"
 
 
 //
@@ -49,7 +49,7 @@
 //    u1 info[attribute_length];
 //};
 
-CConstantPool G_constant_pool;
+ConstantPool G_constant_pool;
 
 struct AttributeInfo
 {

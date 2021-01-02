@@ -11,7 +11,7 @@
 
 class CAttributeInfo;
 class ClassFileBlob;
-class CConstantPool;
+class ConstantPool;
 
 namespace Parser
 {
@@ -96,6 +96,6 @@ namespace Parser
     class CAttributes
     {
     public:
-        static CAttributeInfo* ReadAttributeInfo(ClassFileBlob& Blob, const CConstantPool& ConstantPool);
+        static CAttributeInfo* ReadAttributeInfo(ClassFileBlob& Blob, const ConstantPool& ConstantPool);
     };
 }

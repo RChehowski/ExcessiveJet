@@ -70,7 +70,7 @@ namespace Parser
     typedef CAttributeInfo* (*FAttributeInfoNewInstanceFunction)(u2, u4);
 
 
-    CAttributeInfo* CAttributes::ReadAttributeInfo(ClassFileBlob& Blob, const CConstantPool& ConstantPool)
+    CAttributeInfo* CAttributes::ReadAttributeInfo(ClassFileBlob& Blob, const ConstantPool& ConstantPool)
     {
         u2 AttributeNameIndex = (u2)0;
         Blob >> AttributeNameIndex;

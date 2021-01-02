@@ -13,17 +13,17 @@ using Util::Memory;
 
 namespace Util
 {
-    CMemoryFile::CMemoryFile(const WideString& InFileName) : FileName(InFileName)
+    CMemoryReader::CMemoryReader(const WideString& InFileName) : FileName(InFileName)
     {
         FileBytes = FileUtils::ReadFile(FileName, &FileSize);
     }
 
-    CMemoryFile::~CMemoryFile()
+    CMemoryReader::~CMemoryReader()
     {
         Memory::Free((const void*)FileBytes);
     }
 
-    void CMemoryFile::ReadBytes(void* Memory, usz Size)
+    void CMemoryReader::ReadBytes(void* Memory, usz Size)
     {
         RangeCheck(Size);
 
@@ -31,7 +31,7 @@ namespace Util
         Position += Size;
     }
 
-    void CMemoryFile::Seek(ssz Offset, EMemoryFileOrigin Origin)
+    void CMemoryReader::Seek(ssz Offset, EMemoryFileOrigin Origin)
     {
         ssz OriginatedOffset;
         switch (Origin)
@@ -61,5 +61,25 @@ namespace Util
         const ssz NewPosition= OriginatedOffset + Offset;
         ASSERT((NewPosition >= 0) && (NewPosition < FileSize));
         Position = NewPosition;
+    }
+
+    void operator>> (Util::CMemoryReader& Reader, u1& Instance)
+    {
+
+    }
+
+    void operator>> (Util::CMemoryReader& Reader, u2& Instance)
+    {
+
+    }
+
+    void operator>> (Util::CMemoryReader& Reader, u4& Instance)
+    {
+
+    }
+
+    void operator>> (Util::CMemoryReader& Reader, u8& Instance)
+    {
+
     }
 }

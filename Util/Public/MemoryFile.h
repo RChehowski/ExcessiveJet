@@ -26,7 +26,7 @@ namespace Util
         End
     };
 
-    class CMemoryFile
+    class CMemoryReader
     {
         FORCEINLINE void RangeCheck(usz AddOffset) const
         {
@@ -35,9 +35,9 @@ namespace Util
         }
 
     public:
-        explicit CMemoryFile(const WideString& InFileName);
+        explicit CMemoryReader(const WideString& InFileName);
 
-        ~CMemoryFile();
+        ~CMemoryReader();
 
         [[nodiscard]]
         FORCEINLINE bool IsValid() const
@@ -129,6 +129,11 @@ namespace Util
         {
             return FileSize;
         }
+
+        friend void operator>> (Util::CMemoryReader& Reader, u1& Instance);
+        friend void operator>> (Util::CMemoryReader& Reader, u2& Instance);
+        friend void operator>> (Util::CMemoryReader& Reader, u4& Instance);
+        friend void operator>> (Util::CMemoryReader& Reader, u8& Instance);
 
     private:
         std::wstring FileName;

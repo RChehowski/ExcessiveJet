@@ -11,7 +11,7 @@
 #include "Platform/Memory.h"
 
 // TODO: Delete
-#include "CConstantPool.h"
+#include "ConstantPool.h"
 
 using Util::Memory;
 
