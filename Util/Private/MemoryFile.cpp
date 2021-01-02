@@ -65,21 +65,21 @@ namespace Util
 
     void operator>> (Util::CMemoryReader& Reader, u1& Instance)
     {
-
+        Instance = Reader.Read<u1>();
     }
 
     void operator>> (Util::CMemoryReader& Reader, u2& Instance)
     {
-
+        Instance = Reader.Read<u2>();
     }
 
     void operator>> (Util::CMemoryReader& Reader, u4& Instance)
     {
-
+        Instance = Reader.Read<u4>();
     }
 
     void operator>> (Util::CMemoryReader& Reader, u8& Instance)
     {
-
+        Instance = Reader.Read<u8>();
     }
 }

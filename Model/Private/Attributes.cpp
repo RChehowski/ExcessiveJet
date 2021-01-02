@@ -70,19 +70,19 @@ namespace Parser
     typedef CAttributeInfo* (*FAttributeInfoNewInstanceFunction)(u2, u4);
 
 
-    CAttributeInfo* CAttributes::ReadAttributeInfo(ClassFileBlob& Blob, const ConstantPool& ConstantPool)
-    {
-        u2 AttributeNameIndex = (u2)0;
-        Blob >> AttributeNameIndex;
-
-        u4 AttributeLength = (u4)0;
-        Blob >> AttributeLength;
-
-        ConstantPool.Get<const CONSTANT_Utf8_info>(AttributeNameIndex);
-
-        FAttributeInfoNewInstanceFunction AttributeInfoNewInstanceFunction =
-                &CLocalVariableTableAttributeInfo::NewInstance;
-
-        return nullptr;
-    }
+//    CAttributeInfo* CAttributes::ReadAttributeInfo(ClassFileBlob& Blob, const ConstantPool& ConstantPool)
+//    {
+//        u2 AttributeNameIndex = (u2)0;
+//        Blob >> AttributeNameIndex;
+//
+//        u4 AttributeLength = (u4)0;
+//        Blob >> AttributeLength;
+//
+//        ConstantPool.Get<const CONSTANT_Utf8_info>(AttributeNameIndex);
+//
+//        FAttributeInfoNewInstanceFunction AttributeInfoNewInstanceFunction =
+//                &CLocalVariableTableAttributeInfo::NewInstance;
+//
+//        return nullptr;
+//    }
 }

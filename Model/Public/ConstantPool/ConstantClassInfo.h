@@ -22,6 +22,11 @@ namespace Parse
              return NameIndex;
         }
 
+        void DeserializeFrom(Util::CMemoryReader& Reader) override
+        {
+            Reader >> *this;
+        }
+
         friend void operator>>(Util::CMemoryReader& Reader, CConstantClassInfo& Instance);
 
     private:

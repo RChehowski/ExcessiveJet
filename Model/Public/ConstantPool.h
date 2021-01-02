@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ConstantPool/ConstantInfo.h"
+
 #include "ConstantPool/ConstantClassInfo.h"
 #include "ConstantPool/ConstantDoubleInfo.h"
 #include "ConstantPool/ConstantFieldRefInfo.h"
@@ -19,9 +21,12 @@
 #include "ConstantPool/ConstantStringInfo.h"
 #include "ConstantPool/ConstantUtf8Info.h"
 
-#include "StringUtf8.h"
 
 namespace Parse
 {
-    CConstantInfo* GetConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
+    class CConstantPool
+    {
+    public:
+        static CConstantInfo* NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
+    };
 }

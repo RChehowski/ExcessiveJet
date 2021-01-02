@@ -5,12 +5,11 @@
 #ifndef CPP20_MEMORYFILE_H
 #define CPP20_MEMORYFILE_H
 
-#include <string>
-
 #include "Types.h"
 #include "Assert.h"
-
 #include "ByteOrder.h"
+
+#include <string>
 
 namespace Util
 {
@@ -30,7 +29,7 @@ namespace Util
     {
         FORCEINLINE void RangeCheck(usz AddOffset) const
         {
-            const ssz NewPosition= Position + AddOffset;
+            const ssz NewPosition = (ssz)(Position + AddOffset);
             ASSERT(NewPosition < FileSize);
         }
 
@@ -51,7 +50,7 @@ namespace Util
             return ByteOrder;
         }
 
-        FORCEINLINE void GetByteOrder(const CByteOrder* InByteOrder)
+        FORCEINLINE void SetByteOrder(const CByteOrder* InByteOrder)
         {
             ByteOrder = InByteOrder;
         }
@@ -71,49 +70,12 @@ namespace Util
             T ReadValue;
             ReadBytes((void*)&ReadValue, sizeof(T));
 
-            const bool bEndianChangeRequired = true;
+            if (!ByteOrder->IsNative())
+            {
+                CMathUtils::TwiddleBytes((u1*)&ReadValue, sizeof(T));
+            }
 
-            //
-            if constexpr (sizeof(T) == 1)
-            {
-                // No conversion required for just one byte
-                return ReadValue;
-            }
-            else if constexpr (sizeof(T) == 2)
-            {
-                if (ByteOrder->IsNative())
-                {
-                    union {
-                        u2 Value;
-                        u1 Bytes[sizeof(Value)];
-                    } Converter{};
-
-                    // Get bytes
-                    Converter.Value = *((u2*)&ReadValue);
-
-                    return (T)Converter.Value;
-                }
-                else
-                {
-                    return ReadValue;
-                }
-            }
-            else if constexpr (sizeof(T) == 4)
-            {
-                union
-                {
-                    u4 Value;
-                    u1 Bytes[sizeof(Value)];
-                } Converter {};
-            }
-            else if constexpr (sizeof(T) == 8)
-            {
-                union
-                {
-                    u4 Value;
-                    u1 Bytes[sizeof(Value)];
-                } Converter {};
-            }
+            return ReadValue;
         }
 
         void Seek(ssz Offset, EMemoryFileOrigin Origin);

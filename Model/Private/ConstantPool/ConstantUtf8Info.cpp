@@ -2,7 +2,11 @@
 #include "ConstantPool/ConstantUtf8Info.h"
 #include "MemoryFile.h"
 
+#include "Platform/Memory.h"
+
 #include <sstream>
+
+using Util::Memory;
 
 namespace Parse
 {
@@ -19,6 +23,8 @@ namespace Parse
     void operator>>(Util::CMemoryReader& Reader, CConstantUtf8Info& Instance)
     {
         Reader >> Instance.Length;
-        Reader >> Instance.Bytes;
+
+        Instance.Bytes = Memory::MallocT<u1>(Instance.Length);
+        Reader.ReadBytes((void*)Instance.Bytes, (usz)Instance.Length);
     }
 }

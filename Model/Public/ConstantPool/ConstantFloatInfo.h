@@ -22,6 +22,11 @@ namespace Parse
              return Bytes;
         }
 
+        void DeserializeFrom(Util::CMemoryReader& Reader) override
+        {
+            Reader >> *this;
+        }
+
         friend void operator>>(Util::CMemoryReader& Reader, CConstantFloatInfo& Instance);
 
     private:

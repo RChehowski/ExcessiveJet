@@ -9,6 +9,11 @@
 
 #include <string>
 
+namespace Util
+{
+    class CMemoryReader;
+}
+
 namespace Parse
 {
     enum class EConstantPoolInfoTag : u1
@@ -49,6 +54,8 @@ namespace Parse
 
         virtual std::string ToString() const = 0;
 
+        virtual void DeserializeFrom(Util::CMemoryReader& Reader) = 0;
+
         FORCEINLINE static EConstantPoolInfoTag GetConstantPoolInfoTagByByte(const u1 TagByte)
         {
             switch (TagByte)
@@ -74,6 +81,8 @@ namespace Parse
                     return EConstantPoolInfoTag::Invalid_NotATag;
             }
         }
+
+        friend void operator>>(Util::CMemoryReader& Reader, CConstantInfo& Instance);
 
     private:
         const EConstantPoolInfoTag ConstantPoolInfoTag;

@@ -12,7 +12,7 @@ namespace Util
         FILE* File = nullptr;
         _wfopen_s(&File, FileName.c_str(), L"rb");
 
-        if (File == nullptr)
+        if (File != nullptr)
         {
             fseek(File, 0, SEEK_END);
             const usz FileSize = (usz)_ftelli64(File);

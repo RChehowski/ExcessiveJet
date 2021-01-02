@@ -22,7 +22,7 @@ set(ConstantPoolConstants
     Model/Private/ConstantPool/ConstantNameAndTypeInfo.cpp
     Model/Private/ConstantPool/ConstantStringInfo.cpp
     Model/Private/ConstantPool/ConstantUtf8Info.cpp
-)
+        Model/Private/ConstantPool/ConstantInfo.cpp)
 
 add_executable(CPP20
     main.cpp

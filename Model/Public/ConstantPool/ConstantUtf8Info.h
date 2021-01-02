@@ -23,15 +23,20 @@ namespace Parse
         }
 
         [[nodiscard]]
-        FORCEINLINE u1 GetBytes() const
+        FORCEINLINE u1* GetBytes() const
         {
              return Bytes;
+        }
+
+        void DeserializeFrom(Util::CMemoryReader& Reader) override
+        {
+            Reader >> *this;
         }
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantUtf8Info& Instance);
 
     private:
         u2 Length = (u2)0;
-        u1 Bytes = (u1)0;
+        u1* Bytes = nullptr;
     };
 }
