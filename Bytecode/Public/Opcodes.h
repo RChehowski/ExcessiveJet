@@ -516,7 +516,7 @@ namespace Bytecode
         &Opcodes::JSR_W,
     };
 
-    constexpr size_t NumOpcodes = sizeof(G_OpcodesArray) / sizeof(void*);
+    constexpr usz NumOpcodes = sizeof(G_OpcodesArray) / sizeof(void*);
 
     const Opcode& GetOpcodeForByte(u1 Byte);
 }

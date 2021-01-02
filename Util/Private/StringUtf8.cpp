@@ -6,12 +6,12 @@
 
 namespace Util
 {
-    StringUtf8::StringUtf8() : StringUtf8(nullptr, (size_t)0)
+    StringUtf8::StringUtf8() : StringUtf8(nullptr, (usz)0)
     {
 
     }
 
-    StringUtf8::StringUtf8(const u1* const InData, const size_t InNumBytes) : NumBytes(InNumBytes)
+    StringUtf8::StringUtf8(const u1* const InData, const usz InNumBytes) : NumBytes(InNumBytes)
     {
         if (NumBytes > 0)
         {
@@ -24,7 +24,7 @@ namespace Util
         }
     }
 
-    StringUtf8::StringUtf8(const char* String): StringUtf8((const u1*)String, (size_t)strlen(String))
+    StringUtf8::StringUtf8(const char* String): StringUtf8((const u1*)String, (usz)strlen(String))
     {
     }
 
@@ -59,7 +59,7 @@ namespace Util
         }
     }
 
-    size_t StringUtf8::GetNumBytes() const
+    usz StringUtf8::GetNumBytes() const
     {
         return NumBytes;
     }

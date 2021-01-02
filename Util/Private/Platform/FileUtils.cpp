@@ -7,7 +7,7 @@
 
 namespace Util
 {
-    u1* FileUtils::ReadFile(const WideString& FileName, size_t* OutNumBytes)
+    u1* FileUtils::ReadFile(const WideString& FileName, usz* OutNumBytes)
     {
         FILE* File = nullptr;
         _wfopen_s(&File, FileName.c_str(), L"rb");
@@ -15,7 +15,7 @@ namespace Util
         if (File == nullptr)
         {
             fseek(File, 0, SEEK_END);
-            const size_t FileSize = (size_t)_ftelli64(File);
+            const usz FileSize = (usz)_ftelli64(File);
             fseek(File, 0, SEEK_SET);
 
             u1* const Data = (u1*)Memory::Malloc(FileSize);

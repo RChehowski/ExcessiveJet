@@ -11,7 +11,7 @@
 #include "Platform/Memory.h"
 
 // TODO: Delete
-#include "../../../ConstantPool.h"
+#include "CConstantPool.h"
 
 using Util::Memory;
 
@@ -70,9 +70,9 @@ public:
     }
 
     [[nodiscard]]
-    FORCEINLINE const CLocalVariable* GetLocalVariable(size_t Index) const
+    FORCEINLINE const CLocalVariable* GetLocalVariable(usz Index) const
     {
-        ASSERT(Index < (size_t)LocalVariableTableLength);
+        ASSERT(Index < (usz)LocalVariableTableLength);
         return LocalVariableTable + Index;
     }
 
@@ -82,7 +82,12 @@ public:
         return LocalVariableTableLength;
     }
 
-    friend void operator>> (ClassFileBlob& Blob, CLocalVariableTableAttributeInfo& Instance);
+    void operator>> (ClassFileBlob& Blob) override;
+
+    FORCEINLINE static CAttributeInfo* NewInstance(u2 InAttributeNameIndex, u4 InAttributeLength)
+    {
+        return new CLocalVariableTableAttributeInfo(InAttributeNameIndex, InAttributeLength);
+    }
 
 private:
     u2 LocalVariableTableLength;

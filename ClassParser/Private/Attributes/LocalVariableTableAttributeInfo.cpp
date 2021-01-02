@@ -14,16 +14,14 @@ void operator>> (ClassFileBlob& Blob, CLocalVariable& Instance)
 }
 
 
-void operator>> (ClassFileBlob& Blob, CLocalVariableTableAttributeInfo& Instance)
+void CLocalVariableTableAttributeInfo::operator>> (ClassFileBlob& Blob)
 {
-    Blob >> Instance.LocalVariableTableLength;
+    Blob >> LocalVariableTableLength;
 
-    Instance.LocalVariableTable =
-            (CLocalVariable*)Memory::MallocT<CLocalVariable>((size_t)Instance.LocalVariableTableLength);
+    LocalVariableTable = (CLocalVariable*)Memory::MallocT<CLocalVariable>((usz)LocalVariableTableLength);
 
-    for (u2 Offset = 0; Offset < Instance.LocalVariableTableLength; ++Offset)
+    for (u2 Offset = 0; Offset < LocalVariableTableLength; ++Offset)
     {
-        CLocalVariable& LocalVariable = Instance.LocalVariableTable[Offset];
-        Blob >> LocalVariable;
+        Blob >> LocalVariableTable[Offset];
     }
 }

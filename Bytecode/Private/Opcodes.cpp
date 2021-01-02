@@ -14,6 +14,6 @@ namespace Bytecode
 
     const Opcode& GetOpcodeForByte(const u1 Byte)
     {
-        return *G_OpcodesArray[(size_t)Byte];
+        return *G_OpcodesArray[(usz)Byte];
     }
 }

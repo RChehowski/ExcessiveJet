@@ -6,6 +6,8 @@
 
 #include "Types.h"
 
+class ClassFileBlob;
+
 class CAttributeInfo
 {
 public:
@@ -28,6 +30,8 @@ public:
     {
         return AttributeLength;
     }
+
+    virtual void operator>> (ClassFileBlob& Blob) = 0;
 
 private:
     const u2 AttributeNameIndex;

@@ -11,24 +11,24 @@ namespace Util
 {
     class Memory
     {
-        static void Memcpy(void* const Dst, const void* const Src, const size_t NumBytes);
+        static void Memcpy(void* const Dst, const void* const Src, const usz NumBytes);
 
-        static s4 Memcmp(const void* const A, const void* const B, const size_t NumBytes);
+        static s4 Memcmp(const void* const A, const void* const B, const usz NumBytes);
 
     public:
         template<class T>
-        static T* MallocT(size_t Size, size_t Alignment = 1)
+        static T* MallocT(usz Size, usz Alignment = 1)
         {
             return reinterpret_cast<T*>(Malloc(Size * sizeof(T), Alignment));
         }
 
-        static void* Malloc(size_t Size, size_t Alignment = 1);
+        static void* Malloc(usz Size, usz Alignment = 1);
 
         static void Free(const void* Ptr);
 
 
         template<typename TDst, typename TSrc>
-        static void Memcpy(TDst* const Dst, const TSrc* const Src, const size_t NumBytes)
+        static void Memcpy(TDst* const Dst, const TSrc* const Src, const usz NumBytes)
         {
             Memcpy(
                 reinterpret_cast<void*>(Dst),
@@ -38,7 +38,7 @@ namespace Util
         }
 
         template<typename TA, typename TB>
-        static s4 Memcmp(const TA* const A, const TB* const B, const size_t NumBytes)
+        static s4 Memcmp(const TA* const A, const TB* const B, const usz NumBytes)
         {
             return Memcmp(
                 reinterpret_cast<const void*>(A),

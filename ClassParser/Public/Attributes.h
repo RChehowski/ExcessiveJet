@@ -2,16 +2,16 @@
 // Created by ASUS on 01/01/2021.
 //
 
-#ifndef CPP20_ATTRIBUTES_H
-#define CPP20_ATTRIBUTES_H
+#pragma once
 
 #include "Types.h"
 #include "Assert.h"
 #include "Platform/Memory.h"
 #include "StringUtf8.h"
 
-#include <optional>
-#include <unordered_map>
+class CAttributeInfo;
+class ClassFileBlob;
+class CConstantPool;
 
 namespace Parser
 {
@@ -30,15 +30,27 @@ namespace Parser
 
     public:
         [[nodiscard]]
-        FORCEINLINE u1 GetId() const
+        FORCEINLINE constexpr u1 GetId() const
         {
             return Id;
         }
 
         [[nodiscard]]
-        FORCEINLINE const char* GetName() const
+        FORCEINLINE constexpr const char* GetName() const
         {
             return Name;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE constexpr u2 GetAddedInVersion() const
+        {
+            return AddedInVersion;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE constexpr u2 GetAddedInMinorVersion() const
+        {
+            return AddedInMinorVersion;
         }
 
     private:
@@ -73,54 +85,17 @@ namespace Parser
         DEFINE_ATTRIBUTE_NAME(15,   RuntimeInvisibleAnnotations,            49, 0);
         DEFINE_ATTRIBUTE_NAME(16,   RuntimeVisibleParameterAnnotations,     49, 0);
         DEFINE_ATTRIBUTE_NAME(17,   RuntimeInvisibleParameterAnnotations,   49, 0);
-        DEFINE_ATTRIBUTE_NAME(18,   AnnotationDefault,                      49,0);
+        DEFINE_ATTRIBUTE_NAME(18,   AnnotationDefault,                      49, 0);
         DEFINE_ATTRIBUTE_NAME(19,   BootstrapMethods,                       51, 0);
 
-        static constexpr size_t GetNumAttributeNames();
+        static constexpr usz GetNumAttributeNames();
 
-        const CAttributeName* GetAttributeNameByName(const Util::StringUtf8& String);
+        static const CAttributeName* GetAttributeNameByName(const Util::StringUtf8& String);
     };
 
-    constexpr const CAttributeName* G_AttributeNamesArray[] = {
-        &CAttributeNames::ConstantValue,
-        &CAttributeNames::Code,
-        &CAttributeNames::StackMapTable,
-        &CAttributeNames::Exceptions,
-        &CAttributeNames::InnerClasses,
-        &CAttributeNames::EnclosingMethod,
-        &CAttributeNames::Synthetic,
-        &CAttributeNames::Signature,
-        &CAttributeNames::SourceFile,
-        &CAttributeNames::SourceDebugExtension,
-        &CAttributeNames::LineNumberTable,
-        &CAttributeNames::LocalVariableTable,
-        &CAttributeNames::LocalVariableTypeTable,
-        &CAttributeNames::Deprecated,
-        &CAttributeNames::RuntimeVisibleAnnotations,
-        &CAttributeNames::RuntimeInvisibleAnnotations,
-        &CAttributeNames::RuntimeVisibleParameterAnnotations,
-        &CAttributeNames::RuntimeInvisibleParameterAnnotations,
-        &CAttributeNames::AnnotationDefault,
-        &CAttributeNames::BootstrapMethods,
+    class CAttributes
+    {
+    public:
+        static CAttributeInfo* ReadAttributeInfo(ClassFileBlob& Blob, const CConstantPool& ConstantPool);
     };
-
-    typedef std::unordered_map<Util::StringUtf8, const CAttributeName*> AttributeNamesMap;
-
-    extern const AttributeNamesMap G_AttributeNamesMap;
-
 }
-
-
-
-
-
-
-
-
-class Attributes
-{
-
-};
-
-
-#endif //CPP20_ATTRIBUTES_H

@@ -2,8 +2,8 @@
 // Created by ASUS on 27/12/2020.
 //
 
-#ifndef CPP20_CONSTANTPOOL_H
-#define CPP20_CONSTANTPOOL_H
+#ifndef CPP20_CCONSTANTPOOL_H
+#define CPP20_CCONSTANTPOOL_H
 
 #include <cstdlib>
 #include <string>
@@ -18,31 +18,25 @@
 class ClassFileBlob
 {
 private:
-    ClassFileBlob(const size_t size);
+    ClassFileBlob(const usz size);
 
 public:
     ~ClassFileBlob();
 
     static ClassFileBlob* fromFile(const char* fileName);
 
-//    template <class T>
-//    T read()
-//    {
-//        uint8_t* const readPtr = _data + _index;
-//        _index += sizeof(T);
-//
-//        return big_endian_to_native(*(T *) readPtr);
-//    }
 
-    void read(uint8_t* bytes, size_t numBytes);
+    void read(uint8_t* bytes, usz numBytes);
 
-    u1* GetBytes(size_t NumBytes);
+    u1* GetBytes(usz NumBytes);
+
+
 
 private:
-    const size_t _size;
+    const usz _size;
     uint8_t* const _data;
 
-    size_t _index = 0;
+    usz _index = 0;
 };
 
 void operator>>(ClassFileBlob& blob, u1& v);
@@ -50,23 +44,31 @@ void operator>>(ClassFileBlob& blob, u2& v);
 void operator>>(ClassFileBlob& blob, u4& v);
 void operator>>(ClassFileBlob& blob, u8& v);
 
-enum class ConstantPoolInfoTag : uint8_t
+enum class EConstantPoolInfoTag : u1
 {
-    CONSTANT_Class 	= 7,
-    CONSTANT_Fieldref = 9,
-    CONSTANT_Methodref 	= 10,
-    CONSTANT_InterfaceMethodref =	11,
-    CONSTANT_String =8,
-    CONSTANT_Integer = 3,
-    CONSTANT_Float 	= 4,
-    CONSTANT_Long 	= 5,
-    CONSTANT_Double = 6,
-    CONSTANT_NameAndType = 12,
-    CONSTANT_Utf8 = 1,
-    CONSTANT_MethodHandle = 15,
-    CONSTANT_MethodType = 16,
-    CONSTANT_InvokeDynamic  = 18,
+    // Note: They must be in the ascending order to make the binary search work
+    Utf8                = 1,
+    Integer             = 3,
+    Float               = 4,
+    Long                = 5,
+    Double              = 6,
+    Class               = 7,
+    String              = 8,
+    Fieldref            = 9,
+    Methodref           = 10,
+    InterfaceMethodref  = 11,
+    NameAndType         = 12,
+    MethodHandle        = 15,
+    MethodType          = 16,
+    InvokeDynamic       = 18,
 };
+
+namespace Parser
+{
+    EConstantPoolInfoTag GetConstantPoolInfoTag(u1 InTagByte);
+
+
+}
 
 class cp_info
 {
@@ -77,9 +79,9 @@ public:
     {
     }
 
-    FORCEINLINE ConstantPoolInfoTag getTag() const
+    FORCEINLINE EConstantPoolInfoTag getTag() const
     {
-        return (ConstantPoolInfoTag)_tag;
+        return (EConstantPoolInfoTag)_tag;
     }
 
     virtual std::string to_string() const = 0;
@@ -96,7 +98,7 @@ struct CONSTANT_Class_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 
@@ -113,7 +115,7 @@ struct CONSTANT_Fieldref_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_Methodref_info : public cp_info
@@ -128,7 +130,7 @@ struct CONSTANT_Methodref_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_InterfaceMethodref_info : public cp_info
@@ -143,7 +145,7 @@ struct CONSTANT_InterfaceMethodref_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_String_info : public cp_info
@@ -157,7 +159,7 @@ struct CONSTANT_String_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_Integer_info : public cp_info
@@ -171,7 +173,7 @@ struct CONSTANT_Integer_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_Float_info : public cp_info
@@ -185,7 +187,7 @@ struct CONSTANT_Float_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_Long_info : public cp_info
@@ -200,7 +202,7 @@ struct CONSTANT_Long_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_Double_info : public cp_info
@@ -215,7 +217,7 @@ struct CONSTANT_Double_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_NameAndType_info : public cp_info
@@ -230,7 +232,7 @@ struct CONSTANT_NameAndType_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_Utf8_info : public cp_info
@@ -250,7 +252,7 @@ struct CONSTANT_Utf8_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_MethodHandle_info : public cp_info
@@ -265,7 +267,7 @@ struct CONSTANT_MethodHandle_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_MethodType_info : public cp_info
@@ -279,7 +281,7 @@ struct CONSTANT_MethodType_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 struct CONSTANT_InvokeDynamic_info : public cp_info
@@ -294,16 +296,16 @@ struct CONSTANT_InvokeDynamic_info : public cp_info
 
     std::string to_string() const override;
 
-    static const ConstantPoolInfoTag StaticTag;
+    static const EConstantPoolInfoTag StaticTag;
 };
 
 
 
 
-class ConstantPool
+class CConstantPool
 {
 public:
-    explicit FORCEINLINE ConstantPool(size_t size = 0)
+    explicit FORCEINLINE CConstantPool(usz size = 0)
     {
         if (size > 0)
         {
@@ -317,7 +319,7 @@ public:
     }
 
     template<class T>
-    FORCEINLINE T* Get(const size_t index)
+    FORCEINLINE const T* Get(const usz index) const
     {
         static_assert(std::is_base_of<cp_info, T>::value, "T must be inherited from cp_info");
 
@@ -349,4 +351,4 @@ private:
 };
 
 
-#endif //CPP20_CONSTANTPOOL_H
+#endif //CPP20_CCONSTANTPOOL_H

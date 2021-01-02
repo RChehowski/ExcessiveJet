@@ -4,11 +4,49 @@
 
 #include <cstdio>
 #include <cstring>
-#include "ConstantPool.h"
+#include <algorithm>
+#include "CConstantPool.h"
 
 #include "Platform/Misc.h"
+#include "Assert.h"
 
-ClassFileBlob::ClassFileBlob(const size_t size) : _size(size), _data((uint8_t*)malloc(_size))
+constexpr EConstantPoolInfoTag ConstantPoolInfoTags[] =
+{
+    // Note: They must be in the ascending order to make the binary search work
+    EConstantPoolInfoTag::Utf8,
+    EConstantPoolInfoTag::Integer,
+    EConstantPoolInfoTag::Float,
+    EConstantPoolInfoTag::Long,
+    EConstantPoolInfoTag::Double,
+    EConstantPoolInfoTag::Class,
+    EConstantPoolInfoTag::String,
+    EConstantPoolInfoTag::Fieldref,
+    EConstantPoolInfoTag::Methodref,
+    EConstantPoolInfoTag::InterfaceMethodref,
+    EConstantPoolInfoTag::NameAndType,
+    EConstantPoolInfoTag::MethodHandle,
+    EConstantPoolInfoTag::MethodType,
+    EConstantPoolInfoTag::InvokeDynamic,
+};
+
+EConstantPoolInfoTag Parser::GetConstantPoolInfoTag(u1 InTagByte)
+{
+    const EConstantPoolInfoTag TagByteAsTag = (EConstantPoolInfoTag)InTagByte;
+    
+    // Validate the tag byte
+    bool bTagIsValid = std::binary_search(
+        std::begin(ConstantPoolInfoTags),
+        std::end(ConstantPoolInfoTags),
+        TagByteAsTag
+    );
+    ASSERT(bTagIsValid);
+
+    return TagByteAsTag;
+}
+
+
+
+ClassFileBlob::ClassFileBlob(const usz size) : _size(size), _data((uint8_t*)malloc(_size))
 {
 }
 
@@ -23,7 +61,7 @@ ClassFileBlob* ClassFileBlob::fromFile(const char* fileName)
     fopen_s(&file, fileName, "rb");
 
     fseek(file, 0, SEEK_END);
-    const size_t fileSize = ftell(file);
+    const usz fileSize = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     ClassFileBlob* const classFileBlob = new ClassFileBlob(fileSize);
@@ -33,7 +71,7 @@ ClassFileBlob* ClassFileBlob::fromFile(const char* fileName)
     return classFileBlob;
 }
 
-void ClassFileBlob::read(uint8_t* bytes, size_t numBytes)
+void ClassFileBlob::read(uint8_t* bytes, usz numBytes)
 {
     const uint8_t* const readPtr = _data + _index;
     _index += numBytes;
@@ -41,7 +79,7 @@ void ClassFileBlob::read(uint8_t* bytes, size_t numBytes)
     memcpy(bytes, readPtr, numBytes);
 }
 
-u1* ClassFileBlob::GetBytes(size_t NumBytes)
+u1* ClassFileBlob::GetBytes(usz NumBytes)
 {
     u1* const ReadPtr = _data + _index;
     _index += NumBytes;
@@ -382,18 +420,18 @@ std::string CONSTANT_InvokeDynamic_info::to_string() const
 }
 
 // StaticTag
-const ConstantPoolInfoTag CONSTANT_Class_info::StaticTag = ConstantPoolInfoTag::CONSTANT_Class;
-const ConstantPoolInfoTag CONSTANT_Fieldref_info::StaticTag = ConstantPoolInfoTag::CONSTANT_Fieldref;
-const ConstantPoolInfoTag CONSTANT_Methodref_info::StaticTag = ConstantPoolInfoTag::CONSTANT_Methodref;
-const ConstantPoolInfoTag CONSTANT_InterfaceMethodref_info::StaticTag = ConstantPoolInfoTag::CONSTANT_InterfaceMethodref;
-const ConstantPoolInfoTag CONSTANT_String_info::StaticTag = ConstantPoolInfoTag::CONSTANT_String;
-const ConstantPoolInfoTag CONSTANT_Integer_info::StaticTag = ConstantPoolInfoTag::CONSTANT_Integer;
-const ConstantPoolInfoTag CONSTANT_Float_info::StaticTag = ConstantPoolInfoTag::CONSTANT_Float;
-const ConstantPoolInfoTag CONSTANT_Long_info::StaticTag = ConstantPoolInfoTag::CONSTANT_Long;
-const ConstantPoolInfoTag CONSTANT_Double_info::StaticTag = ConstantPoolInfoTag::CONSTANT_Double;
-const ConstantPoolInfoTag CONSTANT_NameAndType_info::StaticTag = ConstantPoolInfoTag::CONSTANT_NameAndType;
-const ConstantPoolInfoTag CONSTANT_Utf8_info::StaticTag = ConstantPoolInfoTag::CONSTANT_Utf8;
-const ConstantPoolInfoTag CONSTANT_MethodHandle_info::StaticTag = ConstantPoolInfoTag::CONSTANT_MethodHandle;
-const ConstantPoolInfoTag CONSTANT_MethodType_info::StaticTag = ConstantPoolInfoTag::CONSTANT_MethodType;
-const ConstantPoolInfoTag CONSTANT_InvokeDynamic_info::StaticTag = ConstantPoolInfoTag::CONSTANT_InvokeDynamic;
+const EConstantPoolInfoTag CONSTANT_Class_info::StaticTag = EConstantPoolInfoTag::Class;
+const EConstantPoolInfoTag CONSTANT_Fieldref_info::StaticTag = EConstantPoolInfoTag::Fieldref;
+const EConstantPoolInfoTag CONSTANT_Methodref_info::StaticTag = EConstantPoolInfoTag::Methodref;
+const EConstantPoolInfoTag CONSTANT_InterfaceMethodref_info::StaticTag = EConstantPoolInfoTag::InterfaceMethodref;
+const EConstantPoolInfoTag CONSTANT_String_info::StaticTag = EConstantPoolInfoTag::String;
+const EConstantPoolInfoTag CONSTANT_Integer_info::StaticTag = EConstantPoolInfoTag::Integer;
+const EConstantPoolInfoTag CONSTANT_Float_info::StaticTag = EConstantPoolInfoTag::Float;
+const EConstantPoolInfoTag CONSTANT_Long_info::StaticTag = EConstantPoolInfoTag::Long;
+const EConstantPoolInfoTag CONSTANT_Double_info::StaticTag = EConstantPoolInfoTag::Double;
+const EConstantPoolInfoTag CONSTANT_NameAndType_info::StaticTag = EConstantPoolInfoTag::NameAndType;
+const EConstantPoolInfoTag CONSTANT_Utf8_info::StaticTag = EConstantPoolInfoTag::Utf8;
+const EConstantPoolInfoTag CONSTANT_MethodHandle_info::StaticTag = EConstantPoolInfoTag::MethodHandle;
+const EConstantPoolInfoTag CONSTANT_MethodType_info::StaticTag = EConstantPoolInfoTag::MethodType;
+const EConstantPoolInfoTag CONSTANT_InvokeDynamic_info::StaticTag = EConstantPoolInfoTag::InvokeDynamic;
 

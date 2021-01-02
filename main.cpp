@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <functional>
 #include <intrin.h>
-#include "ConstantPool.h"
+#include "CConstantPool.h"
 
 
 //
@@ -49,7 +49,7 @@
 //    u1 info[attribute_length];
 //};
 
-ConstantPool G_constant_pool;
+CConstantPool G_constant_pool;
 
 struct AttributeInfo
 {
@@ -118,8 +118,8 @@ public:
     {
         length = other.length;
 
-        bytes = (u1*)malloc((size_t)length);
-        memcpy((void*)bytes, (const void*)other.bytes, (size_t)length);
+        bytes = (u1*)malloc((usz)length);
+        memcpy((void*)bytes, (const void*)other.bytes, (usz)length);
     }
 
 //    LiteralConstantUtf8View(LiteralConstantUtf8View&& other) noexcept :
@@ -251,7 +251,7 @@ void read_attribute_Code(ClassFileBlob& blob, u2 attribute_name_index, u4 attrib
     u4 CodeLength = (u4)0;
     blob >> CodeLength;
 
-    u1* Code = Util::Memory::MallocT<u1>((size_t)CodeLength);
+    u1* Code = Util::Memory::MallocT<u1>((usz)CodeLength);
     Util::Memory::Memcpy(Code, blob.GetBytes(CodeLength), CodeLength);
 
     std::ostringstream oss;
@@ -362,45 +362,47 @@ void read_attribute_LocalVariableTable(ClassFileBlob& blob, u2 attribute_name_in
     }
 }
 
-typedef void (*ReadFunction)(ClassFileBlob&, u2, u4);
-typedef std::unordered_map<Util::StringUtf8, ReadFunction> FuncMap;
+#include "Attributes.h"
+
+//typedef void (*ReadFunction)(ClassFileBlob&, u2, u4);
+//typedef std::unordered_map<Parser::CAttributeName, ReadFunction> FuncMap;
 
 
-const FuncMap G_Map({
-    {
-        "Deprecated",
-        read_attribute_Deprecated
-    },
-    {
-        "RuntimeVisibleAnnotations",
-        read_attribute_RuntimeVisibleAnnotations
-    },
-    {
-        "Code",
-        read_attribute_Code
-    },
-    {
-        "LineNumberTable",
-        read_attribute_LineNumberTable
-    },
-    {
-        "LocalVariableTable",
-        read_attribute_LocalVariableTable
-    }
-});
+//const FuncMap G_Map({
+//    {
+//        Parser::CAttributeNames::Deprecated,
+//        read_attribute_Deprecated
+//    }
+//    {
+//        "RuntimeVisibleAnnotations",
+//        read_attribute_RuntimeVisibleAnnotations
+//    },
+//    {
+//        "Code",
+//        read_attribute_Code
+//    },
+//    {
+//        "LineNumberTable",
+//        read_attribute_LineNumberTable
+//    },
+//    {
+//        "LocalVariableTable",
+//        read_attribute_LocalVariableTable
+//    }
+//});
 
 void operator>> (ClassFileBlob& blob, AttributeInfo& _this)
 {
     blob >> _this.attribute_name_index;
     blob >> _this.attribute_length;
 
-    CONSTANT_Utf8_info* utf8_info = G_constant_pool.Get<CONSTANT_Utf8_info>(_this.attribute_name_index);
+//    CONSTANT_Utf8_info* utf8_info = G_constant_pool.Get<CONSTANT_Utf8_info>(_this.attribute_name_index);
 
-    auto It = G_Map.find(utf8_info->GetString());
-    if (It != G_Map.end())
-    {
-        It->second(blob, _this.attribute_name_index, _this.attribute_length);
-    }
+//    auto It = G_Map.find(utf8_info->GetString());
+//    if (It != G_Map.end())
+//    {
+//        It->second(blob, _this.attribute_name_index, _this.attribute_length);
+//    }
 }
 
 struct FieldInfo
@@ -491,9 +493,9 @@ int main()
         u1 tag;
         (*classFileBlob) >> tag;
 
-        switch((ConstantPoolInfoTag)tag)
+        switch((EConstantPoolInfoTag)tag)
         {
-            case ConstantPoolInfoTag::CONSTANT_Class:
+            case EConstantPoolInfoTag::Class:
             {
                 CONSTANT_Class_info* const const_info = new CONSTANT_Class_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -501,7 +503,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_Fieldref:
+            case EConstantPoolInfoTag::Fieldref:
             {
                 CONSTANT_Fieldref_info* const const_info = new CONSTANT_Fieldref_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -509,7 +511,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_Methodref:
+            case EConstantPoolInfoTag::Methodref:
             {
                 CONSTANT_Methodref_info* const const_info = new CONSTANT_Methodref_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -517,7 +519,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_InterfaceMethodref:
+            case EConstantPoolInfoTag::InterfaceMethodref:
             {
                 CONSTANT_InterfaceMethodref_info* const const_info = new CONSTANT_InterfaceMethodref_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -525,7 +527,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_String:
+            case EConstantPoolInfoTag::String:
             {
                 CONSTANT_String_info* const const_info = new CONSTANT_String_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -533,7 +535,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_Integer:
+            case EConstantPoolInfoTag::Integer:
             {
                 CONSTANT_Integer_info* const const_info = new CONSTANT_Integer_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -541,7 +543,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_Float:
+            case EConstantPoolInfoTag::Float:
             {
                 CONSTANT_Float_info* const const_info = new CONSTANT_Float_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -549,7 +551,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_Long:
+            case EConstantPoolInfoTag::Long:
             {
                 CONSTANT_Long_info* const const_info = new CONSTANT_Long_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -557,7 +559,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_Double:
+            case EConstantPoolInfoTag::Double:
             {
                 CONSTANT_Double_info* const const_info = new CONSTANT_Double_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -565,7 +567,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_NameAndType:
+            case EConstantPoolInfoTag::NameAndType:
             {
                 CONSTANT_NameAndType_info* const const_info = new CONSTANT_NameAndType_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -573,7 +575,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_Utf8:
+            case EConstantPoolInfoTag::Utf8:
             {
                 CONSTANT_Utf8_info* const const_info = new CONSTANT_Utf8_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -581,7 +583,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_MethodHandle:
+            case EConstantPoolInfoTag::MethodHandle:
             {
                 CONSTANT_MethodHandle_info* const const_info = new CONSTANT_MethodHandle_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -589,7 +591,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_MethodType:
+            case EConstantPoolInfoTag::MethodType:
             {
                 CONSTANT_MethodType_info* const const_info = new CONSTANT_MethodType_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -597,7 +599,7 @@ int main()
 
                 break;
             }
-            case ConstantPoolInfoTag::CONSTANT_InvokeDynamic:
+            case EConstantPoolInfoTag::InvokeDynamic:
             {
                 CONSTANT_InvokeDynamic_info* const const_info = new CONSTANT_InvokeDynamic_info(tag);
                 *(classFileBlob) >> *const_info;
@@ -617,9 +619,6 @@ int main()
     {
         std::cout << i++ << ")" << info->to_string() << std::endl;
     }
-
-    CONSTANT_Utf8_info* utf8Info = G_constant_pool.Get<CONSTANT_Utf8_info>(38);
-
     u2 access_flags;
     (*classFileBlob) >> access_flags;
 
@@ -632,7 +631,7 @@ int main()
     u2 interfaces_count;
     (*classFileBlob) >> interfaces_count;
 
-    u2* interfaces = (interfaces_count == 0) ? nullptr : (u2*)malloc((size_t)interfaces_count);
+    u2* interfaces = (interfaces_count == 0) ? nullptr : (u2*)malloc((usz)interfaces_count);
     for (u2 interface_index = 0; interface_index < interfaces_count; ++interface_index)
     {
         (*classFileBlob) >> interfaces[interface_index];

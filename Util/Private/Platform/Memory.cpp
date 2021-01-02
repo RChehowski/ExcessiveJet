@@ -9,17 +9,17 @@
 
 namespace Util
 {
-    void Memory::Memcpy(void* const Dst, const void* const Src, const size_t NumBytes)
+    void Memory::Memcpy(void* const Dst, const void* const Src, const usz NumBytes)
     {
         memcpy(Dst, Src, NumBytes);
     }
 
-    s4 Memory::Memcmp(const void* const A, const void* const B, const size_t NumBytes)
+    s4 Memory::Memcmp(const void* const A, const void* const B, const usz NumBytes)
     {
         return (s4)memcmp(A, B, NumBytes);
     }
 
-    void* Memory::Malloc(size_t Size, size_t Alignment)
+    void* Memory::Malloc(usz Size, usz Alignment)
     {
         void* const Ptr = malloc(Size);
         return Ptr;

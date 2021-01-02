@@ -17,7 +17,7 @@ namespace Util
     {
     public:
         StringUtf8();
-        StringUtf8(const u1* InData, size_t InNumBytes);
+        StringUtf8(const u1* InData, usz InNumBytes);
         StringUtf8(const char* String);
         StringUtf8(const StringUtf8& Other);
         StringUtf8(StringUtf8&& Other) noexcept;
@@ -28,9 +28,9 @@ namespace Util
         bool EqualsBytes(const StringUtf8& Other) const;
 
         [[nodiscard]]
-        size_t GetNumBytes() const;
+        usz GetNumBytes() const;
 
-        FORCEINLINE u1 GetByte(const size_t Index) const
+        FORCEINLINE u1 GetByte(const usz Index) const
         {
             return Data[Index];
         }
@@ -46,7 +46,7 @@ namespace Util
 
     private:
         u1* Data;
-        size_t NumBytes;
+        usz NumBytes;
     };
 }
 
