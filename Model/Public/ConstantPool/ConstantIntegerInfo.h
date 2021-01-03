@@ -26,6 +26,9 @@ namespace Parse
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantIntegerInfo& Instance);
 
+    public:
+        static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Integer;
+
     private:
         u4 Bytes = (u4)0;
     };

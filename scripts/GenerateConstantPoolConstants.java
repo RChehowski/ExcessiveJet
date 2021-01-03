@@ -61,6 +61,11 @@ public class GenerateConstantPoolConstants
         {
             return "Constant" + Name + "Info";
         }
+
+        public final String GetFullClassName()
+        {
+            return "C" + GetFullName();
+        }
     }
 
     public static void DeleteDir(final Path DirPath) throws IOException
@@ -140,9 +145,14 @@ public class GenerateConstantPoolConstants
         s.add("        friend void operator>>(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader, C" + Desc.GetFullName() + "& Instance);");
         s.add("");
 
-        s.add("    private:");
 
-        // Fields
+        // Static fields
+        s.add("    public:");
+        s.add("        static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::" + Desc.Name + ";");
+        s.add("");
+
+        // Instance fields
+        s.add("    private:");
         for (final Pair<String, String> Pair : Desc)
         {
         s.add("        " + Pair.First + " " + Pair.Second + " = (" + Pair.First + ")0;");
@@ -182,7 +192,6 @@ public class GenerateConstantPoolConstants
         s.add("    }");
         s.add("");
 
-
         // Deserialize method
         s.add("    void C" + Desc.GetFullName() + "::" + Const.GenDeserializeMethod + "(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader)");
         s.add("    {");
@@ -198,6 +207,7 @@ public class GenerateConstantPoolConstants
         s.add("    {");
         s.add("        Instance." + Const.GenDeserializeMethod + "(Reader);");
         s.add("    }");
+        s.add("");
 
         // Namespace exit
         s.add("}");

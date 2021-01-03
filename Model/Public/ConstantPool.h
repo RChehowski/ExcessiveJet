@@ -21,12 +21,31 @@
 #include "ConstantPool/ConstantStringInfo.h"
 #include "ConstantPool/ConstantUtf8Info.h"
 
+#include "Assert.h"
+
 
 namespace Parse
 {
     class CConstantPool
     {
     public:
-        static CConstantInfo* NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
     };
+
+    CConstantInfo* New_ConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
+
+    template <typename T>
+    T* Cast_ConstantInfo(CConstantInfo* const ConstantInfo)
+    {
+        static_assert(std::is_base_of_v<CConstantInfo, T>, "T must be a subclass of CConstantInfo");
+
+        if (ConstantInfo->GetConstantPoolInfoTag() == T::StaticTag)
+        {
+            return reinterpret_cast<T*>(ConstantInfo);
+        }
+        else
+        {
+            ASSERT(false);
+            return nullptr;
+        }
+    }
 }

@@ -32,6 +32,9 @@ namespace Parse
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantMethodHandleInfo& Instance);
 
+    public:
+        static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::MethodHandle;
+
     private:
         u1 ReferenceKind = (u1)0;
         u2 ReferenceIndex = (u2)0;

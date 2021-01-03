@@ -44,7 +44,7 @@ namespace Parse
 
     const CTagToConstantInfoSpawnFunction G_TagToConstantInfoSpawnFunction = GetTagToConstantInfoSpawnFunction();
 
-    CConstantInfo* CConstantPool::NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag)
+    CConstantInfo* New_ConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag)
     {
         auto It = G_TagToConstantInfoSpawnFunction.find(ConstantPoolInfoTag);
         if (It != G_TagToConstantInfoSpawnFunction.end())

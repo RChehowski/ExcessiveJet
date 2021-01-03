@@ -26,4 +26,5 @@ namespace Parse
     {
         Instance.DeserializeFrom(Reader);
     }
+
 }

@@ -480,6 +480,9 @@ using Parse::CConstantPool;
 using Parse::CConstantInfo;
 using Parse::EConstantPoolInfoTag;
 
+using Parse::New_ConstantInfo;
+using Parse::Cast_ConstantInfo;
+
 int main()
 {
     CMemoryReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
@@ -504,7 +507,7 @@ int main()
 
         EConstantPoolInfoTag Tag = CConstantInfo::GetConstantPoolInfoTagByByte(TagByte);
 
-        CConstantInfo* const ConstantInfo = CConstantPool::NewConstantInfo(Tag);
+        CConstantInfo* const ConstantInfo = New_ConstantInfo(Tag);
         MemoryReader >> *ConstantInfo;
 
         std::cout << ConstantInfo->ToString() << std::endl << std::endl;

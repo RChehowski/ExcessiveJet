@@ -47,40 +47,38 @@ namespace Parse
 
         virtual ~CConstantInfo() = default;
 
+        [[nodiscard]]
         FORCEINLINE EConstantPoolInfoTag GetConstantPoolInfoTag() const
         {
             return ConstantPoolInfoTag;
         }
 
+        [[nodiscard]]
         virtual std::string ToString() const = 0;
 
         virtual void DeserializeFrom(Util::CMemoryReader& Reader) = 0;
 
-        FORCEINLINE static EConstantPoolInfoTag GetConstantPoolInfoTagByByte(const u1 TagByte)
+        [[nodiscard]]
+        FORCEINLINE bool IsA(EConstantPoolInfoTag InConstantPoolInfoTag) const
         {
-            switch (TagByte)
-            {
-                case (u1) EConstantPoolInfoTag::Utf8:
-                case (u1) EConstantPoolInfoTag::Integer:
-                case (u1) EConstantPoolInfoTag::Float:
-                case (u1) EConstantPoolInfoTag::Long:
-                case (u1) EConstantPoolInfoTag::Double:
-                case (u1) EConstantPoolInfoTag::Class:
-                case (u1) EConstantPoolInfoTag::String:
-                case (u1) EConstantPoolInfoTag::FieldRef:
-                case (u1) EConstantPoolInfoTag::MethodRef:
-                case (u1) EConstantPoolInfoTag::InterfaceMethodRef:
-                case (u1) EConstantPoolInfoTag::NameAndType:
-                case (u1) EConstantPoolInfoTag::MethodHandle:
-                case (u1) EConstantPoolInfoTag::MethodType:
-                case (u1) EConstantPoolInfoTag::InvokeDynamic:
-                    return (EConstantPoolInfoTag)TagByte;
+            return GetConstantPoolInfoTag() == InConstantPoolInfoTag;
+        }
 
-                default:
-                    ASSERT(false);
-                    return EConstantPoolInfoTag::Invalid_NotATag;
+        template<typename T>
+        [[nodiscard]]
+        FORCEINLINE bool IsA() const
+        {
+            if constexpr (std::is_base_of_v<CConstantInfo, T>)
+            {
+                return IsA(T::StaticTag);
+            }
+            else
+            {
+                return false;
             }
         }
+
+        static EConstantPoolInfoTag GetConstantPoolInfoTagByByte(u1 TagByte);
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantInfo& Instance);
 

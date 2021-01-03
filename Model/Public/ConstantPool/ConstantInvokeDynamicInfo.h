@@ -32,6 +32,9 @@ namespace Parse
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantInvokeDynamicInfo& Instance);
 
+    public:
+        static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::InvokeDynamic;
+
     private:
         u2 BootstrapMethodAttrIndex = (u2)0;
         u2 NameAndTypeIndex = (u2)0;

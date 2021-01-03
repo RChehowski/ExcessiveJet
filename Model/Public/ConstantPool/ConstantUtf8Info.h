@@ -32,6 +32,9 @@ namespace Parse
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantUtf8Info& Instance);
 
+    public:
+        static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Utf8;
+
     private:
         u2 Length = (u2)0;
         u1* Bytes = (u1*)0;
