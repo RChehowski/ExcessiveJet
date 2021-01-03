@@ -1,7 +1,4 @@
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +19,8 @@ public class GenerateConstantPoolConstants
 
         private static final String GenReaderClass = "MemoryReader";
         private static final String GenBaseClass = "ConstantInfo";
+
+        private static final String GenDeserializeMethod = "DeserializeFrom";
     }
 
     private static class Pair<TFirst, TSecond>
@@ -133,6 +132,10 @@ public class GenerateConstantPoolConstants
         s.add("");
         }
 
+        // Deserialize method
+        s.add("        void " + Const.GenDeserializeMethod + "(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader) override;");
+        s.add("");
+
         // Operator>>
         s.add("        friend void operator>>(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader, C" + Desc.GetFullName() + "& Instance);");
         s.add("");
@@ -179,13 +182,21 @@ public class GenerateConstantPoolConstants
         s.add("    }");
         s.add("");
 
-        // operator>>()
-        s.add("    void operator>>(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader, C" + Desc.GetFullName() + "& Instance)");
+
+        // Deserialize method
+        s.add("    void C" + Desc.GetFullName() + "::" + Const.GenDeserializeMethod + "(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader)");
         s.add("    {");
         for (final Pair<String, String> Pair : Desc)
         {
-        s.add("        Reader >> Instance." + Pair.Second + ";");
+        s.add("        Reader >> " + Pair.Second + ";");
         }
+        s.add("    }");
+        s.add("");
+
+        // operator>>()
+        s.add("    void operator>>(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader, C" + Desc.GetFullName() + "& Instance)");
+        s.add("    {");
+        s.add("        Instance." + Const.GenDeserializeMethod + "(Reader);");
         s.add("    }");
 
         // Namespace exit
@@ -235,7 +246,7 @@ public class GenerateConstantPoolConstants
             )),
             new ClassDesc("Utf8", Arrays.asList(
                 Pair.of("u2", "Length"),
-                Pair.of("u1", "Bytes")
+                Pair.of("u1*", "Bytes")
             )),
             new ClassDesc("MethodHandle", Arrays.asList(
                 Pair.of("u1", "ReferenceKind"),

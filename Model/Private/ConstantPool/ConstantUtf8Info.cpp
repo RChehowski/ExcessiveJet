@@ -1,7 +1,6 @@
 
 #include "ConstantPool/ConstantUtf8Info.h"
 #include "MemoryFile.h"
-
 #include "Platform/Memory.h"
 
 #include <sstream>
@@ -15,16 +14,23 @@ namespace Parse
         std::ostringstream oss;
         oss << "ConstantUtf8Info {" << std::endl;
         oss << "              Length: " << Length << std::endl;
-        oss << "               Bytes: " << Bytes << std::endl;
+        oss << "               Bytes: ";
+        oss.write((const char*)Bytes, (std::streamsize)Length);
+        oss << std::endl;
         oss << "}" << std::endl;
         return std::move(oss.str());
     }
 
+    void CConstantUtf8Info::DeserializeFrom(Util::CMemoryReader& Reader)
+    {
+        Reader >> Length;
+
+        Bytes = Memory::MallocT<u1>(Length);
+        Reader.ReadBytes(Bytes, (usz)Length);
+    }
+
     void operator>>(Util::CMemoryReader& Reader, CConstantUtf8Info& Instance)
     {
-        Reader >> Instance.Length;
-
-        Instance.Bytes = Memory::MallocT<u1>(Instance.Length);
-        Reader.ReadBytes((void*)Instance.Bytes, (usz)Instance.Length);
+        Instance.DeserializeFrom(Reader);
     }
 }

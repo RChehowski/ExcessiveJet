@@ -30,7 +30,7 @@ namespace Util
         FORCEINLINE void RangeCheck(usz AddOffset) const
         {
             const ssz NewPosition = (ssz)(Position + AddOffset);
-            ASSERT(NewPosition < FileSize);
+            ASSERT((NewPosition >= 0) && ((usz)NewPosition < (usz)FileSize));
         }
 
     public:

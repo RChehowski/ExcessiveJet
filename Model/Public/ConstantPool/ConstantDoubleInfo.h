@@ -28,10 +28,7 @@ namespace Parse
              return LowBytes;
         }
 
-        void DeserializeFrom(Util::CMemoryReader& Reader) override
-        {
-            Reader >> *this;
-        }
+        void DeserializeFrom(Util::CMemoryReader& Reader) override;
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantDoubleInfo& Instance);
 

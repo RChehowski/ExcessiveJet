@@ -16,9 +16,14 @@ namespace Parse
         return std::move(oss.str());
     }
 
+    void CConstantInvokeDynamicInfo::DeserializeFrom(Util::CMemoryReader& Reader)
+    {
+        Reader >> BootstrapMethodAttrIndex;
+        Reader >> NameAndTypeIndex;
+    }
+
     void operator>>(Util::CMemoryReader& Reader, CConstantInvokeDynamicInfo& Instance)
     {
-        Reader >> Instance.BootstrapMethodAttrIndex;
-        Reader >> Instance.NameAndTypeIndex;
+        Instance.DeserializeFrom(Reader);
     }
 }

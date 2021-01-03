@@ -16,9 +16,14 @@ namespace Parse
         return std::move(oss.str());
     }
 
+    void CConstantDoubleInfo::DeserializeFrom(Util::CMemoryReader& Reader)
+    {
+        Reader >> HighBytes;
+        Reader >> LowBytes;
+    }
+
     void operator>>(Util::CMemoryReader& Reader, CConstantDoubleInfo& Instance)
     {
-        Reader >> Instance.HighBytes;
-        Reader >> Instance.LowBytes;
+        Instance.DeserializeFrom(Reader);
     }
 }

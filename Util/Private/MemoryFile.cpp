@@ -59,7 +59,7 @@ namespace Util
         }
 
         const ssz NewPosition= OriginatedOffset + Offset;
-        ASSERT((NewPosition >= 0) && (NewPosition < FileSize));
+        ASSERT((NewPosition >= 0) && ((usz)NewPosition < FileSize));
         Position = NewPosition;
     }
 

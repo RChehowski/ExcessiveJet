@@ -16,9 +16,14 @@ namespace Parse
         return std::move(oss.str());
     }
 
+    void CConstantMethodHandleInfo::DeserializeFrom(Util::CMemoryReader& Reader)
+    {
+        Reader >> ReferenceKind;
+        Reader >> ReferenceIndex;
+    }
+
     void operator>>(Util::CMemoryReader& Reader, CConstantMethodHandleInfo& Instance)
     {
-        Reader >> Instance.ReferenceKind;
-        Reader >> Instance.ReferenceIndex;
+        Instance.DeserializeFrom(Reader);
     }
 }

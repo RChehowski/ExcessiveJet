@@ -28,15 +28,12 @@ namespace Parse
              return Bytes;
         }
 
-        void DeserializeFrom(Util::CMemoryReader& Reader) override
-        {
-            Reader >> *this;
-        }
+        void DeserializeFrom(Util::CMemoryReader& Reader) override;
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantUtf8Info& Instance);
 
     private:
         u2 Length = (u2)0;
-        u1* Bytes = nullptr;
+        u1* Bytes = (u1*)0;
     };
 }

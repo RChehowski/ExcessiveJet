@@ -485,19 +485,19 @@ int main()
     CMemoryReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
     MemoryReader.SetByteOrder(CByteOrders::BigEndian());
 
-    u4 magic;
-    MemoryReader >> magic;
+    u4 Magic = (u4)0;
+    MemoryReader >> Magic;
 
-    u2 minor_version;
-    MemoryReader >> minor_version;
+    u2 MinorVersion = (u2)0;
+    MemoryReader >> MinorVersion;
 
-    u2 major_version;
-    MemoryReader >> major_version;
+    u2 MajorVersion = (u2)0;
+    MemoryReader >> MajorVersion;
 
-    u2 constant_pool_count;
-    MemoryReader >> constant_pool_count;
+    u2 ConstantPoolCount = (u2)0;
+    MemoryReader >> ConstantPoolCount;
 
-    for (u2 constant_pool_index = 1; constant_pool_index < constant_pool_count; ++constant_pool_index)
+    for (u2 ConstantPoolIndex = 1; ConstantPoolIndex < ConstantPoolCount; ++ConstantPoolIndex)
     {
         u1 TagByte = (u1)0;
         MemoryReader >> TagByte;
@@ -679,7 +679,7 @@ int main()
 //        (*classFileBlob) >> method_info;
 //    }
 //
-//    printf("0x%x\n", magic);
+//    printf("0x%x\n", Magic);
 
     return 0;
 }

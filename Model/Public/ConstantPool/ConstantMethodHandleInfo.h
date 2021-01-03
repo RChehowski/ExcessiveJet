@@ -28,10 +28,7 @@ namespace Parse
              return ReferenceIndex;
         }
 
-        void DeserializeFrom(Util::CMemoryReader& Reader) override
-        {
-            Reader >> *this;
-        }
+        void DeserializeFrom(Util::CMemoryReader& Reader) override;
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantMethodHandleInfo& Instance);
 
