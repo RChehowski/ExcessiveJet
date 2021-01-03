@@ -2,15 +2,11 @@
 // Created by ASUS on 27/12/2020.
 //
 
-#include <cstdio>
-#include <cstring>
-#include <algorithm>
-#include <functional>
-#include <unordered_map>
 #include "ConstantPool.h"
 
-#include "Platform/Misc.h"
-#include "Assert.h"
+#include <cstdio>
+#include <functional>
+#include <unordered_map>
 
 
 namespace Parse
@@ -18,31 +14,23 @@ namespace Parse
     typedef std::function<CConstantInfo*(EConstantPoolInfoTag)> CConstantInfoSpawnFunction;
     typedef std::unordered_map<EConstantPoolInfoTag, CConstantInfoSpawnFunction> CTagToConstantInfoSpawnFunction;
 
-    CTagToConstantInfoSpawnFunction GetTagToConstantInfoSpawnFunction() noexcept
-    {
-        using EInfoTag = EConstantPoolInfoTag;
-
-        CTagToConstantInfoSpawnFunction TagToConstantInfoSpawnFunction = {
-            { EInfoTag::Utf8,               [](EInfoTag Tag) { return new CConstantUtf8Info(Tag); } },
-            { EInfoTag::Integer,            [](EInfoTag Tag) { return new CConstantIntegerInfo(Tag); } },
-            { EInfoTag::Float,              [](EInfoTag Tag) { return new CConstantFloatInfo(Tag); } },
-            { EInfoTag::Long,               [](EInfoTag Tag) { return new CConstantLongInfo(Tag); } },
-            { EInfoTag::Double,             [](EInfoTag Tag) { return new CConstantDoubleInfo(Tag); } },
-            { EInfoTag::Class,              [](EInfoTag Tag) { return new CConstantClassInfo(Tag); } },
-            { EInfoTag::String,             [](EInfoTag Tag) { return new CConstantStringInfo(Tag); } },
-            { EInfoTag::FieldRef,           [](EInfoTag Tag) { return new CConstantFieldRefInfo(Tag); } },
-            { EInfoTag::MethodRef,          [](EInfoTag Tag) { return new CConstantMethodRefInfo(Tag); } },
-            { EInfoTag::InterfaceMethodRef, [](EInfoTag Tag) { return new CConstantInterfaceMethodRefInfo(Tag); } },
-            { EInfoTag::NameAndType,        [](EInfoTag Tag) { return new CConstantNameAndTypeInfo(Tag); } },
-            { EInfoTag::MethodHandle,       [](EInfoTag Tag) { return new CConstantMethodHandleInfo(Tag); } },
-            { EInfoTag::MethodType,         [](EInfoTag Tag) { return new CConstantMethodTypeInfo(Tag); } },
-            { EInfoTag::InvokeDynamic,      [](EInfoTag Tag) { return new CConstantInvokeDynamicInfo(Tag); } }
-        };
-
-        return std::move(TagToConstantInfoSpawnFunction);
-    }
-
-    const CTagToConstantInfoSpawnFunction G_TagToConstantInfoSpawnFunction = GetTagToConstantInfoSpawnFunction();
+    using ECPIT = EConstantPoolInfoTag;
+    const CTagToConstantInfoSpawnFunction G_TagToConstantInfoSpawnFunction = {
+        { ECPIT::Utf8,               [](ECPIT Tag) { return new CConstantUtf8Info(Tag); } },
+        { ECPIT::Integer,            [](ECPIT Tag) { return new CConstantIntegerInfo(Tag); } },
+        { ECPIT::Float,              [](ECPIT Tag) { return new CConstantFloatInfo(Tag); } },
+        { ECPIT::Long,               [](ECPIT Tag) { return new CConstantLongInfo(Tag); } },
+        { ECPIT::Double,             [](ECPIT Tag) { return new CConstantDoubleInfo(Tag); } },
+        { ECPIT::Class,              [](ECPIT Tag) { return new CConstantClassInfo(Tag); } },
+        { ECPIT::String,             [](ECPIT Tag) { return new CConstantStringInfo(Tag); } },
+        { ECPIT::FieldRef,           [](ECPIT Tag) { return new CConstantFieldRefInfo(Tag); } },
+        { ECPIT::MethodRef,          [](ECPIT Tag) { return new CConstantMethodRefInfo(Tag); } },
+        { ECPIT::InterfaceMethodRef, [](ECPIT Tag) { return new CConstantInterfaceMethodRefInfo(Tag); } },
+        { ECPIT::NameAndType,        [](ECPIT Tag) { return new CConstantNameAndTypeInfo(Tag); } },
+        { ECPIT::MethodHandle,       [](ECPIT Tag) { return new CConstantMethodHandleInfo(Tag); } },
+        { ECPIT::MethodType,         [](ECPIT Tag) { return new CConstantMethodTypeInfo(Tag); } },
+        { ECPIT::InvokeDynamic,      [](ECPIT Tag) { return new CConstantInvokeDynamicInfo(Tag); } }
+    };
 
     CConstantInfo* New_ConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag)
     {
