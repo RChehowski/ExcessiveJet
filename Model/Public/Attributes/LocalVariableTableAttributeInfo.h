@@ -57,39 +57,34 @@ private:
     u2 Index;
 };
 
-
-struct CLocalVariableTableAttributeInfo : public CAttributeInfo
+namespace Parse
 {
-    using Super = CAttributeInfo;
-    using Super::Super;
-
-public:
-    FORCEINLINE ~CLocalVariableTableAttributeInfo() override
+    class CLocalVariableTableAttributeInfo : public CAttributeInfo
     {
-        Memory::Free(LocalVariableTable);
-    }
+        using Super = CAttributeInfo;
+        using Super::Super;
 
-    [[nodiscard]]
-    FORCEINLINE const CLocalVariable* GetLocalVariable(usz Index) const
-    {
-        ASSERT(Index < (usz)LocalVariableTableLength);
-        return LocalVariableTable + Index;
-    }
+    public:
+        FORCEINLINE ~CLocalVariableTableAttributeInfo() override
+        {
+            Memory::Free(LocalVariableTable);
+        }
 
-    [[nodiscard]]
-    FORCEINLINE u2 GetLocalVariableTableLength() const
-    {
-        return LocalVariableTableLength;
-    }
+        [[nodiscard]]
+        FORCEINLINE const CLocalVariable* GetLocalVariable(usz Index) const
+        {
+            ASSERT(Index < (usz)LocalVariableTableLength);
+            return LocalVariableTable + Index;
+        }
 
-    void operator>> (ClassFileBlob& Blob) override;
+        [[nodiscard]]
+        FORCEINLINE u2 GetLocalVariableTableLength() const
+        {
+            return LocalVariableTableLength;
+        }
 
-    FORCEINLINE static CAttributeInfo* NewInstance(u2 InAttributeNameIndex, u4 InAttributeLength)
-    {
-        return new CLocalVariableTableAttributeInfo(InAttributeNameIndex, InAttributeLength);
-    }
-
-private:
-    u2 LocalVariableTableLength;
-    CLocalVariable* LocalVariableTable = nullptr;
-};
+    private:
+        u2 LocalVariableTableLength;
+        CLocalVariable* LocalVariableTable = nullptr;
+    };
+}

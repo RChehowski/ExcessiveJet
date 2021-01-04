@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Types.h"
+#include "Platform/Memory.h"
 
 namespace Util
 {
@@ -47,7 +48,7 @@ namespace Util
                     Result |= (((Value >> 0x08) & 0xFF) << 0x30) & 0x00FF000000000000ULL;
                     Result |= (((Value >> 0x00) & 0xFF) << 0x38) & 0xFF00000000000000ULL;
 
-                    *((u8 *) Bytes) = Result;
+                    Memory::Memcpy(Bytes, &Result, Size);
                     break;
                 }
                 case 4: {
@@ -59,7 +60,7 @@ namespace Util
                     Result |= (((Value >> 0x08) & 0xFF) << 0x10) & 0x00FF0000;
                     Result |= (((Value >> 0x00) & 0xFF) << 0x18) & 0xFF000000;
 
-                    Memory::Memcpy(Bytes, &Result, sizeof(u4));
+                    Memory::Memcpy(Bytes, &Result, Size);
                     break;
                 }
                 case 2: {
@@ -69,7 +70,7 @@ namespace Util
                     Result |= (((Value >> 0x08) & 0xFF) << 0x00) & 0x00FF;
                     Result |= (((Value >> 0x00) & 0xFF) << 0x08) & 0xFF00;
 
-                    *((u2 *) Bytes) = Result;
+                    Memory::Memcpy(Bytes, &Result, Size);
                     break;
                 }
                 case 1: {
@@ -80,5 +81,34 @@ namespace Util
                     break;
             }
         }
+
+        template<typename TTo, typename TFrom /* auto */>
+        FORCEINLINE static TTo IntegerCast(TFrom From)
+        {
+            if constexpr (!std::is_signed_v<TFrom>)
+            {
+                if constexpr (!std::is_signed_v<TTo>)
+                {
+                    if constexpr (sizeof(TTo) >= sizeof(TFrom))
+                    {
+                        // Will not overflow
+                        return static_cast<TTo>(From);
+                    }
+                    else
+                    {
+                        ASSERT(From <= (TFrom)std::numeric_limits<TTo>::max());
+                        return static_cast<TTo>(From);
+                    }
+                }
+                else
+                {
+                    []<bool flag = false>() { static_assert(flag, "Not implemented"); }();
+                }
+            }
+            else
+            {
+                []<bool flag = false>() { static_assert(flag, "Not implemented"); }();
+            }
+        };
     };
 }

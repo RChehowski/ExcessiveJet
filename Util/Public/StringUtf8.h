@@ -44,6 +44,8 @@ namespace Util
 
         StringUtf8& operator=(StringUtf8&& Other) noexcept;
 
+
+
     private:
         u1* Data;
         usz NumBytes;

@@ -4,48 +4,52 @@
 
 #pragma once
 
+#include "Types.h"
+#include "Assert.h"
 #include "ConstantPool/ConstantInfo.h"
 
-#include "ConstantPool/ConstantClassInfo.h"
-#include "ConstantPool/ConstantDoubleInfo.h"
-#include "ConstantPool/ConstantFieldRefInfo.h"
-#include "ConstantPool/ConstantFloatInfo.h"
-#include "ConstantPool/ConstantIntegerInfo.h"
-#include "ConstantPool/ConstantInterfaceMethodRefInfo.h"
-#include "ConstantPool/ConstantInvokeDynamicInfo.h"
-#include "ConstantPool/ConstantLongInfo.h"
-#include "ConstantPool/ConstantMethodHandleInfo.h"
-#include "ConstantPool/ConstantMethodRefInfo.h"
-#include "ConstantPool/ConstantMethodTypeInfo.h"
-#include "ConstantPool/ConstantNameAndTypeInfo.h"
-#include "ConstantPool/ConstantStringInfo.h"
-#include "ConstantPool/ConstantUtf8Info.h"
+#include <vector>
+#include <functional>
 
-#include "Assert.h"
-
+namespace Util
+{
+    class CMemoryReader;
+}
 
 namespace Parse
 {
+    class CConstantInfo;
+    class CAttributeType;
+
     class CConstantPool
     {
+        using CBiConsumer = std::function<void(
+            usz,            // Index in ConstantInfos
+            CConstantInfo*  // CConstantInfo
+        )>;
+
     public:
+        ~CConstantPool();
+
+        void ForEach(const CBiConsumer& BiConsumer);
+
+        void ForEach(const CBiConsumer& BiConsumer, EConstantPoolInfoTag ConstantPoolInfoTag);
+
+        const CAttributeType* GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool);
+
+
+        CConstantInfo* operator[] (usz IndexInConstantPool);
+
+        template<class T>
+        FORCEINLINE T* Get(usz IndexInConstantPool)
+        {
+            CConstantInfo* const ConstantInfo = (*this)[IndexInConstantPool];
+            return CConstantInfo::CastConstantInfo<T>(ConstantInfo);
+        }
+
+        friend void operator>>(Util::CMemoryReader& Reader, CConstantPool& Instance);
+
+    private:
+        std::vector<CConstantInfo*> ConstantInfos;
     };
-
-    CConstantInfo* New_ConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
-
-    template <typename T>
-    T* Cast_ConstantInfo(CConstantInfo* const ConstantInfo)
-    {
-        static_assert(std::is_base_of_v<CConstantInfo, T>, "T must be a subclass of CConstantInfo");
-
-        if (ConstantInfo->GetConstantPoolInfoTag() == T::StaticTag)
-        {
-            return reinterpret_cast<T*>(ConstantInfo);
-        }
-        else
-        {
-            ASSERT(false);
-            return nullptr;
-        }
-    }
 }

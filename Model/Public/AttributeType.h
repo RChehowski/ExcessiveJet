@@ -6,21 +6,18 @@
 
 #include "Types.h"
 #include "Assert.h"
-#include "Platform/Memory.h"
 #include "StringUtf8.h"
 
-class CAttributeInfo;
-class ClassFileBlob;
 class ConstantPool;
 
-namespace Parser
+namespace Parse
 {
-    class CAttributeName
+    class CAttributeType
     {
-        friend class CAttributeNames;
+        friend class CAttributeTypes;
 
     private:
-        constexpr CAttributeName(const u1 InId, const char* const InName, const u2 InAddedInVersion, const u2 InAddedInMinorVersion)
+        constexpr CAttributeType(const u1 InId, const char* const InName, const u2 InAddedInVersion, const u2 InAddedInMinorVersion)
             : Id(InId)
             , Name(InName)
             , AddedInVersion(InAddedInVersion)
@@ -54,17 +51,17 @@ namespace Parser
         }
 
     private:
-        u1 Id;
+        const u1 Id;
         const char* Name;
 
         const u2 AddedInVersion;
         const u2 AddedInMinorVersion;
     };
 
-    #define DEFINE_ATTRIBUTE_NAME(Id, Name, AddedInVersion, AddedInMinorVersion) static constexpr CAttributeName Name =\
-        CAttributeName((u1)Id, LITERAL_TO_STRING(Name), AddedInVersion, AddedInMinorVersion)
+    #define DEFINE_ATTRIBUTE_NAME(Id, Name, AddedInVersion, AddedInMinorVersion) static constexpr CAttributeType Name =\
+        CAttributeType((u1)Id, LITERAL_TO_STRING(Name), AddedInVersion, AddedInMinorVersion)
 
-    class CAttributeNames
+    class CAttributeTypes
     {
     public:
         DEFINE_ATTRIBUTE_NAME(0,    ConstantValue,                          45, 3);
@@ -90,12 +87,6 @@ namespace Parser
 
         static constexpr usz GetNumAttributeNames();
 
-        static const CAttributeName* GetAttributeNameByName(const Util::StringUtf8& String);
-    };
-
-    class CAttributes
-    {
-    public:
-        static CAttributeInfo* ReadAttributeInfo(ClassFileBlob& Blob, const ConstantPool& ConstantPool);
+        static const CAttributeType* GetAttributeNameByName(const Util::StringUtf8& String);
     };
 }

@@ -6,34 +6,57 @@
 
 #include "Types.h"
 
-class ClassFileBlob;
-
-class CAttributeInfo
+namespace Util
 {
-public:
-    FORCEINLINE CAttributeInfo(u2 InAttributeNameIndex, u4 InAttributeLength)
-        : AttributeNameIndex(InAttributeNameIndex)
-        , AttributeLength(InAttributeLength)
+    class CMemoryReader;
+}
+
+namespace Parse
+{
+    class CConstantPool;
+
+    class CAttributeInfo
     {
-    }
+    public:
+        FORCEINLINE CAttributeInfo(u2 InAttributeNameIndex, u4 InAttributeLength)
+            : AttributeNameIndex(InAttributeNameIndex)
+            , AttributeLength(InAttributeLength)
+        {
+        }
 
-    virtual ~CAttributeInfo() = default;
+        virtual ~CAttributeInfo() = default;
 
-    [[nodiscard]]
-    FORCEINLINE u2 GetAttributeNameIndex() const
+        [[nodiscard]]
+        FORCEINLINE u2 GetAttributeNameIndex() const
+        {
+            return AttributeNameIndex;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE usz GetAttributeLength() const
+        {
+            // Expand AttributeLength to usz
+            return (usz)AttributeLength;
+        }
+
+        virtual void DeserializeFrom(Util::CMemoryReader& Reader, const CConstantPool& ConstantPool) = 0;
+
+    private:
+        u2 AttributeNameIndex;
+        u4 AttributeLength;
+    };
+
+    class CScopeAttributeInfoDeserializeTracker
     {
-        return AttributeNameIndex;
-    }
+    public:
+        CScopeAttributeInfoDeserializeTracker(CAttributeInfo &InAttributeInfo, Util::CMemoryReader &InReader);
 
-    [[nodiscard]]
-    FORCEINLINE u4 GetAttributeLength() const
-    {
-        return AttributeLength;
-    }
+        ~CScopeAttributeInfoDeserializeTracker();
 
-    virtual void operator>> (ClassFileBlob& Blob) = 0;
+    private:
+        const CAttributeInfo& AttributeInfo;
+        const Util::CMemoryReader& Reader;
 
-private:
-    const u2 AttributeNameIndex;
-    const u4 AttributeLength;
-};
+        const usz DeserializeBegin;
+    };
+}

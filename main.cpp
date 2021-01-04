@@ -52,7 +52,7 @@
 ////    u1 info[attribute_length];
 ////};
 //
-//ConstantPool G_constant_pool;
+//ConstantInfos G_constant_pool;
 //
 //struct AttributeInfo
 //{
@@ -368,12 +368,12 @@
 //#include "Attributes.h"
 //
 ////typedef void (*ReadFunction)(ClassFileBlob&, u2, u4);
-////typedef std::unordered_map<Parser::CAttributeName, ReadFunction> FuncMap;
+////typedef std::unordered_map<Parser::CAttributeType, ReadFunction> FuncMap;
 //
 //
 ////const FuncMap G_Map({
 ////    {
-////        Parser::CAttributeNames::Deprecated,
+////        Parser::CAttributeTypes::Deprecated,
 ////        read_attribute_Deprecated
 ////    }
 ////    {
@@ -470,7 +470,9 @@
 //
 
 #include "MemoryFile.h"
-#include "ConstantPool.h"
+#include "ConstantPool/ConstantInfo.h"
+#include "FieldInfo.h"
+#include "ClassInfo.h"
 
 
 using Util::CMemoryReader;
@@ -479,39 +481,66 @@ using Util::CByteOrders;
 using Parse::CConstantPool;
 using Parse::CConstantInfo;
 using Parse::EConstantPoolInfoTag;
+using Parse::CFieldInfo;
 
-using Parse::New_ConstantInfo;
-using Parse::Cast_ConstantInfo;
+using Parse::CClassInfo;
 
 int main()
 {
     CMemoryReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
     MemoryReader.SetByteOrder(CByteOrders::BigEndian());
 
-    u4 Magic = (u4)0;
-    MemoryReader >> Magic;
+    CClassInfo ClassInfo;
+    MemoryReader >> ClassInfo;
 
-    u2 MinorVersion = (u2)0;
-    MemoryReader >> MinorVersion;
-
-    u2 MajorVersion = (u2)0;
-    MemoryReader >> MajorVersion;
-
-    u2 ConstantPoolCount = (u2)0;
-    MemoryReader >> ConstantPoolCount;
-
-    for (u2 ConstantPoolIndex = 1; ConstantPoolIndex < ConstantPoolCount; ++ConstantPoolIndex)
-    {
-        u1 TagByte = (u1)0;
-        MemoryReader >> TagByte;
-
-        EConstantPoolInfoTag Tag = CConstantInfo::GetConstantPoolInfoTagByByte(TagByte);
-
-        CConstantInfo* const ConstantInfo = New_ConstantInfo(Tag);
-        MemoryReader >> *ConstantInfo;
-
-        std::cout << ConstantInfo->ToString() << std::endl << std::endl;
-    }
+//    u4 Magic = (u4)0;
+//    MemoryReader >> Magic;
+//
+//    u2 MinorVersion = (u2)0;
+//    MemoryReader >> MinorVersion;
+//
+//    u2 MajorVersion = (u2)0;
+//    MemoryReader >> MajorVersion;
+//
+//    CConstantPool ConstantPool;
+//    MemoryReader >> ConstantPool;
+//
+//    u2 AccessFlags = (u2)0;
+//    MemoryReader >> AccessFlags;
+//
+//    u2 ThisClass = (u2)0;
+//    MemoryReader >> ThisClass;
+//
+//    u2 SuperClass = (u2)0;
+//    MemoryReader >> SuperClass;
+//
+//    u2 InterfacesCount = (u2)0;
+//    MemoryReader >> InterfacesCount;
+//
+//    std::vector<u2> Interfaces;
+//    Interfaces.reserve((size_t)InterfacesCount);
+//
+//    for (u2 InterfaceIndex = 0; InterfaceIndex < InterfacesCount; InterfaceIndex++)
+//    {
+//        u2 Interface = (u2)0;
+//        MemoryReader >> Interface;
+//
+//        Interfaces.push_back(Interface);
+//    }
+//
+//    u2 FieldsCount = (u2)0;
+//    MemoryReader >> FieldsCount;
+//
+//    std::vector<CFieldInfo*> Fields;
+//    Fields.reserve((size_t)FieldsCount);
+//
+//    for (u2 FieldIndex = 0; FieldIndex < FieldsCount; ++FieldIndex)
+//    {
+//        CFieldInfo* const FieldInfo = new CFieldInfo();
+//        MemoryReader >> *FieldInfo;
+//
+//        Fields.push_back(FieldInfo);
+//    }
 
     return 0;
 

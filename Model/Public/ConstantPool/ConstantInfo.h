@@ -78,6 +78,24 @@ namespace Parse
             }
         }
 
+        static CConstantInfo* NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
+
+        template <typename T>
+        static T* CastConstantInfo(CConstantInfo* const ConstantInfo)
+        {
+            static_assert(std::is_base_of_v<CConstantInfo, T>, "T must be a subclass of CConstantInfo");
+
+            if (ConstantInfo->GetConstantPoolInfoTag() == T::StaticTag)
+            {
+                return reinterpret_cast<T*>(ConstantInfo);
+            }
+            else
+            {
+                ASSERT(false);
+                return nullptr;
+            }
+        }
+
         static EConstantPoolInfoTag GetConstantPoolInfoTagByByte(u1 TagByte);
 
         friend void operator>>(Util::CMemoryReader& Reader, CConstantInfo& Instance);

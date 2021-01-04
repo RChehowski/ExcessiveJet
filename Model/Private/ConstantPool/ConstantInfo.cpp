@@ -4,36 +4,79 @@
 
 #include "ConstantPool/ConstantInfo.h"
 
+#include "ConstantPool/ConstantClassInfo.h"
+#include "ConstantPool/ConstantDoubleInfo.h"
+#include "ConstantPool/ConstantFieldRefInfo.h"
+#include "ConstantPool/ConstantFloatInfo.h"
+#include "ConstantPool/ConstantIntegerInfo.h"
+#include "ConstantPool/ConstantInterfaceMethodRefInfo.h"
+#include "ConstantPool/ConstantInvokeDynamicInfo.h"
+#include "ConstantPool/ConstantLongInfo.h"
+#include "ConstantPool/ConstantMethodHandleInfo.h"
+#include "ConstantPool/ConstantMethodRefInfo.h"
+#include "ConstantPool/ConstantMethodTypeInfo.h"
+#include "ConstantPool/ConstantNameAndTypeInfo.h"
+#include "ConstantPool/ConstantStringInfo.h"
+#include "ConstantPool/ConstantUtf8Info.h"
+
+#include <functional>
+
 namespace Parse
 {
+    typedef std::function<CConstantInfo*(EConstantPoolInfoTag)> CConstantInfoSpawnFunction;
+    typedef std::unordered_map<EConstantPoolInfoTag, CConstantInfoSpawnFunction> CTagToConstantInfoSpawnFunction;
+
+    using ETag = EConstantPoolInfoTag;
+    const CTagToConstantInfoSpawnFunction G_TagToConstantInfoSpawnFunction = {
+            {ETag::Utf8,               [](ETag Tag) { return new CConstantUtf8Info(Tag); } },
+            {ETag::Integer,            [](ETag Tag) { return new CConstantIntegerInfo(Tag); } },
+            {ETag::Float,              [](ETag Tag) { return new CConstantFloatInfo(Tag); } },
+            {ETag::Long,               [](ETag Tag) { return new CConstantLongInfo(Tag); } },
+            {ETag::Double,             [](ETag Tag) { return new CConstantDoubleInfo(Tag); } },
+            {ETag::Class,              [](ETag Tag) { return new CConstantClassInfo(Tag); } },
+            {ETag::String,             [](ETag Tag) { return new CConstantStringInfo(Tag); } },
+            {ETag::FieldRef,           [](ETag Tag) { return new CConstantFieldRefInfo(Tag); } },
+            {ETag::MethodRef,          [](ETag Tag) { return new CConstantMethodRefInfo(Tag); } },
+            {ETag::InterfaceMethodRef, [](ETag Tag) { return new CConstantInterfaceMethodRefInfo(Tag); } },
+            {ETag::NameAndType,        [](ETag Tag) { return new CConstantNameAndTypeInfo(Tag); } },
+            {ETag::MethodHandle,       [](ETag Tag) { return new CConstantMethodHandleInfo(Tag); } },
+            {ETag::MethodType,         [](ETag Tag) { return new CConstantMethodTypeInfo(Tag); } },
+            {ETag::InvokeDynamic,      [](ETag Tag) { return new CConstantInvokeDynamicInfo(Tag); } }
+    };
+
+
     EConstantPoolInfoTag CConstantInfo::GetConstantPoolInfoTagByByte(const u1 TagByte)
     {
-        switch (TagByte)
+        // Try to find it in the map
+        auto It = G_TagToConstantInfoSpawnFunction.find((EConstantPoolInfoTag)TagByte);
+        if (It != G_TagToConstantInfoSpawnFunction.end())
         {
-            case (u1) EConstantPoolInfoTag::Utf8:
-            case (u1) EConstantPoolInfoTag::Integer:
-            case (u1) EConstantPoolInfoTag::Float:
-            case (u1) EConstantPoolInfoTag::Long:
-            case (u1) EConstantPoolInfoTag::Double:
-            case (u1) EConstantPoolInfoTag::Class:
-            case (u1) EConstantPoolInfoTag::String:
-            case (u1) EConstantPoolInfoTag::FieldRef:
-            case (u1) EConstantPoolInfoTag::MethodRef:
-            case (u1) EConstantPoolInfoTag::InterfaceMethodRef:
-            case (u1) EConstantPoolInfoTag::NameAndType:
-            case (u1) EConstantPoolInfoTag::MethodHandle:
-            case (u1) EConstantPoolInfoTag::MethodType:
-            case (u1) EConstantPoolInfoTag::InvokeDynamic:
-                return (EConstantPoolInfoTag)TagByte;
-
-            default:
-                ASSERT(false);
-                return EConstantPoolInfoTag::Invalid_NotATag;
+            return It->first;
+        }
+        else
+        {
+            // Not in the map, trigger assertion error
+            ASSERT(false);
+            return EConstantPoolInfoTag::Invalid_NotATag;;
         }
     }
 
     void operator>>(Util::CMemoryReader &Reader, CConstantInfo &Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    CConstantInfo* CConstantInfo::NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag)
+    {
+        auto It = G_TagToConstantInfoSpawnFunction.find(ConstantPoolInfoTag);
+        if (It != G_TagToConstantInfoSpawnFunction.end())
+        {
+            // Create a new instance
+            return It->second(ConstantPoolInfoTag);
+        }
+        else
+        {
+            return nullptr;
+        }
     }
 }

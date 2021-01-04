@@ -1,6 +1,8 @@
 #pragma once
 
+#include "StringUtf8.h"
 #include "ConstantPool/ConstantInfo.h"
+
 
 namespace Util
 {
@@ -17,16 +19,22 @@ namespace Parse
         std::string ToString() const override;
 
         [[nodiscard]]
-        FORCEINLINE u2 GetLength() const
+        FORCEINLINE const Util::StringUtf8& GetStringUtf8() const
         {
-             return Length;
+            return StringUtf8;
         }
 
-        [[nodiscard]]
-        FORCEINLINE u1* GetBytes() const
-        {
-             return Bytes;
-        }
+//        [[nodiscard]]
+//        FORCEINLINE u2 GetLength() const
+//        {
+//             return Length;
+//        }
+//
+//        [[nodiscard]]
+//        FORCEINLINE u1* GetBytes() const
+//        {
+//             return Bytes;
+//        }
 
         void DeserializeFrom(Util::CMemoryReader& Reader) override;
 
@@ -36,7 +44,9 @@ namespace Parse
         static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Utf8;
 
     private:
-        u2 Length = (u2)0;
-        u1* Bytes = (u1*)0;
+//        u2 Length = (u2)0;
+//        u1* Bytes = (u1*)0;
+
+        Util::StringUtf8 StringUtf8;
     };
 }
