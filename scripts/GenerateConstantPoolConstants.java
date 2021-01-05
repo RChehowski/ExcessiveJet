@@ -255,7 +255,7 @@ public class GenerateConstantPoolConstants
                 Pair.of("u2", "DescriptorIndex")
             )),
             new ClassDesc("Utf8", Arrays.asList(
-                Pair.of("u2", "Length"),
+                Pair.of("u2", "NumBytes"),
                 Pair.of("u1*", "Bytes")
             )),
             new ClassDesc("MethodHandle", Arrays.asList(

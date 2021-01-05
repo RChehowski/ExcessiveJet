@@ -31,7 +31,7 @@ namespace Parse
         &CAttributeTypes::BootstrapMethods,
     };
 
-    typedef std::unordered_map<Util::StringUtf8, const CAttributeType*> AttributeNamesMap;
+    typedef std::unordered_map<Util::IStringUtf8, const CAttributeType*> AttributeNamesMap;
     extern const AttributeNamesMap G_AttributeNamesMap;
 
     constexpr usz CAttributeTypes::GetNumAttributeNames()
@@ -39,9 +39,9 @@ namespace Parse
         return (usz)(sizeof(G_AttributeNamesArray) / sizeof(void*));
     }
 
-    const CAttributeType* CAttributeTypes::GetAttributeNameByName(const Util::StringUtf8& String)
+    const CAttributeType* CAttributeTypes::GetAttributeNameByName(const Util::CStringUtf8& String)
     {
-        AttributeNamesMap::const_iterator It = G_AttributeNamesMap.find(String);
+        const auto It = G_AttributeNamesMap.find(String);
         return (It != G_AttributeNamesMap.cend()) ? It->second : nullptr;
     }
 
@@ -54,7 +54,7 @@ namespace Parse
         for (const CAttributeType* AttributeName : G_AttributeNamesArray)
         {
             Map.insert({
-                std::move(Util::StringUtf8(AttributeName->GetName())),
+                std::move(Util::CStringUtf8(AttributeName->GetName())),
                 AttributeName
             });
         }

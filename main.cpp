@@ -351,8 +351,8 @@
 //        u2 StartPc = (u2)0;
 //        blob >> StartPc;
 //
-//        u2 Length = (u2)0;
-//        blob >> Length;
+//        u2 NumBytes = (u2)0;
+//        blob >> NumBytes;
 //
 //        u2 NameIndex = (u2)0;
 //        blob >> NameIndex;

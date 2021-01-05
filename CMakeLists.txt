@@ -23,7 +23,7 @@ set(ConstantPoolConstants
     Model/Private/ConstantPool/ConstantStringInfo.cpp
     Model/Private/ConstantPool/ConstantUtf8Info.cpp
     Model/Private/ConstantPool/ConstantInfo.cpp
-    )
+        Model/Private/Attributes/ConstantValueAttributeInfo.cpp Model/Public/Attributes/ConstantValueAttributeInfo.h)
 
 add_executable(CPP20
     main.cpp
@@ -44,5 +44,10 @@ add_executable(CPP20
     Model/Private/ConstantPool/ConstantInterfaceMethodrefInfo.cpp
     Model/Private/FieldInfo.cpp
     Model/Private/ClassInfo.cpp
+
+    Util/Public/SerializedArray.h
+
+
+
     ${ConstantPoolConstants}
 )

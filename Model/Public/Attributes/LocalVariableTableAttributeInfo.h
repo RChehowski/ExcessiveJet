@@ -8,83 +8,75 @@
 #include "Attributes/AttributeInfo.h"
 
 #include "Assert.h"
-#include "Platform/Memory.h"
+#include "SerializedArray.h"
 
-// TODO: Delete
-#include "ConstantPool.h"
 
-using Util::Memory;
-
-struct CLocalVariable
+namespace Util
 {
-    friend void operator>> (ClassFileBlob& Blob, CLocalVariable& Instance);
-
-    [[nodiscard]]
-    FORCEINLINE u2 GetStartPc() const
-    {
-        return StartPC;
-    }
-
-    [[nodiscard]]
-    FORCEINLINE u2 GetLength() const
-    {
-        return Length;
-    }
-
-    [[nodiscard]]
-    FORCEINLINE u2 GetNameIndex() const
-    {
-        return NameIndex;
-    }
-
-    [[nodiscard]]
-    FORCEINLINE u2 GetDescriptorIndex() const
-    {
-        return DescriptorIndex;
-    }
-
-    [[nodiscard]]
-    FORCEINLINE u2 GetIndex() const
-    {
-        return Index;
-    }
-
-private:
-    u2 StartPC;
-    u2 Length;
-    u2 NameIndex;
-    u2 DescriptorIndex;
-    u2 Index;
-};
+    class CMemoryReader;
+}
 
 namespace Parse
 {
+    class CLocalVariable
+    {
+    public:
+        [[nodiscard]]
+        FORCEINLINE u2 GetStartPc() const
+        {
+            return StartPC;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE u2 GetLength() const
+        {
+            return Length;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE u2 GetNameIndex() const
+        {
+            return NameIndex;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE u2 GetDescriptorIndex() const
+        {
+            return DescriptorIndex;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE u2 GetIndex() const
+        {
+            return Index;
+        }
+
+        // Must implement operator>> to be deserialized
+        friend void operator>> (Util::CMemoryReader& Reader, CLocalVariable& Instance);
+
+    private:
+        u2 StartPC;
+        u2 Length;
+        u2 NameIndex;
+        u2 DescriptorIndex;
+        u2 Index;
+    };
+
     class CLocalVariableTableAttributeInfo : public CAttributeInfo
     {
         using Super = CAttributeInfo;
         using Super::Super;
 
     public:
-        FORCEINLINE ~CLocalVariableTableAttributeInfo() override
+        [[nodiscard]]
+        FORCEINLINE const Util::TSerializedArray<u2, CLocalVariable>& GetLocalVariableTable() const
         {
-            Memory::Free(LocalVariableTable);
+            return LocalVariableTable;
         }
 
-        [[nodiscard]]
-        FORCEINLINE const CLocalVariable* GetLocalVariable(usz Index) const
-        {
-            ASSERT(Index < (usz)LocalVariableTableLength);
-            return LocalVariableTable + Index;
-        }
-
-        [[nodiscard]]
-        FORCEINLINE u2 GetLocalVariableTableLength() const
-        {
-            return LocalVariableTableLength;
-        }
+        void DeserializeFrom(Util::CMemoryReader& Reader) override;
 
     private:
-        u2 LocalVariableTableLength;
-        CLocalVariable* LocalVariableTable = nullptr;
+        Util::TSerializedArray<u2, CLocalVariable> LocalVariableTable;
     };
 }

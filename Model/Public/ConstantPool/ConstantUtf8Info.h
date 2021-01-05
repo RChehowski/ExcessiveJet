@@ -19,15 +19,15 @@ namespace Parse
         std::string ToString() const override;
 
         [[nodiscard]]
-        FORCEINLINE const Util::StringUtf8& GetStringUtf8() const
+        FORCEINLINE const Util::CStringUtf8& GetStringUtf8() const
         {
             return StringUtf8;
         }
 
 //        [[nodiscard]]
-//        FORCEINLINE u2 GetLength() const
+//        FORCEINLINE u2 GetNumBytes() const
 //        {
-//             return Length;
+//             return NumBytes;
 //        }
 //
 //        [[nodiscard]]
@@ -44,9 +44,9 @@ namespace Parse
         static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Utf8;
 
     private:
-//        u2 Length = (u2)0;
+//        u2 NumBytes = (u2)0;
 //        u1* Bytes = (u1*)0;
 
-        Util::StringUtf8 StringUtf8;
+        Util::CStringUtf8 StringUtf8;
     };
 }

@@ -39,7 +39,7 @@ namespace Parse
             return (usz)AttributeLength;
         }
 
-        virtual void DeserializeFrom(Util::CMemoryReader& Reader, const CConstantPool& ConstantPool) = 0;
+        virtual void DeserializeFrom(Util::CMemoryReader& Reader) = 0;
 
     private:
         u2 AttributeNameIndex;

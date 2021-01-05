@@ -13,7 +13,7 @@ namespace Parse
     {
         std::ostringstream oss;
         oss << "ConstantUtf8Info {" << std::endl;
-        oss << "          StringUtf8: " << (std::string)StringUtf8 << std::endl;
+        oss << "          CStringUtf8: " << (std::string)StringUtf8 << std::endl;
         oss << "}" << std::endl;
         return std::move(oss.str());
     }
@@ -26,7 +26,7 @@ namespace Parse
         u1* Bytes = Memory::MallocT<u1>(Length);
         Reader.ReadBytes(Bytes, (usz)Length);
 
-        StringUtf8 = Util::StringUtf8(Bytes, (usz)Length);
+        StringUtf8 = Util::CStringUtf8(Bytes, (usz)Length);
 
         // TODO: Optimize me
         Memory::Free(Bytes);
