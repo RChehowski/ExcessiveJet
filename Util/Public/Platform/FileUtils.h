@@ -12,7 +12,7 @@ namespace Util
     class FileUtils
     {
     public:
-        static u1* ReadFile(const WideString& FileName, usz* OutNumBytes);
+        static FileInputStream ReadFile(const SystemPath& Path);
     };
 }
 

@@ -2,41 +2,36 @@
 // Created by ASUS on 29/12/2020.
 //
 
+#include <locale>
+#include <codecvt>
+#include <filesystem>
+#include <fstream>
 #include "Platform/Memory.h"
 #include "Platform/FileUtils.h"
 
 namespace Util
 {
-    u1* FileUtils::ReadFile(const WideString& FileName, usz* OutNumBytes)
+    FileInputStream FileUtils::ReadFile(const SystemPath& Path)
     {
-        FILE* File = nullptr;
-        _wfopen_s(&File, FileName.c_str(), L"rb");
-
-        if (File != nullptr)
+        FileInputStream fs;
+        if (std::filesystem::exists(Path) && !std::filesystem::is_directory(Path))
         {
-            fseek(File, 0, SEEK_END);
-            const usz FileSize = (usz)_ftelli64(File);
-            fseek(File, 0, SEEK_SET);
-
-            u1* const Data = (u1*)Memory::Malloc(FileSize);
-            fread(Data, FileSize, 1, File);
-            fclose(File);
-
-            if (OutNumBytes)
+            std::filesystem::path real_path = Path;
+            if (std::filesystem::is_symlink(Path))
             {
-                *OutNumBytes = FileSize;
+                real_path = std::filesystem::read_symlink(Path);
             }
 
-            return Data;
+            fs.open(real_path, std::fstream::in | std::fstream::binary);
         }
         else
         {
-            if (OutNumBytes)
+            if(fs.is_open())
             {
-                *OutNumBytes = 0;
+                fs.close();
             }
-
-            return false;
         }
+
+        return fs;
     }
 }

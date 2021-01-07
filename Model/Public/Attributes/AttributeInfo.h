@@ -54,9 +54,9 @@ namespace Parse
         ~CScopeAttributeInfoDeserializeTracker();
 
     private:
-        const CAttributeInfo& AttributeInfo;
-        const Util::CMemoryReader& Reader;
+        CAttributeInfo& AttributeInfo;
+        Util::CMemoryReader& Reader;
 
-        const usz DeserializeBegin;
+        usz DeserializeBegin;
     };
 }

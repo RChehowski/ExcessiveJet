@@ -2,33 +2,30 @@
 // Created by ASUS on 29/12/2020.
 //
 
-#include "Platform/Memory.h"
 #include "Platform/FileUtils.h"
-
-#include "MathUtils.h"
 #include "MemoryFile.h"
-
 
 using Util::Memory;
 
 namespace Util
 {
-    CMemoryReader::CMemoryReader(const WideString& InFileName) : FileName(InFileName)
+    CMemoryReader::CMemoryReader(const SystemPath& Path) : FilePath(Path), FileName(Path.filename())
     {
-        FileBytes = FileUtils::ReadFile(FileName, &FileSize);
+        FileStream = FileUtils::ReadFile(Path);
+        ASSERT(FileStream.is_open());
     }
 
     CMemoryReader::~CMemoryReader()
     {
-        Memory::Free((const void*)FileBytes);
+        if (FileStream.is_open())
+        {
+            FileStream.close();
+        }
     }
 
     void CMemoryReader::ReadBytes(void* Memory, usz Size)
     {
-        RangeCheck(Size);
-
-        Memory::Memcpy(Memory, FileBytes + Position, Size);
-        Position += Size;
+        FileStream.read(static_cast<char*>(Memory), Size);
     }
 
     void CMemoryReader::Seek(ssz Offset, EMemoryFileOrigin Origin)
@@ -43,12 +40,12 @@ namespace Util
             }
             case EMemoryFileOrigin::Cur:
             {
-                OriginatedOffset = (ssz)Position;
+                OriginatedOffset = (ssz)FileStream.tellg();
                 break;
             }
             case EMemoryFileOrigin::End:
             {
-                OriginatedOffset = (ssz)FileSize;
+                OriginatedOffset = (ssz)GetFileSize();
                 break;
             }
             default:
@@ -59,8 +56,8 @@ namespace Util
         }
 
         const ssz NewPosition= OriginatedOffset + Offset;
-        ASSERT((NewPosition >= 0) && ((usz)NewPosition < FileSize));
-        Position = NewPosition;
+        ASSERT((NewPosition >= 0) && ((usz)NewPosition < GetFileSize()));
+        FileStream.seekg(NewPosition);
     }
 
     void operator>> (Util::CMemoryReader& Reader, u1& Instance)

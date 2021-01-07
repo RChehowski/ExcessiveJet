@@ -8,6 +8,7 @@
 #include "Types.h"
 #include "Assert.h"
 #include "ByteOrder.h"
+#include "MathUtils.h"
 
 #include <string>
 
@@ -27,21 +28,21 @@ namespace Util
 
     class CMemoryReader
     {
-        FORCEINLINE void RangeCheck(usz AddOffset) const
+        FORCEINLINE void RangeCheck(usz AddOffset)
         {
-            const ssz NewPosition = (ssz)(Position + AddOffset);
-            ASSERT((NewPosition >= 0) && ((usz)NewPosition < (usz)FileSize));
+            const ssz NewPosition = (ssz)(Tell() + AddOffset);
+            ASSERT((NewPosition >= 0) && ((usz)NewPosition < (usz)GetFileSize()));
         }
 
     public:
-        explicit CMemoryReader(const WideString& InFileName);
+        explicit CMemoryReader(const SystemPath& InFileName);
 
         ~CMemoryReader();
 
         [[nodiscard]]
         FORCEINLINE bool IsValid() const
         {
-            return (FileBytes != nullptr);
+            return FileStream.is_open() && FileStream.good();
         }
 
         [[nodiscard]]
@@ -81,15 +82,15 @@ namespace Util
         void Seek(ssz Offset, EMemoryFileOrigin Origin);
 
         [[nodiscard]]
-        FORCEINLINE size_t Tell() const
+        FORCEINLINE size_t Tell()
         {
-            return Position;
+            return FileStream.tellg();
         }
 
         [[nodiscard]]
         FORCEINLINE size_t GetFileSize() const
         {
-            return FileSize;
+            return std::filesystem::file_size(FilePath);
         }
 
         friend void operator>> (Util::CMemoryReader& Reader, u1& Instance);
@@ -98,12 +99,10 @@ namespace Util
         friend void operator>> (Util::CMemoryReader& Reader, u8& Instance);
 
     private:
-        std::wstring FileName;
+        SystemPath FilePath;
+        SystemPath FileName;
 
-        usz FileSize = (usz)0;
-        uint8_t* FileBytes = nullptr;
-
-        usz Position = (usz)0;
+        FileInputStream FileStream;
 
         const CByteOrder* ByteOrder = CByteOrders::NativeEndian();
     };

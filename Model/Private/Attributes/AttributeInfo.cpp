@@ -18,7 +18,7 @@ namespace Parse
 
     CScopeAttributeInfoDeserializeTracker::~CScopeAttributeInfoDeserializeTracker()
     {
-        const usz BytesRead = Reader.Tell() - DeserializeBegin;
+        usz BytesRead = Reader.Tell() - DeserializeBegin;
         ASSERT(BytesRead == AttributeInfo.GetAttributeLength());
     }
     #pragma endregion
