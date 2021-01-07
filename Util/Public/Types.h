@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <string>
 #include <fstream>
+#include <filesystem>
 
 #define __STRINGIFY(x) #x
 #define LITERAL_TO_STRING(x) __STRINGIFY(x)
@@ -94,5 +95,6 @@ enum class ClassAccessFlags : uint16_t
 #define STRIP_DEBUG_INFO 0
 
 using FileInputStream = std::iostream;
+using SystemPath = std::filesystem::path;
 
 #endif //CPP20_TYPES_H
