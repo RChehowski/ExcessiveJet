@@ -13,9 +13,10 @@
 #define __STRINGIFY(x) #x
 #define LITERAL_TO_STRING(x) __STRINGIFY(x)
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
     #define FORCEINLINE __forceinline
 #else
+    #define FORCEINLINE inline
 #endif
 
 using u1 = uint8_t;
