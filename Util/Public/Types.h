@@ -94,7 +94,7 @@ enum class ClassAccessFlags : uint16_t
 
 #define STRIP_DEBUG_INFO 0
 
-using FileInputStream = std::iostream;
+using FileInputStream = std::ifstream;
 using SystemPath = std::filesystem::path;
 
 #endif //CPP20_TYPES_H
