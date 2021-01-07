@@ -23,7 +23,7 @@ set(ConstantPoolConstants
     Model/Private/ConstantPool/ConstantStringInfo.cpp
     Model/Private/ConstantPool/ConstantUtf8Info.cpp
     Model/Private/ConstantPool/ConstantInfo.cpp
-        Model/Private/Attributes/ConstantValueAttributeInfo.cpp Model/Public/Attributes/ConstantValueAttributeInfo.h)
+    Model/Private/Attributes/ConstantValueAttributeInfo.cpp)
 
 add_executable(CPP20
     main.cpp
@@ -39,9 +39,9 @@ add_executable(CPP20
     Model/Private/Attributes/AttributeInfo.cpp
     Model/Private/Attributes/LocalVariableTableAttributeInfo.cpp
     Model/Private/ConstantPool/ConstantClassInfo.cpp
-    Model/Private/ConstantPool/ConstantFieldrefInfo.cpp
-    Model/Private/ConstantPool/ConstantMethodrefInfo.cpp
-    Model/Private/ConstantPool/ConstantInterfaceMethodrefInfo.cpp
+    Model/Private/ConstantPool/ConstantFieldRefInfo.cpp
+    Model/Private/ConstantPool/ConstantMethodRefInfo.cpp
+    Model/Private/ConstantPool/ConstantInterfaceMethodRefInfo.cpp
     Model/Private/FieldInfo.cpp
     Model/Private/ClassInfo.cpp
 
