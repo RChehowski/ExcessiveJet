@@ -20,6 +20,7 @@
 #include "ConstantPool/ConstantUtf8Info.h"
 
 #include <functional>
+#include <unordered_map>
 
 namespace Parse
 {
