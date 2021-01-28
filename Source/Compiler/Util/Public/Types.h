@@ -9,13 +9,16 @@
 #include <cstdint>
 #include <cstdio>
 #include <string>
+#include <fstream>
+#include <filesystem>
 
 #define __STRINGIFY(x) #x
 #define LITERAL_TO_STRING(x) __STRINGIFY(x)
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
     #define FORCEINLINE __forceinline
 #else
+    #define FORCEINLINE inline
 #endif
 
 using u1 = uint8_t;
@@ -93,5 +96,8 @@ enum class ClassAccessFlags : uint16_t
 };
 
 #define STRIP_DEBUG_INFO 0
+
+using FileInputStream = std::ifstream;
+using SystemPath = std::filesystem::path;
 
 #endif //CPP20_TYPES_H
