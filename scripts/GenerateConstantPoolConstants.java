@@ -20,7 +20,7 @@ public class GenerateConstantPoolConstants
         private static final String GenReaderClass = "MemoryReader";
         private static final String GenBaseClass = "ConstantInfo";
 
-        private static final String GenDeserializeMethod = "DeserializeFrom";
+        private static final String GenDeserializeMethod = "DeserializeBody";
     }
 
     private static class Pair<TFirst, TSecond>

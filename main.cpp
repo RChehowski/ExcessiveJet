@@ -1,19 +1,20 @@
 
-#include <stdint.h>
-#include <cinttypes>
-
-#include <cassert>
-
-#include <iostream>
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <functional>
-#include <intrin.h>
-
-
-#include "ConstantPool.h"
-#include "MemoryFile.h"
+//#include <stdint.h>
+//#include <cinttypes>
+//
+//#include <cassert>
+//
+//#include <iostream>
+//#include <vector>
+//#include <unordered_map>
+//#include <unordered_set>
+//#include <functional>
+//#include <intrin.h>
+//#include <StringUtf8.h>
+//
+//
+//#include "ConstantPool.h"
+//#include "ClassReader.h"
 
 
 ////
@@ -469,249 +470,30 @@
 //
 //
 
-#include "MemoryFile.h"
-#include "ConstantPool/ConstantInfo.h"
-#include "FieldInfo.h"
-#include "ClassInfo.h"
 
-
-using Util::CMemoryReader;
-using Util::CByteOrders;
-
-using Parse::CConstantPool;
-using Parse::CConstantInfo;
-using Parse::EConstantPoolInfoTag;
-using Parse::CFieldInfo;
-
-using Parse::CClassInfo;
-
+//#include "ConstantPool/ConstantInfo.h"
+//#include "FieldInfo.h"
+//#include "ClassInfo.h"
+//
+//#include "ClassReader.h"
+//
+//
+//using Util::CByteOrders;
+//
+//using Parse::CConstantPool;
+//using Parse::CConstantInfo;
+//using Parse::EConstantPoolInfoTag;
+//using Parse::CFieldInfo;
+//
+//using Parse::CClassInfo;
+//
 int main()
 {
-    CMemoryReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
-    MemoryReader.SetByteOrder(CByteOrders::BigEndian());
-
-    CClassInfo ClassInfo;
-    MemoryReader >> ClassInfo;
-
-//    u4 Magic = (u4)0;
-//    MemoryReader >> Magic;
+//    Parse::CClassReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
+//    MemoryReader.SetByteOrder(CByteOrders::BigEndian());
 //
-//    u2 MinorVersion = (u2)0;
-//    MemoryReader >> MinorVersion;
+//    CClassInfo ClassInfo;
+//    MemoryReader >> ClassInfo;
 //
-//    u2 MajorVersion = (u2)0;
-//    MemoryReader >> MajorVersion;
-//
-//    CConstantPool ConstantPool;
-//    MemoryReader >> ConstantPool;
-//
-//    u2 AccessFlags = (u2)0;
-//    MemoryReader >> AccessFlags;
-//
-//    u2 ThisClass = (u2)0;
-//    MemoryReader >> ThisClass;
-//
-//    u2 SuperClass = (u2)0;
-//    MemoryReader >> SuperClass;
-//
-//    u2 InterfacesCount = (u2)0;
-//    MemoryReader >> InterfacesCount;
-//
-//    std::vector<u2> Interfaces;
-//    Interfaces.reserve((size_t)InterfacesCount);
-//
-//    for (u2 InterfaceIndex = 0; InterfaceIndex < InterfacesCount; InterfaceIndex++)
-//    {
-//        u2 Interface = (u2)0;
-//        MemoryReader >> Interface;
-//
-//        Interfaces.push_back(Interface);
-//    }
-//
-//    u2 FieldsCount = (u2)0;
-//    MemoryReader >> FieldsCount;
-//
-//    std::vector<CFieldInfo*> Fields;
-//    Fields.reserve((size_t)FieldsCount);
-//
-//    for (u2 FieldIndex = 0; FieldIndex < FieldsCount; ++FieldIndex)
-//    {
-//        CFieldInfo* const FieldInfo = new CFieldInfo();
-//        MemoryReader >> *FieldInfo;
-//
-//        Fields.push_back(FieldInfo);
-//    }
-
-    return 0;
-
-//        std::cout << " >> " << (int)constant_pool_index << " >> " << std::endl;
-//
-//        u1 tag;
-//        (*classFileBlob) >> tag;
-//
-//        switch((EConstantPoolInfoTag)tag)
-//        {
-//            case EConstantPoolInfoTag::Class:
-//            {
-//                CONSTANT_Class_info* const const_info = new CONSTANT_Class_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::Fieldref:
-//            {
-//                CONSTANT_Fieldref_info* const const_info = new CONSTANT_Fieldref_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::Methodref:
-//            {
-//                CONSTANT_Methodref_info* const const_info = new CONSTANT_Methodref_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::InterfaceMethodref:
-//            {
-//                CONSTANT_InterfaceMethodref_info* const const_info = new CONSTANT_InterfaceMethodref_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::String:
-//            {
-//                CONSTANT_String_info* const const_info = new CONSTANT_String_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::Integer:
-//            {
-//                CONSTANT_Integer_info* const const_info = new CONSTANT_Integer_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::Float:
-//            {
-//                CONSTANT_Float_info* const const_info = new CONSTANT_Float_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::Long:
-//            {
-//                CONSTANT_Long_info* const const_info = new CONSTANT_Long_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::Double:
-//            {
-//                CONSTANT_Double_info* const const_info = new CONSTANT_Double_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::NameAndType:
-//            {
-//                CONSTANT_NameAndType_info* const const_info = new CONSTANT_NameAndType_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::Utf8:
-//            {
-//                CONSTANT_Utf8_info* const const_info = new CONSTANT_Utf8_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::MethodHandle:
-//            {
-//                CONSTANT_MethodHandle_info* const const_info = new CONSTANT_MethodHandle_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::MethodType:
-//            {
-//                CONSTANT_MethodType_info* const const_info = new CONSTANT_MethodType_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            case EConstantPoolInfoTag::InvokeDynamic:
-//            {
-//                CONSTANT_InvokeDynamic_info* const const_info = new CONSTANT_InvokeDynamic_info(tag);
-//                *(classFileBlob) >> *const_info;
-//                G_constant_pool.Add(const_info);
-//
-//                break;
-//            }
-//            default:
-//            {
-//                exit(tag);
-//            }
-//        }
-//    }
-//
-//    int i = 1;
-//    for (const cp_info* const info : G_constant_pool)
-//    {
-//        std::cout << i++ << ")" << info->to_string() << std::endl;
-//    }
-//    u2 access_flags;
-//    (*classFileBlob) >> access_flags;
-//
-//    u2 this_class;
-//    (*classFileBlob) >> this_class;
-//
-//    u2 super_class;
-//    (*classFileBlob) >> super_class;
-//
-//    u2 interfaces_count;
-//    (*classFileBlob) >> interfaces_count;
-//
-//    u2* interfaces = (interfaces_count == 0) ? nullptr : (u2*)malloc((usz)interfaces_count);
-//    for (u2 interface_index = 0; interface_index < interfaces_count; ++interface_index)
-//    {
-//        (*classFileBlob) >> interfaces[interface_index];
-//    }
-//
-//    u2 fields_count;
-//    (*classFileBlob) >> fields_count;
-//
-//    for (u2 field_index = 0; field_index < fields_count; ++field_index)
-//    {
-//        FieldInfo field_info;
-//        (*classFileBlob) >> field_info;
-//    }
-//
-//    u2 MethodsCount;
-//    (*classFileBlob) >> MethodsCount;
-//
-//    for (u2 MethodIndex = 0; MethodIndex < MethodsCount; ++MethodIndex)
-//    {
-//        MethodInfo method_info;
-//        (*classFileBlob) >> method_info;
-//    }
-//
-//    printf("0x%x\n", Magic);
-
-    return 0;
+//    return 0;
 }
