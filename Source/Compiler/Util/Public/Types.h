@@ -64,9 +64,6 @@ namespace Util
     using WideString = std::wstring;
 }
 
-template<class T>
-using TSharedFromThis = std::enable_shared_from_this<T>;
-
 //enum class ClassAccessFlags : uint16_t
 //{
 //    // Declared public; may be accessed from outside its package.

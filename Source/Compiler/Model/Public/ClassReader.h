@@ -5,6 +5,7 @@
 #pragma once
 
 #include "MemoryReader.h"
+#include <memory>
 
 namespace Parse
 {
