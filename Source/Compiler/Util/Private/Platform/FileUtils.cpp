@@ -2,12 +2,11 @@
 // Created by ASUS on 29/12/2020.
 //
 
-#include "Platform/Memory.h"
 #include "Platform/FileUtils.h"
 
 namespace Util
 {
-    u1* FileUtils::ReadFile(const WideString& FileName, usz* OutNumBytes)
+    CAllocation FileUtils::ReadFile(const WideString& FileName)
     {
         FILE* File = nullptr;
         _wfopen_s(&File, FileName.c_str(), L"rb");
@@ -18,25 +17,16 @@ namespace Util
             const usz FileSize = (usz)_ftelli64(File);
             fseek(File, 0, SEEK_SET);
 
-            u1* const Data = Memory::Malloc<u1>(FileSize);
-            fread(Data, FileSize, 1, File);
+            CAllocation Allocation(FileSize);
+
+            fread(Allocation.Get<void*>(), FileSize, 1, File);
             fclose(File);
 
-            if (OutNumBytes)
-            {
-                *OutNumBytes = FileSize;
-            }
-
-            return Data;
+            return std::move(Allocation);
         }
         else
         {
-            if (OutNumBytes)
-            {
-                *OutNumBytes = 0;
-            }
-
-            return nullptr;
+            return CAllocation::EmptyAllocation();
         }
     }
 }

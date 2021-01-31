@@ -5,13 +5,11 @@
 #pragma once
 
 #include "Types.h"
-#include "ClassReader.h"
 #include "SerializedArray.h"
-
-class CClassReader;
 
 namespace Parse
 {
+    class CClassReader;
     class CConstantPool;
 
     class CAttributeInfo : public TSharedFromThis<CAttributeInfo>

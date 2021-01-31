@@ -11,12 +11,12 @@ namespace Util
     u1* CopyBytes(const u1* InBytes, usz InNumBytes)
     {
 #if DEBUG_NULL_TERMINATE_STRING
-        u1* const Bytes = Memory::Malloc<u1>(InNumBytes + 1);
-        Memory::Memcpy(Bytes, InBytes, InNumBytes);
+        u1* const Bytes = CMemory::Malloc<u1>(InNumBytes + 1);
+        CMemory::Memcpy(Bytes, InBytes, InNumBytes);
         Bytes[(usz)InNumBytes] = (u1)'\0';
 #else
-        u1* const Bytes = Memory::MallocT<u1>(InNumBytes);
-        Memory::Memcpy(Bytes, InBytes, InNumBytes);
+        u1* const Bytes = CMemory::MallocT<u1>(InNumBytes);
+        CMemory::Memcpy(Bytes, InBytes, InNumBytes);
 #endif // DEBUG_NULL_TERMINATE_STRING
 
         return Bytes;
@@ -48,7 +48,7 @@ namespace Util
     {
         if (Bytes)
         {
-            Memory::Free(Bytes);
+            CMemory::Free(Bytes);
         }
     }
 
@@ -60,7 +60,7 @@ namespace Util
 
     CStringUtf8& CStringUtf8::operator=(CStringUtf8&& Other) noexcept
     {
-        Memory::Free((void*)Bytes);
+        CMemory::Free((void*)Bytes);
         Bytes = Other.Bytes;
         Other.Bytes = nullptr;
 

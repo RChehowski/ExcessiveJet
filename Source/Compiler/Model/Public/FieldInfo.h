@@ -5,14 +5,14 @@
 #pragma once
 
 #include "Types.h"
-#include "ClassReader.h"
 #include "SerializedArray.h"
 #include "Attributes/AttributeInfo.h"
 
-class CClassReader;
 
 namespace Parse
 {
+    class CClassReader;
+
     struct EFieldAccessFlag
     {
         // Declared public; may be accessed from outside its package.

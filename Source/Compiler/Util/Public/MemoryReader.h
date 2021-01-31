@@ -8,6 +8,7 @@
 #include "Assert.h"
 #include "ByteOrder.h"
 #include "MathUtils.h"
+#include "Allocation.h"
 
 #include <string>
 
@@ -39,7 +40,13 @@ namespace Util
         [[nodiscard]]
         FORCEINLINE bool IsValid() const
         {
-            return (FileBytes != nullptr);
+            return Allocation.IsPresent();
+        }
+
+        [[nodiscard]]
+        FORCEINLINE usz GetSizeInMemory() const
+        {
+            return Allocation.GetSize();
         }
 
         [[nodiscard]]
@@ -83,12 +90,6 @@ namespace Util
             return Position;
         }
 
-        [[nodiscard]]
-        FORCEINLINE size_t GetFileSize() const
-        {
-            return FileSize;
-        }
-
         friend void operator>> (Util::CMemoryReader& Reader, u1& Instance);
         friend void operator>> (Util::CMemoryReader& Reader, u2& Instance);
         friend void operator>> (Util::CMemoryReader& Reader, u4& Instance);
@@ -98,8 +99,7 @@ namespace Util
     private:
         std::wstring FileName;
 
-        usz FileSize = (usz)0;
-        uint8_t* FileBytes = nullptr;
+        CAllocation Allocation;
 
         usz Position = (usz)0;
 

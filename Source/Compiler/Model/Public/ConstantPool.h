@@ -6,16 +6,15 @@
 
 #include "Types.h"
 #include "Assert.h"
-#include "ClassReader.h"
 #include "ConstantPool/ConstantInfo.h"
 
 #include <vector>
 #include <functional>
 
-class CClassReader;
 
 namespace Parse
 {
+    class CClassReader;
     class CConstantInfo;
     class CAttributeType;
 

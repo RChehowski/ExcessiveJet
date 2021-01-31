@@ -255,8 +255,8 @@
 //    u4 CodeLength = (u4)0;
 //    blob >> CodeLength;
 //
-//    u1* Code = Util::Memory::MallocT<u1>((usz)CodeLength);
-//    Util::Memory::Memcpy(Code, blob.GetBytes(CodeLength), CodeLength);
+//    u1* Code = Util::CMemory::MallocT<u1>((usz)CodeLength);
+//    Util::CMemory::Memcpy(Code, blob.GetBytes(CodeLength), CodeLength);
 //
 //    std::ostringstream oss;
 //    for (u4 i = 0; i < CodeLength; ++i)
@@ -471,29 +471,28 @@
 //
 
 
-//#include "ConstantPool/ConstantInfo.h"
-//#include "FieldInfo.h"
-//#include "ClassInfo.h"
-//
-//#include "ClassReader.h"
-//
-//
-//using Util::CByteOrders;
-//
-//using Parse::CConstantPool;
-//using Parse::CConstantInfo;
-//using Parse::EConstantPoolInfoTag;
-//using Parse::CFieldInfo;
-//
-//using Parse::CClassInfo;
-//
+#include "ClassReader.h"
+
+#include "FieldInfo.h"
+#include "ClassInfo.h"
+
+using Util::CByteOrders;
+using Parse::CClassInfo;
+using Parse::CClassReader;
+
+
 int main()
 {
-//    Parse::CClassReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
-//    MemoryReader.SetByteOrder(CByteOrders::BigEndian());
-//
-//    CClassInfo ClassInfo;
-//    MemoryReader >> ClassInfo;
+    std::vector<u1> vec(8);
+    *(u8*)vec.data() = 0xDEADBEEFDEADBABE;
+
+    u8 dat = *(u8*)vec.data();
+
+    CClassReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
+    MemoryReader.SetByteOrder(CByteOrders::BigEndian());
+
+    CClassInfo ClassInfo;
+    MemoryReader >> ClassInfo;
 //
 //    return 0;
 }

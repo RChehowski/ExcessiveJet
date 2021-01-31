@@ -5,13 +5,13 @@
 
 namespace Parse
 {
-    CConstantPool* CClassReader::GetConstantPool() const
+    std::shared_ptr<CConstantPool> CClassReader::GetConstantPool() const
     {
         ASSERT(ConstantPool != nullptr);
         return ConstantPool;
     }
 
-    void CClassReader::SetConstantPool(CConstantPool *const InConstantPool)
+    void CClassReader::SetConstantPool(const std::shared_ptr<CConstantPool>& InConstantPool)
     {
         ASSERT(ConstantPool == nullptr);
         ConstantPool = InConstantPool;

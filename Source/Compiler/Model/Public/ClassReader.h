@@ -20,11 +20,11 @@ namespace Parse
         }
 
         [[nodiscard]]
-        CConstantPool* GetConstantPool() const;
+        std::shared_ptr<CConstantPool> GetConstantPool() const;
 
-        void SetConstantPool(CConstantPool* InConstantPool);
+        void SetConstantPool(const std::shared_ptr<CConstantPool>& InConstantPool);
 
     private:
-        CConstantPool* ConstantPool = nullptr;
+        std::shared_ptr<CConstantPool> ConstantPool;
     };
 }

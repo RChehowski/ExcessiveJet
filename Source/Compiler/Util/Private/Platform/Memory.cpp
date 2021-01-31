@@ -10,17 +10,17 @@
 
 namespace Util
 {
-    void Memory::Memcpy(void* const Dst, const void* const Src, const usz NumBytes)
+    void CMemory::Memcpy(void* const Dst, const void* const Src, const usz NumBytes)
     {
         memcpy(Dst, Src, NumBytes);
     }
 
-    s4 Memory::Memcmp(const void* const A, const void* const B, const usz NumBytes)
+    s4 CMemory::Memcmp(const void* const A, const void* const B, const usz NumBytes)
     {
         return (s4)memcmp(A, B, NumBytes);
     }
 
-    void* Memory::MallocImpl(usz Size, usz Alignment)
+    void* CMemory::MallocImpl(usz Size, usz Alignment)
     {
         // TODO: Write something more decent
 
@@ -34,12 +34,12 @@ namespace Util
 
 
 
-    void Memory::Free(const void *const Ptr)
+    void CMemory::Free(const void *const Ptr)
     {
         free(const_cast<void*>(Ptr));
     }
 
-    void Memory::MemZero(void* Ptr, usz Size)
+    void CMemory::MemZero(void* Ptr, usz Size)
     {
         memset(Ptr, 0, Size);
     }

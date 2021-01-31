@@ -53,30 +53,35 @@ namespace Util
         template<typename TTo, typename TFrom /* auto */>
         FORCEINLINE static TTo IntegerCast(TFrom From)
         {
-            if constexpr (!std::is_signed_v<TFrom>)
-            {
-                if constexpr (!std::is_signed_v<TTo>)
-                {
-                    if constexpr (sizeof(TTo) >= sizeof(TFrom))
-                    {
-                        // Will not overflow
-                        return static_cast<TTo>(From);
-                    }
-                    else
-                    {
-                        ASSERT(From <= (TFrom)std::numeric_limits<TTo>::max());
-                        return static_cast<TTo>(From);
-                    }
-                }
-                else
-                {
-                    CONSTEXPR_ASSERT(false, "Not implemented");
-                }
-            }
-            else
-            {
-                CONSTEXPR_ASSERT(false, "Not implemented");
-            }
+            static_assert(std::is_integral_v<TTo> && std::is_integral_v<TTo>,
+                    "IntegerCast is valid for integral types only");
+
+//            if constexpr (sizeof(TTo) <= sizeof(TFrom))
+//            {
+//                if constexpr (std::is_signed_v<TFrom> != std::is_signed_v<TTo>)
+//                {
+//                    if constexpr (std::is_signed_v<TFrom>)
+//                    {
+//                        // From signed to unsigned. From should be greater or equal to zero.
+//                        ASSERT(From >= (TFrom) 0);
+//                    }
+//                    else
+//                    {
+//                        // From unsigned to signed
+//                        ASSERT(From <= );
+//                    }
+//                }
+//                else if constexpr (sizeof(TTo) < sizeof(TFrom))
+//                {
+//                    // Both TTo and TFrom are either signed or unsigned
+//                    ASSERT(
+//                        (From >= (TFrom) std::numeric_limits<TTo>::min()) &&
+//                        (From <= (TFrom) std::numeric_limits<TTo>::max())
+//                    );
+//                }
+//            }
+
+            return (TTo)From;
         }
 
         /**

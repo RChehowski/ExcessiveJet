@@ -12,28 +12,26 @@ namespace Util
     void CMemoryReader::RangeCheck(usz AddOffset) const
     {
         const ssz NewPosition = (ssz)(Position + AddOffset);
-        ASSERT((NewPosition >= 0) && ((usz)NewPosition < (usz)FileSize));
+        ASSERT((NewPosition >= 0) && ((usz)NewPosition < (usz)GetSizeInMemory()));
     }
-
 
     CMemoryReader::CMemoryReader(const WideString& InFileName) : FileName(InFileName)
     {
-        FileBytes = FileUtils::ReadFile(FileName, &FileSize);
+        Allocation = FileUtils::ReadFile(FileName);
     }
 
     CMemoryReader::~CMemoryReader()
     {
-        Memory::Free((const void*)FileBytes);
     }
 
     const void* CMemoryReader::ReadBytes(void* Memory, usz Size)
     {
         RangeCheck(Size);
 
-        const u1* const Ptr = FileBytes + Position;
+        const u1* const Ptr = Allocation.Get<const u1>() + Position;
         if (Memory)
         {
-            Memory::Memcpy(Memory, Ptr, Size);
+            CMemory::Memcpy(Memory, Ptr, Size);
         }
 
         Position += Size;
@@ -53,23 +51,23 @@ namespace Util
             }
             case EMemoryFileOrigin::Cur:
             {
-                OriginatedOffset = (ssz)Position;
+                OriginatedOffset = CMathUtils::IntegerCast<ssz>(Position);
                 break;
             }
             case EMemoryFileOrigin::End:
             {
-                OriginatedOffset = (ssz)FileSize;
+                OriginatedOffset = CMathUtils::IntegerCast<ssz>(GetSizeInMemory());
                 break;
             }
             default:
             {
-                OriginatedOffset = (ssz)-1;
+                OriginatedOffset = CMathUtils::IntegerCast<ssz>(-1);
                 break;
             }
         }
 
         const ssz NewPosition= OriginatedOffset + Offset;
-        ASSERT((NewPosition >= 0) && ((usz)NewPosition < FileSize));
+        ASSERT((NewPosition >= 0) && ((usz)NewPosition < GetSizeInMemory()));
         Position = NewPosition;
     }
 

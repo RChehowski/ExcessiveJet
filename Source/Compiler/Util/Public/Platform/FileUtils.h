@@ -5,14 +5,15 @@
 #ifndef CPP20_FILEUTILS_H
 #define CPP20_FILEUTILS_H
 
-#include <Types.h>
+#include "Types.h"
+#include "Allocation.h"
 
 namespace Util
 {
     class FileUtils
     {
     public:
-        static FileInputStream ReadFile(const SystemPath& Path);
+        static CAllocation ReadFile(const WideString& FileName);
     };
 }
 

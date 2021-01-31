@@ -8,18 +8,21 @@
 
 namespace Parse
 {
-    void operator>>(CClassReader& Reader, CClassInfo& Instance)
+    void CClassInfo::Deserialize(CClassReader& Reader,
+                                 EClassInfoDeserializingMode ClassInfoDeserializingMode
+    )
     {
-        Reader >> Instance.Magic;
-        Reader >> Instance.MinorVersion;
-        Reader >> Instance.MajorVersion;
+        Reader >> Magic;
+        Reader >> MinorVersion;
+        Reader >> MajorVersion;
 
-        Reader >> Instance.ConstantPool;
-        Reader.SetConstantPool(&(Instance.ConstantPool));
+        ConstantPool = std::make_shared<CConstantPool>();
+        Reader >> *(ConstantPool.get());
+        Reader.SetConstantPool(ConstantPool);
 
-        Reader >> Instance.AccessFlags;
-        Reader >> Instance.ThisClass;
-        Reader >> Instance.SuperClass;
+        Reader >> AccessFlags;
+        Reader >> ThisClass;
+        Reader >> SuperClass;
 
 //        Reader >> Instance.Interfaces;
 //        Reader >> Instance.Fields;

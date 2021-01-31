@@ -1,9 +1,14 @@
 
 #pragma once
 
-#include "ClassReader.h"
+//#include "ClassReader.h"
 
 #include <vector>
+
+namespace Parse
+{
+    class CClassReader;
+}
 
 namespace Util
 {

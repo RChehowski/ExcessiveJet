@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-using Util::Memory;
+using Util::CMemory;
 
 namespace Parse
 {

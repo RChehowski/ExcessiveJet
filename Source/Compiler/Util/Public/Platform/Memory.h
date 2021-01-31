@@ -2,14 +2,14 @@
 // Created by ASUS on 30/12/2020.
 //
 
-#ifndef CPP20_MEMORY_H
-#define CPP20_MEMORY_H
+#ifndef CPP20_CMEMORY_H
+#define CPP20_CMEMORY_H
 
 #include "Platform/Misc.h"
 
 namespace Util
 {
-    class Memory
+    class CMemory
     {
         static void Memcpy(void* const Dst, const void* const Src, const usz NumBytes);
 
@@ -21,7 +21,7 @@ namespace Util
         static constexpr usz DefaultMallocAlignment = sizeof(void*);
 
         template<class T>
-        FORCEINLINE static T* Malloc(usz Size, usz Alignment = Memory::DefaultMallocAlignment)
+        FORCEINLINE static T* Malloc(usz Size, usz Alignment = CMemory::DefaultMallocAlignment)
         {
             return reinterpret_cast<T*>(MallocImpl(Size, Alignment));
         }
@@ -54,4 +54,4 @@ namespace Util
 }
 
 
-#endif //CPP20_MEMORY_H
+#endif //CPP20_CMEMORY_H
