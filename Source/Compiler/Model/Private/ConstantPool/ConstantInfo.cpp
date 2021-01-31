@@ -23,62 +23,44 @@
 #include <functional>
 #include <unordered_map>
 
+#define ADD_CONSTANT_INFO(Name)\
+    {ETag::Name, [](ETag Tag){return std::make_shared<CConstant##Name##Info>(Tag);}}
+
 namespace Parse
 {
-    typedef std::function<CConstantInfo*(EConstantPoolInfoTag)> CConstantInfoSpawnFunction;
-    typedef std::unordered_map<EConstantPoolInfoTag, CConstantInfoSpawnFunction> CTagToConstantInfoSpawnFunction;
+    using CConstantInfoSpawnFunction = std::function<std::shared_ptr<CConstantInfo>(EConstantPoolInfoTag)>;
+    using CTagToConstantInfoSpawnFunction = std::unordered_map<EConstantPoolInfoTag, CConstantInfoSpawnFunction>;
 
     using ETag = EConstantPoolInfoTag;
     const CTagToConstantInfoSpawnFunction G_TagToConstantInfoSpawnFunction {
-            {ETag::Utf8,               [](ETag Tag) { return new CConstantUtf8Info(Tag); } },
-            {ETag::Integer,            [](ETag Tag) { return new CConstantIntegerInfo(Tag); } },
-            {ETag::Float,              [](ETag Tag) { return new CConstantFloatInfo(Tag); } },
-            {ETag::Long,               [](ETag Tag) { return new CConstantLongInfo(Tag); } },
-            {ETag::Double,             [](ETag Tag) { return new CConstantDoubleInfo(Tag); } },
-            {ETag::Class,              [](ETag Tag) { return new CConstantClassInfo(Tag); } },
-            {ETag::String,             [](ETag Tag) { return new CConstantStringInfo(Tag); } },
-            {ETag::FieldRef,           [](ETag Tag) { return new CConstantFieldRefInfo(Tag); } },
-            {ETag::MethodRef,          [](ETag Tag) { return new CConstantMethodRefInfo(Tag); } },
-            {ETag::InterfaceMethodRef, [](ETag Tag) { return new CConstantInterfaceMethodRefInfo(Tag); } },
-            {ETag::NameAndType,        [](ETag Tag) { return new CConstantNameAndTypeInfo(Tag); } },
-            {ETag::MethodHandle,       [](ETag Tag) { return new CConstantMethodHandleInfo(Tag); } },
-            {ETag::MethodType,         [](ETag Tag) { return new CConstantMethodTypeInfo(Tag); } },
-            {ETag::InvokeDynamic,      [](ETag Tag) { return new CConstantInvokeDynamicInfo(Tag); } }
+        ADD_CONSTANT_INFO(Utf8),
+        ADD_CONSTANT_INFO(Integer),
+        ADD_CONSTANT_INFO(Float),
+        ADD_CONSTANT_INFO(Long),
+        ADD_CONSTANT_INFO(Double),
+        ADD_CONSTANT_INFO(Class),
+        ADD_CONSTANT_INFO(String),
+        ADD_CONSTANT_INFO(FieldRef),
+        ADD_CONSTANT_INFO(MethodRef),
+        ADD_CONSTANT_INFO(InterfaceMethodRef),
+        ADD_CONSTANT_INFO(NameAndType),
+        ADD_CONSTANT_INFO(MethodHandle),
+        ADD_CONSTANT_INFO(MethodType),
+        ADD_CONSTANT_INFO(InvokeDynamic),
     };
-
-
-    EConstantPoolInfoTag CConstantInfo::GetConstantPoolInfoTagByByte(const u1 TagByte)
-    {
-        // Try to find it in the map
-        auto It = G_TagToConstantInfoSpawnFunction.find((EConstantPoolInfoTag)TagByte);
-        if (It != G_TagToConstantInfoSpawnFunction.end())
-        {
-            return It->first;
-        }
-        else
-        {
-            // Not in the map, trigger assertion error
-            ASSERT(false);
-            return EConstantPoolInfoTag::Invalid_NotATag;;
-        }
-    }
 
     void operator>>(CClassReader &Reader, CConstantInfo &Instance)
     {
         Instance.DeserializeFrom(Reader);
     }
 
-    CConstantInfo* CConstantInfo::NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag)
+    std::shared_ptr<CConstantInfo> CConstantInfo::NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag)
     {
         auto It = G_TagToConstantInfoSpawnFunction.find(ConstantPoolInfoTag);
-        if (It != G_TagToConstantInfoSpawnFunction.end())
-        {
-            // Create a new instance
-            return It->second(ConstantPoolInfoTag);
-        }
-        else
-        {
-            return nullptr;
-        }
+
+        ASSERT(It != G_TagToConstantInfoSpawnFunction.end());
+
+        // Create a new instance
+        return It->second(ConstantPoolInfoTag);
     }
 }

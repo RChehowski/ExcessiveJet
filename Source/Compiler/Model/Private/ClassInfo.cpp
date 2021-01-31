@@ -8,12 +8,10 @@
 
 namespace Parse
 {
-    void CClassInfo::Deserialize(CClassReader& Reader,
-                                 EClassInfoDeserializingMode ClassInfoDeserializingMode
-    )
+    void CClassInfo::Deserialize(CClassReader& Reader, EClassInfoDeserializingMode ClassInfoDeserializingMode)
     {
         Reader >> Magic;
-        ASSERT(Magic == 0xcafebabe);
+        ASSERT(Magic == 0xCAFEBABE);
 
         Reader >> MinorVersion;
         Reader >> MajorVersion;

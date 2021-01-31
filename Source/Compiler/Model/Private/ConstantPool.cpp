@@ -61,11 +61,10 @@ namespace Parse
             u1 TagByte = (u1)0;
             Reader >> TagByte;
 
-            CConstantInfo* const ConstantInfo =
-                    CConstantInfo::NewConstantInfo(CConstantInfo::GetConstantPoolInfoTagByByte(TagByte));
-            Reader >> *ConstantInfo;
+            std::shared_ptr<CConstantInfo> ConstantInfo = CConstantInfo::NewConstantInfo((EConstantPoolInfoTag)TagByte);
+            Reader >> ConstantInfo;
 
-            Instance.ConstantInfos.push_back(std::shared_ptr<CConstantInfo>(ConstantInfo));
+            Instance.ConstantInfos.push_back(ConstantInfo);
         }
     }
 }
