@@ -1,32 +1,59 @@
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 
 public class GenerateConstantPoolConstants
 {
+    private static String GetHungarianClassName(final String ClassName)
+    {
+        return 'C' + ClassName;
+    }
+
+    /**
+     * Java 5 has no StringJoiner
+     */
+    private static class NewLineJoiner
+    {
+        private NewLineJoiner add(Object object)
+        {
+            Strings.add(object.toString());
+            return this;
+        }
+
+        @Override
+        public String toString()
+        {
+            final StringBuilder sb = new StringBuilder();
+
+            final int Size = Strings.size();
+            for (int i = 0; i < Size; i++)
+            {
+                sb.append(Strings.get(i));
+                if (i < (Size - 1))
+                {
+                    sb.append("\n");
+                }
+            }
+
+            return sb.toString();
+        }
+
+        private List<String> Strings = new ArrayList<String>();
+    }
+
     private static class Const
     {
         private static final String GenNamespace = "Parse";
-        private static final String GenReaderNamespace = "Util";
 
-        private static final String GenReaderClass = "MemoryReader";
+        private static final String GenReaderClass = "ClassReader";
         private static final String GenBaseClass = "ConstantInfo";
 
-        private static final String GenDeserializeMethod = "DeserializeBody";
+        private static final String GenDeserializeMethod = "DeserializeFrom";
     }
 
     private static class Pair<TFirst, TSecond>
     {
-        public final TFirst First;
-        public final TSecond Second;
+        private final TFirst First;
+        private final TSecond Second;
 
         private Pair(TFirst first, TSecond second)
         {
@@ -34,9 +61,9 @@ public class GenerateConstantPoolConstants
             Second = second;
         }
 
-        public static<TFirst, TSecond> Pair<TFirst, TSecond> of(TFirst First, TSecond Second)
+        private static<TFirst, TSecond> Pair<TFirst, TSecond> Of(TFirst First, TSecond Second)
         {
-            return new Pair<>(First, Second);
+            return new Pair<TFirst, TSecond>(First, Second);
         }
     }
 
@@ -45,33 +72,30 @@ public class GenerateConstantPoolConstants
         private final String Name;
         private final List<Pair<String, String>> Fields;
 
-        public ClassDesc(final String InName, final List<Pair<String, String>> InFields)
+        private ClassDesc(final String InName, final Pair<String, String>... InFields)
         {
             Name = InName;
-            Fields = InFields;
+
+            Fields = new ArrayList<Pair<String, String>>(InFields.length);
+            Collections.addAll(Fields, InFields);
         }
 
-        @Override
         public Iterator<Pair<String, String>> iterator()
         {
             return Fields.iterator();
         }
 
-        public final String GetFullName()
+        private String GetFullName()
         {
             return "Constant" + Name + "Info";
         }
-
-        public final String GetFullClassName()
-        {
-            return "C" + GetFullName();
-        }
     }
 
-    public static void DeleteDir(final Path DirPath) throws IOException
+    private static void DeleteDir(final File DirFile) throws IOException
     {
-        final File DirFile = Objects.requireNonNull(DirPath.toFile());
-        if (Files.isDirectory(DirPath))
+        assert DirFile != null;
+
+        if (DirFile.isDirectory())
         {
             final File[] FilesInDirectory = DirFile.listFiles();
             if (FilesInDirectory != null)
@@ -81,7 +105,7 @@ public class GenerateConstantPoolConstants
                     if (FileInDirectory.isDirectory())
                     {
                         // Recurse
-                        DeleteDir(FileInDirectory.toPath());
+                        DeleteDir(FileInDirectory);
                     }
                     else
                     {
@@ -92,37 +116,33 @@ public class GenerateConstantPoolConstants
         }
         else
         {
-            Files.deleteIfExists(DirPath);
+            assert DirFile.delete();
         }
     }
 
     private static String GetHeaderContent(final ClassDesc Desc)
     {
-        final StringJoiner s = new StringJoiner(System.lineSeparator());
+        final NewLineJoiner s = new NewLineJoiner();
 
         s.add("#pragma once");
         s.add("");
         s.add("#include \"ConstantPool/" + Const.GenBaseClass + ".h\"");
         s.add("");
 
-        // Declare reader class
-        s.add("namespace " + Const.GenReaderNamespace);
-        s.add("{");
-        s.add("    class C" + Const.GenReaderClass + ";");
-        s.add("}");
-        s.add("");
-
         s.add("namespace " + Const.GenNamespace);
         s.add("{");
-        s.add("    class C" + Desc.GetFullName() + " : public C" + Const.GenBaseClass);
+        s.add("    class " + GetHungarianClassName(Const.GenReaderClass) + ";");
+        s.add("    ");
+        s.add("    class " + GetHungarianClassName(Desc.GetFullName()) + " : public " + GetHungarianClassName(Const.GenBaseClass));
         s.add("    {");
         s.add("    public:");
 
         // Inherited constructor
-        s.add("        using C" + Const.GenBaseClass + "::C" + Const.GenBaseClass + ";");
+        s.add("        using " + GetHungarianClassName(Const.GenBaseClass) + "::" + GetHungarianClassName(Const.GenBaseClass) + ";");
         s.add("");
 
         // ToString()
+        s.add("        [[nodiscard]]");
         s.add("        std::string ToString() const override;");
         s.add("");
 
@@ -138,11 +158,11 @@ public class GenerateConstantPoolConstants
         }
 
         // Deserialize method
-        s.add("        void " + Const.GenDeserializeMethod + "(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader) override;");
+        s.add("        void " + Const.GenDeserializeMethod + "(" + GetHungarianClassName(Const.GenReaderClass) + "& Reader) override;");
         s.add("");
 
         // Operator>>
-        s.add("        friend void operator>>(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader, C" + Desc.GetFullName() + "& Instance);");
+        s.add("        friend void operator>>(" + GetHungarianClassName(Const.GenReaderClass) + "& Reader, " + GetHungarianClassName(Desc.GetFullName()) + "& Instance);");
         s.add("");
 
 
@@ -165,11 +185,11 @@ public class GenerateConstantPoolConstants
 
     private static String GetCppContent(final ClassDesc Desc)
     {
-        final StringJoiner s = new StringJoiner(System.lineSeparator());
+        final NewLineJoiner s = new NewLineJoiner();
 
         s.add("");
         s.add("#include \"ConstantPool/" + Desc.GetFullName() + ".h\"");
-        s.add("#include \"MemoryFile.h\"");
+        s.add("#include \"ClassReader.h\"");
         s.add("");
         s.add("#include <sstream>");
         s.add("");
@@ -179,7 +199,7 @@ public class GenerateConstantPoolConstants
         s.add("{");
 
         // ToString()
-        s.add("    std::string C" + Desc.GetFullName() + "::ToString() const");
+        s.add("    std::string " + GetHungarianClassName(Desc.GetFullName()) + "::ToString() const");
         s.add("    {");
         s.add("        std::ostringstream oss;");
         s.add("        oss << \"" + Desc.GetFullName() + " {\" << std::endl;");
@@ -193,7 +213,7 @@ public class GenerateConstantPoolConstants
         s.add("");
 
         // Deserialize method
-        s.add("    void C" + Desc.GetFullName() + "::" + Const.GenDeserializeMethod + "(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader)");
+        s.add("    void " + GetHungarianClassName(Desc.GetFullName()) + "::" + Const.GenDeserializeMethod + "(" + GetHungarianClassName(Const.GenReaderClass) + "& Reader)");
         s.add("    {");
         for (final Pair<String, String> Pair : Desc)
         {
@@ -203,7 +223,7 @@ public class GenerateConstantPoolConstants
         s.add("");
 
         // operator>>()
-        s.add("    void operator>>(" + Const.GenReaderNamespace + "::C" + Const.GenReaderClass + "& Reader, C" + Desc.GetFullName() + "& Instance)");
+        s.add("    void operator>>(" + GetHungarianClassName(Const.GenReaderClass) + "& Reader, " + GetHungarianClassName(Desc.GetFullName()) + "& Instance)");
         s.add("    {");
         s.add("        Instance." + Const.GenDeserializeMethod + "(Reader);");
         s.add("    }");
@@ -215,87 +235,91 @@ public class GenerateConstantPoolConstants
         return s.toString();
     }
 
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception
     {
         final List<ClassDesc> ClassDescriptions = Arrays.asList(
-            new ClassDesc("Class", Collections.singletonList(
-                Pair.of("u2", "NameIndex")
-            )),
-            new ClassDesc("FieldRef", Arrays.asList(
-                Pair.of("u2", "ClassIndex"),
-                Pair.of("u2", "NameAndTypeIndex")
-            )),
-            new ClassDesc("MethodRef", Arrays.asList(
-                Pair.of("u2", "ClassIndex"),
-                Pair.of("u2", "NameAndTypeIndex")
-            )),
-            new ClassDesc("InterfaceMethodRef", Arrays.asList(
-                Pair.of("u2", "ClassIndex"),
-                Pair.of("u2", "NameAndTypeIndex")
-            )),
-            new ClassDesc("String", Collections.singletonList(
-                Pair.of("u2", "StringIndex")
-            )),
-            new ClassDesc("Integer", Collections.singletonList(
-                Pair.of("u4", "Bytes")
-            )),
-            new ClassDesc("Float", Collections.singletonList(
-                Pair.of("u4", "Bytes")
-            )),
-            new ClassDesc("Long", Arrays.asList(
-                Pair.of("u4", "HighBytes"),
-                Pair.of("u4", "LowBytes")
-            )),
-            new ClassDesc("Double", Arrays.asList(
-                Pair.of("u4", "HighBytes"),
-                Pair.of("u4", "LowBytes")
-            )),
-            new ClassDesc("NameAndType", Arrays.asList(
-                Pair.of("u2", "NameIndex"),
-                Pair.of("u2", "DescriptorIndex")
-            )),
-            new ClassDesc("Utf8", Arrays.asList(
-                Pair.of("u2", "NumBytes"),
-                Pair.of("u1*", "Bytes")
-            )),
-            new ClassDesc("MethodHandle", Arrays.asList(
-                Pair.of("u1", "ReferenceKind"),
-                Pair.of("u2", "ReferenceIndex")
-            )),
-            new ClassDesc("MethodType", Collections.singletonList(
-                Pair.of("u2", "DescriptorIndex")
-            )),
-            new ClassDesc("InvokeDynamic", Arrays.asList(
-                Pair.of("u2", "BootstrapMethodAttrIndex"),
-                Pair.of("u2", "NameAndTypeIndex")
-            ))
+            new ClassDesc("Class",
+                Pair.Of("u2", "NameIndex")
+            ),
+            new ClassDesc("FieldRef",
+                Pair.Of("u2", "ClassIndex"),
+                Pair.Of("u2", "NameAndTypeIndex")
+            ),
+            new ClassDesc("MethodRef",
+                Pair.Of("u2", "ClassIndex"),
+                Pair.Of("u2", "NameAndTypeIndex")
+            ),
+            new ClassDesc("InterfaceMethodRef",
+                Pair.Of("u2", "ClassIndex"),
+                Pair.Of("u2", "NameAndTypeIndex")
+            ),
+            new ClassDesc("String",
+                Pair.Of("u2", "StringIndex")
+            ),
+            new ClassDesc("Integer",
+                Pair.Of("u4", "Bytes")
+            ),
+            new ClassDesc("Float",
+                Pair.Of("u4", "Bytes")
+            ),
+            new ClassDesc("Long",
+                Pair.Of("u4", "HighBytes"),
+                Pair.Of("u4", "LowBytes")
+            ),
+            new ClassDesc("Double",
+                Pair.Of("u4", "HighBytes"),
+                Pair.Of("u4", "LowBytes")
+            ),
+            new ClassDesc("NameAndType",
+                Pair.Of("u2", "NameIndex"),
+                Pair.Of("u2", "DescriptorIndex")
+            ),
+            new ClassDesc("Utf8",
+                Pair.Of("Util::CStringUtf8", "StringUtf8")
+            ),
+            new ClassDesc("MethodHandle",
+                Pair.Of("u1", "ReferenceKind"),
+                Pair.Of("u2", "ReferenceIndex")
+            ),
+            new ClassDesc("MethodType",
+                Pair.Of("u2", "DescriptorIndex")
+            ),
+            new ClassDesc("InvokeDynamic",
+                Pair.Of("u2", "BootstrapMethodAttrIndex"),
+                Pair.Of("u2", "NameAndTypeIndex")
+            )
         );
 
-        final Path OutputDirectory = Paths.get("OutputDirectory");
+        final File OutputDirectory = new File("OutputDirectory").getAbsoluteFile();
         DeleteDir(OutputDirectory);
 
-        final Path CppDirectory = OutputDirectory.resolve("Private");
-        Files.createDirectories(CppDirectory);
+        final File CppDirectory = new File(OutputDirectory, "Private");
+        CppDirectory.mkdirs();
 
-        final Path HeadersDirectory = OutputDirectory.resolve("Public");
-        Files.createDirectories(HeadersDirectory);
+        final File HeadersDirectory = new File(OutputDirectory, "Public");
+        HeadersDirectory.mkdirs();
 
         for (final ClassDesc Desc : ClassDescriptions)
         {
-            final File HeaderFile = HeadersDirectory.resolve(Desc.GetFullName() + ".h").toFile();
-            final File CppFile = CppDirectory.resolve(Desc.GetFullName() + ".cpp").toFile();
+            final File HeaderFile = new File(HeadersDirectory, Desc.GetFullName() + ".h");
+            HeaderFile.createNewFile();
+
+            final File CppFile = new File(CppDirectory, Desc.GetFullName() + ".cpp");
+            CppFile.createNewFile();
 
             final String HeaderContent = GetHeaderContent(Desc);
             final String CppContent = GetCppContent(Desc);
 
-            try (final OutputStream dos = new FileOutputStream(HeaderFile))
             {
-                dos.write(HeaderContent.getBytes(StandardCharsets.UTF_8));
+                final OutputStream dos = new FileOutputStream(HeaderFile);
+                dos.write(HeaderContent.getBytes("utf-8"));
+                dos.close();
             }
-
-            try (final OutputStream dos = new FileOutputStream(CppFile))
             {
-                dos.write(CppContent.getBytes(StandardCharsets.UTF_8));
+                final OutputStream dos = new FileOutputStream(CppFile);
+                dos.write(CppContent.getBytes("utf-8"));
+                dos.close();
             }
         }
     }

@@ -1,17 +1,17 @@
 #pragma once
 
 #include "ConstantPool/ConstantInfo.h"
-#include "ClassReader.h"
-
-class CClassReader;
 
 namespace Parse
 {
+    class CClassReader;
+    
     class CConstantMethodRefInfo : public CConstantInfo
     {
     public:
         using CConstantInfo::CConstantInfo;
 
+        [[nodiscard]]
         std::string ToString() const override;
 
         [[nodiscard]]

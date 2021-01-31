@@ -1,11 +1,8 @@
 
 #include "ConstantPool/ConstantUtf8Info.h"
 #include "ClassReader.h"
-#include "Platform/Memory.h"
 
 #include <sstream>
-
-using Util::CMemory;
 
 namespace Parse
 {
@@ -13,7 +10,7 @@ namespace Parse
     {
         std::ostringstream oss;
         oss << "ConstantUtf8Info {" << std::endl;
-        oss << "          CStringUtf8: " << (std::string)StringUtf8 << std::endl;
+        oss << "          StringUtf8: " << StringUtf8 << std::endl;
         oss << "}" << std::endl;
         return std::move(oss.str());
     }
@@ -27,4 +24,5 @@ namespace Parse
     {
         Instance.DeserializeFrom(Reader);
     }
+
 }
