@@ -5,7 +5,20 @@
 #ifndef CPP20_ASSERT_H
 #define CPP20_ASSERT_H
 
-#define ASSERT(Condition) if (!(Condition)) { exit(1); }
+#define WITH_ASSERT 1
+
+#if WITH_ASSERT
+    #define ASSERT(Condition)\
+        if (!(Condition))\
+        {\
+            fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
+            fprintf(stderr, "Assertion failed: \"%s\"", LITERAL_TO_STRING(Condition));\
+            fflush(stderr);\
+            exit(1);\
+        }
+#else
+    #define ASSERT(Condition)
+#endif // WITH_ASSERT
 
 #define CONSTEXPR_ASSERT(Condition, Str) []<bool _flag = Condition>() { static_assert(_flag, Str); }()
 

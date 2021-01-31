@@ -489,7 +489,6 @@ int main()
     u8 dat = *(u8*)vec.data();
 
     CClassReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
-    MemoryReader.SetByteOrder(CByteOrders::BigEndian());
 
     CClassInfo ClassInfo;
     MemoryReader >> ClassInfo;

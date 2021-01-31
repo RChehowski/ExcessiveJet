@@ -103,6 +103,6 @@ namespace Util
 
         usz Position = (usz)0;
 
-        const CByteOrder* ByteOrder = CByteOrders::NativeEndian();
+        const CByteOrder* ByteOrder = CByteOrders::GetNativeEndian();
     };
 }

@@ -38,49 +38,35 @@ namespace Util
 
     class CByteOrders
     {
-    private:
-        static constexpr const CByteOrder BigEndianField = CByteOrder("Big Endian");
-        static constexpr const CByteOrder LittleEndianField = CByteOrder("Little Endian");
-
     public:
-        static constexpr const CByteOrder* BigEndian()
+        static constexpr const CByteOrder* GetBigEndian()
         {
-            return &BigEndianField;
+            return &BigEndian;
         }
 
-        static constexpr const CByteOrder* LittleEndian()
+        static constexpr const CByteOrder* GetLittleEndian()
         {
-            return &LittleEndianField;
+            return &LittleEndian;
         }
 
-        static constexpr const CByteOrder* NativeEndian()
+        static constexpr const CByteOrder* GetNativeEndian()
         {
-//            // TODO: Should be replaced with something simpler once it's available
-//#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN || \
-//    defined(__BIG_ENDIAN__) || \
-//    defined(__ARMEB__) || \
-//    defined(__THUMBEB__) || \
-//    defined(__AARCH64EB__) || \
-//    defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
-//            // It's a big-endian target architecture
-//            return BigEndian();
-//#elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
-//    defined(__LITTLE_ENDIAN__) || \
-//    defined(__ARMEL__) || \
-//    defined(__THUMBEL__) || \
-//    defined(__AARCH64EL__) || \
-//    defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
-//            // It's a little-endian target architecture
-//            return LittleEndian();
-//#else
-//#error "Unknown endian!"
-//#endif
-            return LittleEndian();
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+            return GetLittleEndian();
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            return GetBigEndian();
+#else
+            #error "Unknown endian!"
+#endif
         }
+
+    private:
+        static constexpr const CByteOrder BigEndian = CByteOrder("Big Endian");
+        static constexpr const CByteOrder LittleEndian = CByteOrder("Little Endian");
     };
 
     constexpr bool CByteOrder::IsNative() const
     {
-        return this == CByteOrders::NativeEndian();
+        return this == CByteOrders::GetNativeEndian();
     }
 }

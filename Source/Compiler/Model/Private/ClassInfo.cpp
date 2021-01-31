@@ -13,6 +13,8 @@ namespace Parse
     )
     {
         Reader >> Magic;
+        ASSERT(Magic == 0xcafebabe);
+
         Reader >> MinorVersion;
         Reader >> MajorVersion;
 
@@ -26,7 +28,5 @@ namespace Parse
 
 //        Reader >> Instance.Interfaces;
 //        Reader >> Instance.Fields;
-
-        std::cout << "Hello";
     }
 }

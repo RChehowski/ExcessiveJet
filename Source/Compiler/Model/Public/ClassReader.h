@@ -15,9 +15,7 @@ namespace Parse
         using Super = Util::CMemoryReader;
 
     public:
-        explicit CClassReader(const Util::WideString& InFileName) : Super (InFileName)
-        {
-        }
+        explicit CClassReader(const Util::WideString& InFileName);
 
         [[nodiscard]]
         std::shared_ptr<CConstantPool> GetConstantPool() const;
