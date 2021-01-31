@@ -22,6 +22,13 @@ namespace Parse
 
         void SetConstantPool(const std::shared_ptr<CConstantPool>& InConstantPool);
 
+        template<class T>
+        friend void operator>> (CClassReader& Reader, std::shared_ptr<T> SharedPtrItem)
+        {
+            ASSERT(SharedPtrItem != nullptr);
+            Reader >> *(SharedPtrItem.get());
+        }
+
     private:
         std::shared_ptr<CConstantPool> ConstantPool;
     };

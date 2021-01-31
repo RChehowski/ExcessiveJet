@@ -18,8 +18,7 @@ namespace Parse
         Reader >> MinorVersion;
         Reader >> MajorVersion;
 
-        ConstantPool = std::make_shared<CConstantPool>();
-        Reader >> *(ConstantPool.get());
+        Reader >> ConstantPool;
         Reader.SetConstantPool(ConstantPool);
 
         Reader >> AccessFlags;

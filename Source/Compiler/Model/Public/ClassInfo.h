@@ -39,7 +39,7 @@ namespace Parse
         u2 MinorVersion = (u2) 0;
         u2 MajorVersion = (u2) 0;
 
-        std::shared_ptr<CConstantPool> ConstantPool;
+        std::shared_ptr<CConstantPool> ConstantPool = std::make_shared<CConstantPool>();
 
         u2 AccessFlags = (u2)0;
         u2 ThisClass = (u2)0;
