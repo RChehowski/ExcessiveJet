@@ -24,14 +24,13 @@
 #include <unordered_map>
 
 #define ADD_CONSTANT_INFO(Name)\
-    {ETag::Name, [](ETag Tag){return std::make_shared<CConstant##Name##Info>(Tag);}}
+    {EConstantPoolInfoTag::Name, [](EConstantPoolInfoTag Tag){return std::make_shared<CConstant##Name##Info>(Tag);}}
 
 namespace Parse
 {
     using CConstantInfoSpawnFunction = std::function<std::shared_ptr<CConstantInfo>(EConstantPoolInfoTag)>;
     using CTagToConstantInfoSpawnFunction = std::unordered_map<EConstantPoolInfoTag, CConstantInfoSpawnFunction>;
 
-    using ETag = EConstantPoolInfoTag;
     const CTagToConstantInfoSpawnFunction G_TagToConstantInfoSpawnFunction {
         ADD_CONSTANT_INFO(Utf8),
         ADD_CONSTANT_INFO(Integer),

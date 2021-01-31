@@ -55,7 +55,7 @@ namespace Parse
         using CAttributeInfo::CAttributeInfo;
 
     public:
-        void DeserializeBody(CClassReader &Reader) override;
+        void DeserializeFrom(CClassReader &Reader) override;
 
         [[nodiscard]]
         FORCEINLINE u2 GetMaxStack() const

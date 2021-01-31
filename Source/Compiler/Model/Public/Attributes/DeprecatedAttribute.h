@@ -11,8 +11,12 @@ namespace Parse
     class CDeprecatedAttributeInfo : public CAttributeInfo
     {
     public:
-        ~CDeprecatedAttributeInfo() override;
+        ~CDeprecatedAttributeInfo() override
+        {
+        }
 
-        void DeserializeBody(CClassReader &Reader) override;
+        void DeserializeFrom(CClassReader &Reader) override
+        {
+        }
     };
 }

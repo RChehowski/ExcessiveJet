@@ -92,7 +92,7 @@ namespace Parse
     public:
         ~CRuntimeVisibleAnnotationsAttributeInfo() override;
 
-        void DeserializeBody(CClassReader &Reader) override;
+        void DeserializeFrom(CClassReader &Reader) override;
 
     private:
         Util::TStandardSerializedArray<CAnnotation> Annotations;

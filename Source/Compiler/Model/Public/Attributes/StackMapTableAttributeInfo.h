@@ -9,7 +9,7 @@
 #include "ClassReader.h"
 #include "AttributeInfo.h"
 
-using Util::Memory;
+using Util::CMemory;
 using Util::TStandardSerializedArray;
 
 namespace Parse
@@ -17,32 +17,38 @@ namespace Parse
 #pragma region CVerificationTypeInfo
     enum class EVariableInfoTag : u1
     {
-        ITEM_Top = 0,
-        ITEM_Integer = 1,
-        ITEM_Float = 2,
-        ITEM_Double = 3,
-        ITEM_Long = 4,
-        ITEM_Null = 5,
-        ITEM_UninitializedThis = 6,
-        ITEM_Object = 7,
-        ITEM_Uninitialized = 8
+        Top = 0,
+        Integer = 1,
+        Float = 2,
+        Double = 3,
+        Long = 4,
+        Null = 5,
+        UninitializedThis = 6,
+        Object = 7,
+        Uninitialized = 8
     };
 
     class CVariableInfo
     {
     public:
-        CVariableInfo(EVariableInfoTag InTag) : Tag(InTag)
+        CVariableInfo(EVariableInfoTag InVariableInfoTag) : VariableInfoTag(InVariableInfoTag)
         {
         }
 
         virtual ~CVariableInfo() = default;
 
-        virtual void DeserializeBody(CClassReader& Reader)
+        [[nodiscard]]
+        FORCEINLINE EVariableInfoTag GetVariableInfoTag()
+        {
+            return VariableInfoTag;
+        }
+
+        virtual void DeserializeFrom(CClassReader& Reader)
         {
         }
 
     private:
-        EVariableInfoTag Tag;
+        EVariableInfoTag VariableInfoTag;
     };
 
     /**
@@ -107,12 +113,14 @@ namespace Parse
      */
     class CObjectVariableInfo final : public CVariableInfo
     {
+        using Super = CVariableInfo;
         using CVariableInfo::CVariableInfo;
 
     public:
-        void DeserializeBody(CClassReader& Reader) override
+        void DeserializeFrom(CClassReader& Reader) override
         {
-            CVariableInfo::DeserializeBody(Reader);
+            Super::DeserializeFrom(Reader);
+
             Reader >> ConstantPoolIndex;
         }
 
@@ -134,12 +142,14 @@ namespace Parse
      */
     class CUninitializedVariableInfo final : public CVariableInfo
     {
+        using Super = CVariableInfo;
         using CVariableInfo::CVariableInfo;
 
     public:
-        void DeserializeBody(CClassReader& Reader) override
+        void DeserializeFrom(CClassReader& Reader) override
         {
-            CVariableInfo::DeserializeBody(Reader);
+            Super::DeserializeFrom(Reader);
+
             Reader >> Offset;
         }
 
@@ -153,213 +163,212 @@ namespace Parse
         u2 Offset = (u2) 0;
     };
 
-
-    union CVerificationTypeInfo
-    {
-    private:
-        /**
-         * Generic, Inaccessible, for fluent GetVariableInfoTag()
-         */
-        CVariableInfo VariableInfo;
-
-    public:
-        CTopVariableInfo TopVariableInfo;
-        CIntegerVariableInfo IntegerVariableInfo;
-        CFloatVariableInfo FloatVariableInfo;
-        CLongVariableInfo LongVariableInfo;
-        CDoubleVariableInfo DoubleVariableInfo;
-        CNullVariableInfo NullVariableInfo;
-        CUninitializedThisVariableInfo UninitializedThisVariableInfo;
-        CObjectVariableInfo ObjectVariableInfo;
-        CUninitializedVariableInfo UninitializedVariableInfo;
-
-        CVerificationTypeInfo()
-        {
-            // Nullify the memory
-            Memory::MemZero(&VariableInfo, sizeof(this));
-        }
-
-        [[nodiscard]]
-        FORCEINLINE EVariableInfoTag GetVariableInfoTag() const
-        {
-            return VariableInfo.Tag;
-        }
-    };
-#pragma endregion // CVerificationTypeInfo
-
-    struct CFrame
-    {
-        u1 FrameType = (u1)0;
-
-        CFrame(u1 InFrameType) : FrameType(InFrameType) {}
-    };
-
-    struct CSameFrame : public CFrame
-    {
-        using CFrame::CFrame;
-
-        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance) {}
-    };
-
-    struct CSameLocals1StackItemFrame : public CFrame
-    {
-        using CFrame::CFrame;
-
-        CVerificationTypeInfo Stack[1] = {0};
-
-        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
-        {
-            Reader >> Stack[0];
-        }
-    };
-
-    struct CSameLocals1StackItemFrameExtended : public CFrame
-    {
-        using CFrame::CFrame;
-
-        u2 OffsetDelta = (u2) 0;
-        CVerificationTypeInfo Stack[1] = {0};
-
-        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
-        {
-            Reader >> OffsetDelta;
-            Reader >> Stack[0];
-        }
-    };
-
-    struct CChopFrame : public CFrame
-    {
-        using CFrame::CFrame;
-
-        u2 OffsetDelta = (u2) 0;
-
-        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
-        {
-            Reader >> OffsetDelta;
-        }
-    };
-
-    struct CSameFrameExtended : public CFrame
-    {
-        using CFrame::CFrame;
-
-        u2 OffsetDelta = (u2) 0;
-
-        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
-        {
-            Reader >> OffsetDelta;
-        }
-    };
-
-    struct CAppendFrame : public CFrame
-    {
-        using CFrame::CFrame;
-
-        u2 OffsetDelta = (u2) 0;
-        CVerificationTypeInfo Locals[FrameType - 251];
-
-        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
-        {
-
-        }
-    };
-
-    struct CFullFrame : public CFrame
-    {
-        using CFrame::CFrame;
-
-        u2 OffsetDelta = (u2) 0;
-        TStandardSerializedArray<CVerificationTypeInfo> Locals;
-        TStandardSerializedArray<CVerificationTypeInfo> Stack;
-    };
-
-
-    union CStackMapFrame
-    {
-        CSameFrame SameFrame;
-        CSameLocals1StackItemFrame SameLocals1StackItemFrame;
-        CSameLocals1StackItemFrameExtended SameLocals1StackItemFrameExtended;
-        CChopFrame ChopFrame;
-        CSameFrameExtended SameFrameExtended;
-        CAppendFrame AppendFrame;
-        CFullFrame FullFrame;
-
-        friend CClassReader& operator>> (CClassReader& Reader, CStackMapFrame& Instance)
-        {
-            u1 FrameType = (u1)0;
-            Reader >> FrameType;
-
-            if ((FrameType >= 0) && (FrameType <= 63))
-            {
-                CSameFrame LocalSameFrame(FrameType);
-                Reader >> LocalSameFrame;
-                SameFrame = std::move(LocalSameFrame);
-
-                return Reader;
-            }
-            if ((FrameType >= 64) && (FrameType <= 127))
-            {
-                CSameLocals1StackItemFrame LocalSameLocals1StackItemFrame(FrameType);
-                Reader >> LocalSameLocals1StackItemFrame;
-                SameLocals1StackItemFrame = std::move(LocalSameLocals1StackItemFrame);
-
-                return Reader;
-            }
-            if (FrameType == 247)
-            {
-                CSameLocals1StackItemFrameExtended LocalSameLocals1StackItemFrameExtended(FrameType);
-                Reader >> LocalSameLocals1StackItemFrameExtended;
-                SameLocals1StackItemFrameExtended = std::move(LocalSameLocals1StackItemFrameExtended);
-
-                return Reader;
-            }
-            if ((FrameType >= 248) && (FrameType <= 250))
-            {
-                CChopFrame LocalChopFrame(FrameType);
-                Reader >> LocalChopFrame;
-                ChopFrame = std::move(LocalChopFrame);
-
-                return Reader;
-            }
-            if (FrameType == 251)
-            {
-                CSameFrameExtended LocalSameFrameExtended(FrameType);
-                Reader >> LocalSameFrameExtended;
-                SameFrameExtended = std::move(LocalSameFrameExtended);
-
-                return Reader;
-            }
-            if ((FrameType >= 252) && (FrameType <= 254))
-            {
-                CAppendFrame LocalAppendFrame(FrameType);
-                Reader >> LocalAppendFrame;
-                AppendFrame = std::move(LocalAppendFrame);
-
-                return Reader;
-            }
-            if (FrameType == 255)
-            {
-                CFullFrame LocalFullFrame(FrameType);
-                Reader >> LocalFullFrame;
-                FrameType = std::move(LocalFullFrame);
-
-                return Reader;
-            }
-
-            ASSERT(false);
-        }
-    }
-
-    class CStackMapTableAttributeInfo : public CAttributeInfo
-    {
-    public:
-        void DeserializeBody(CClassReader& Reader) override
-        {
-            Reader >> Entries;
-        }
-
-    private:
-        TStandardSerializedArray<CStackMapFrame> Entries;
-    };
+//    union CVerificationTypeInfo
+//    {
+//    private:
+//        /**
+//         * Generic, Inaccessible, for fluent GetVariableInfoTag()
+//         */
+//        std::shared_ptr<CVariableInfo> VariableInfo;
+//
+//    public:
+//        CTopVariableInfo TopVariableInfo;
+//        CIntegerVariableInfo IntegerVariableInfo;
+//        CFloatVariableInfo FloatVariableInfo;
+//        CLongVariableInfo LongVariableInfo;
+//        CDoubleVariableInfo DoubleVariableInfo;
+//        CNullVariableInfo NullVariableInfo;
+//        CUninitializedThisVariableInfo UninitializedThisVariableInfo;
+//        CObjectVariableInfo ObjectVariableInfo;
+//        CUninitializedVariableInfo UninitializedVariableInfo;
+//
+//        CVerificationTypeInfo()
+//        {
+//            // Nullify the memory
+//            Memory::MemZero(&VariableInfo, sizeof(this));
+//        }
+//
+//        [[nodiscard]]
+//        FORCEINLINE EVariableInfoTag GetVariableInfoTag() const
+//        {
+//            return VariableInfo.Tag;
+//        }
+//    };
+//#pragma endregion // CVerificationTypeInfo
+//
+//    struct CFrame
+//    {
+//        u1 FrameType = (u1)0;
+//
+//        CFrame(u1 InFrameType) : FrameType(InFrameType) {}
+//    };
+//
+//    struct CSameFrame : public CFrame
+//    {
+//        using CFrame::CFrame;
+//
+//        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance) {}
+//    };
+//
+//    struct CSameLocals1StackItemFrame : public CFrame
+//    {
+//        using CFrame::CFrame;
+//
+//        CVerificationTypeInfo Stack[1] = {0};
+//
+//        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
+//        {
+//            Reader >> Stack[0];
+//        }
+//    };
+//
+//    struct CSameLocals1StackItemFrameExtended : public CFrame
+//    {
+//        using CFrame::CFrame;
+//
+//        u2 OffsetDelta = (u2) 0;
+//        CVerificationTypeInfo Stack[1] = {0};
+//
+//        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
+//        {
+//            Reader >> OffsetDelta;
+//            Reader >> Stack[0];
+//        }
+//    };
+//
+//    struct CChopFrame : public CFrame
+//    {
+//        using CFrame::CFrame;
+//
+//        u2 OffsetDelta = (u2) 0;
+//
+//        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
+//        {
+//            Reader >> OffsetDelta;
+//        }
+//    };
+//
+//    struct CSameFrameExtended : public CFrame
+//    {
+//        using CFrame::CFrame;
+//
+//        u2 OffsetDelta = (u2) 0;
+//
+//        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
+//        {
+//            Reader >> OffsetDelta;
+//        }
+//    };
+//
+//    struct CAppendFrame : public CFrame
+//    {
+//        using CFrame::CFrame;
+//
+//        u2 OffsetDelta = (u2) 0;
+//        CVerificationTypeInfo Locals[FrameType - 251];
+//
+//        FORCEINLINE friend CClassReader& operator>>(CClassReader& Reader, CSameFrame& Instance)
+//        {
+//
+//        }
+//    };
+//
+//    struct CFullFrame : public CFrame
+//    {
+//        using CFrame::CFrame;
+//
+//        u2 OffsetDelta = (u2) 0;
+//        TStandardSerializedArray<CVerificationTypeInfo> Locals;
+//        TStandardSerializedArray<CVerificationTypeInfo> Stack;
+//    };
+//
+//
+//    union CStackMapFrame
+//    {
+//        CSameFrame SameFrame;
+//        CSameLocals1StackItemFrame SameLocals1StackItemFrame;
+//        CSameLocals1StackItemFrameExtended SameLocals1StackItemFrameExtended;
+//        CChopFrame ChopFrame;
+//        CSameFrameExtended SameFrameExtended;
+//        CAppendFrame AppendFrame;
+//        CFullFrame FullFrame;
+//
+//        friend CClassReader& operator>> (CClassReader& Reader, CStackMapFrame& Instance)
+//        {
+//            u1 FrameType = (u1)0;
+//            Reader >> FrameType;
+//
+//            if ((FrameType >= 0) && (FrameType <= 63))
+//            {
+//                CSameFrame LocalSameFrame(FrameType);
+//                Reader >> LocalSameFrame;
+//                SameFrame = std::move(LocalSameFrame);
+//
+//                return Reader;
+//            }
+//            if ((FrameType >= 64) && (FrameType <= 127))
+//            {
+//                CSameLocals1StackItemFrame LocalSameLocals1StackItemFrame(FrameType);
+//                Reader >> LocalSameLocals1StackItemFrame;
+//                SameLocals1StackItemFrame = std::move(LocalSameLocals1StackItemFrame);
+//
+//                return Reader;
+//            }
+//            if (FrameType == 247)
+//            {
+//                CSameLocals1StackItemFrameExtended LocalSameLocals1StackItemFrameExtended(FrameType);
+//                Reader >> LocalSameLocals1StackItemFrameExtended;
+//                SameLocals1StackItemFrameExtended = std::move(LocalSameLocals1StackItemFrameExtended);
+//
+//                return Reader;
+//            }
+//            if ((FrameType >= 248) && (FrameType <= 250))
+//            {
+//                CChopFrame LocalChopFrame(FrameType);
+//                Reader >> LocalChopFrame;
+//                ChopFrame = std::move(LocalChopFrame);
+//
+//                return Reader;
+//            }
+//            if (FrameType == 251)
+//            {
+//                CSameFrameExtended LocalSameFrameExtended(FrameType);
+//                Reader >> LocalSameFrameExtended;
+//                SameFrameExtended = std::move(LocalSameFrameExtended);
+//
+//                return Reader;
+//            }
+//            if ((FrameType >= 252) && (FrameType <= 254))
+//            {
+//                CAppendFrame LocalAppendFrame(FrameType);
+//                Reader >> LocalAppendFrame;
+//                AppendFrame = std::move(LocalAppendFrame);
+//
+//                return Reader;
+//            }
+//            if (FrameType == 255)
+//            {
+//                CFullFrame LocalFullFrame(FrameType);
+//                Reader >> LocalFullFrame;
+//                FrameType = std::move(LocalFullFrame);
+//
+//                return Reader;
+//            }
+//
+//            ASSERT(false);
+//        }
+//    }
+//
+//    class CStackMapTableAttributeInfo : public CAttributeInfo
+//    {
+//    public:
+//        void DeserializeBody(CClassReader& Reader) override
+//        {
+//            Reader >> Entries;
+//        }
+//
+//    private:
+//        TStandardSerializedArray<CStackMapFrame> Entries;
+//    };
 }
 

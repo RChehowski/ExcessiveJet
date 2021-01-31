@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
-project(CPP20)
+project(Excessive)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 include_directories(Util/Public)
 include_directories(Compiler/Bytecode/Public)
@@ -19,7 +19,7 @@ include_directories(Source)
 include_directories(Source/Compiler/Model/Public)
 include_directories(Source/Compiler/Util/Public)
 
-add_executable(CPP20
+add_executable(${CMAKE_PROJECT_NAME}
     main.cpp
     "${UnityBuildFiles}"
 )

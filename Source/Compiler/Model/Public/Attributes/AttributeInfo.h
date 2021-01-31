@@ -12,12 +12,12 @@ namespace Parse
     class CClassReader;
     class CConstantPool;
 
-    class CAttributeInfo : public TSharedFromThis<CAttributeInfo>
+    class CAttributeInfo
     {
     public:
         virtual ~CAttributeInfo() = default;
 
-        virtual void DeserializeBody(CClassReader& Reader) = 0;
+        virtual void DeserializeFrom(CClassReader& Reader) = 0;
 
         friend CClassReader& operator>>(CClassReader& Reader, CAttributeInfo& Instance);
     };

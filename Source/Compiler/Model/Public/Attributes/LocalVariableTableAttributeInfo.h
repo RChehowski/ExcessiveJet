@@ -72,7 +72,7 @@ namespace Parse
             return LocalVariableTable;
         }
 
-        void DeserializeBody(CClassReader& Reader) override;
+        void DeserializeFrom(CClassReader& Reader) override;
 
     private:
         Util::TSerializedArray<u2, CLocalVariable> LocalVariableTable;

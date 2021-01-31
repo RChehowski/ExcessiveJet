@@ -55,7 +55,7 @@ namespace Parse
 
     CRuntimeVisibleAnnotationsAttributeInfo::~CRuntimeVisibleAnnotationsAttributeInfo() = default;
 
-    void CRuntimeVisibleAnnotationsAttributeInfo::DeserializeBody(CClassReader &Reader)
+    void CRuntimeVisibleAnnotationsAttributeInfo::DeserializeFrom(CClassReader &Reader)
     {
         Reader >> Annotations;
     }

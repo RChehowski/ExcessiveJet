@@ -60,7 +60,7 @@ namespace Parse
     CClassReader& operator>>(CClassReader& Reader, CAttributeInfo& Instance)
     {
         CScopeAttributeInfoDeserializeTracker ScopeAttributeInfoDeserializeTracker(Instance, Reader);
-        Instance.DeserializeBody(Reader);
+        Instance.DeserializeFrom(Reader);
 
         return Reader;
     }
@@ -113,7 +113,7 @@ namespace Parse
             CAttributeInfo* AttributeInfo = NewAttributeInfo(AttributeNameString);
             ASSERT(AttributeInfo);
 
-            AttributeInfo->DeserializeBody(Reader);
+            AttributeInfo->DeserializeFrom(Reader);
 
             Instance.Items.push_back(std::shared_ptr<CAttributeInfo>(AttributeInfo));
         }
