@@ -488,7 +488,7 @@ int main()
 
     u8 dat = *(u8*)vec.data();
 
-    CClassReader MemoryReader(L"C:\\Users\\ASUS\\Projects\\JavaHello\\out\\production\\JavaHello\\com\\company\\Sample.class");
+    CClassReader MemoryReader(L"C:\\Users\\ASUS\\Desktop\\GenerateConstantPoolConstants.class");
 
     CClassInfo ClassInfo;
     MemoryReader >> ClassInfo;

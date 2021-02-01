@@ -16,7 +16,7 @@ namespace Parse
         return Reader;
     }
 
-    void CCodeAttributeInfo::DeserializeBody(CClassReader& Reader)
+    void CCodeAttributeInfo::DeserializeFrom(CClassReader& Reader)
     {
         Reader >> MaxStack;
         Reader >> MaxLocals;

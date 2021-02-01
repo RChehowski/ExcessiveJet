@@ -37,9 +37,9 @@ namespace Util
 //        static_assert(std::is_trivially_constructible_v<TItem>, "TItem must be trivially constructible");
 //        static_assert(std::is_trivially_move_assignable_v<TItem>, "TItem must be trivially constructible");
 
-        template<typename TNumItemsFunc, typename TItemFunc>
-        friend void
-        operator>>(Parse::CClassReader &Reader, TSerializedArray<TNumItemsFunc, TItemFunc> &SerializedArray);
+//        template<typename TNumItemsFunc, typename TItemFunc>
+//        friend void
+//        operator>>(Parse::CClassReader &Reader, TSerializedArray<TNumItemsFunc, TItemFunc> &SerializedArray);
 
         friend void operator>>(
                 Parse::CClassReader &Reader,

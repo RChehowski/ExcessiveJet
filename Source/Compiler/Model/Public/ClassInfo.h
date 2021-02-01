@@ -8,6 +8,7 @@
 #include "ConstantPool.h"
 
 #include "FieldInfo.h"
+#include "MethodInfo.h"
 
 #include "SerializedArray.h"
 
@@ -46,7 +47,7 @@ namespace Parse
         u2 SuperClass = (u2)0;
 
         Util::TStandardSerializedArray<u2> Interfaces;
-
         Util::TStandardSerializedArray<CFieldInfo> Fields;
+        Util::TStandardSerializedArray<CMethodInfo> Methods;
     };
 }

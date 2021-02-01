@@ -10,7 +10,9 @@
 #include "StringUtf8.h"
 
 #include "Attributes/DeprecatedAttribute.h"
-//#include "Attributes/RuntimeVisibleAnnotationsAttributeInfo.h"
+#include "Attributes/CodeAttributeInfo.h"
+#include "Attributes/LineNumberTableAttributeInfo.h"
+#include "Attributes/LocalVariableTableAttributeInfo.h"
 
 
 using Util::CLiteralStringUtf8;
@@ -18,7 +20,7 @@ using Util::CLiteralStringUtf8;
 
 #define DEFINE_ATTRIBUTE_INFO_SPAWNER(AttributeName) {\
     CLiteralStringUtf8(LITERAL_TO_STRING(AttributeName)), \
-    []() { return new C##AttributeName##AttributeInfo(); }                                          \
+    []() { return std::make_shared<C##AttributeName##AttributeInfo>(); }                                          \
 }
 
 namespace Parse
@@ -66,30 +68,28 @@ namespace Parse
     }
 
 
-    using CAttributeInfoSpawner = std::function<CAttributeInfo*()>;
+    using CAttributeInfoSpawner = std::function<CSharedAttributeInfo()>;
     using CAttributeInfoSpawners = std::unordered_map<Util::IStringUtf8, CAttributeInfoSpawner>;
 
 
     CAttributeInfoSpawners G_AttributeInfoSpawners {
         DEFINE_ATTRIBUTE_INFO_SPAWNER(Deprecated),
+        DEFINE_ATTRIBUTE_INFO_SPAWNER(Code),
+        DEFINE_ATTRIBUTE_INFO_SPAWNER(LineNumberTable),
+        DEFINE_ATTRIBUTE_INFO_SPAWNER(LocalVariableTable),
+        // TODO: Support all of them!
 //        DEFINE_ATTRIBUTE_INFO_SPAWNER(RuntimeVisibleAnnotations),
     };
 
-    CAttributeInfo* NewAttributeInfo(const Util::CStringUtf8& AttributeNameString)
+    CSharedAttributeInfo NewAttributeInfo(const Util::CStringUtf8& AttributeNameString)
     {
         auto It = G_AttributeInfoSpawners.find(AttributeNameString);
-        if (It != G_AttributeInfoSpawners.end())
-        {
-            // Create a new instance
-            return It->second();
-        }
-        else
-        {
-            return nullptr;
-        }
+
+        ASSERT_MSG(It != G_AttributeInfoSpawners.end(),
+               "Attribute name \"%s\" is not present in the map", ((std::string)AttributeNameString).c_str());
+
+        return It->second();
     }
-
-
 
     CClassReader& operator>>(CClassReader& Reader, CSerializedArrayOfAttributes& Instance)
     {
@@ -110,8 +110,8 @@ namespace Parse
 
             const Util::CStringUtf8& AttributeNameString = AttributeName->GetStringUtf8();
 
-            CAttributeInfo* AttributeInfo = NewAttributeInfo(AttributeNameString);
-            ASSERT(AttributeInfo);
+            CSharedAttributeInfo AttributeInfo = NewAttributeInfo(AttributeNameString);
+            ASSERT(AttributeInfo != nullptr);
 
             AttributeInfo->DeserializeFrom(Reader);
 

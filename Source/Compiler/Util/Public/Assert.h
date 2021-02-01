@@ -12,7 +12,17 @@
         if (!(Condition))\
         {\
             fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
-            fprintf(stderr, "Assertion failed: \"%s\"", LITERAL_TO_STRING(Condition));\
+            fprintf(stderr, "Assertion failed: %s", LITERAL_TO_STRING(Condition));\
+            fflush(stderr);\
+            exit(1);\
+        }
+
+    #define ASSERT_MSG(Condition, Fmt, ...)\
+        if (!(Condition))\
+        {\
+            fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
+            fprintf(stderr, "Assertion failed: %s\n", LITERAL_TO_STRING(Condition));\
+            fprintf(stderr, Fmt, __VA_ARGS__);\
             fflush(stderr);\
             exit(1);\
         }

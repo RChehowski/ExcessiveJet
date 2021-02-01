@@ -17,7 +17,7 @@ namespace Parse
         Reader >> Instance.Index;
     }
 
-    void CLocalVariableTableAttributeInfo::DeserializeBody(CClassReader& Reader)
+    void CLocalVariableTableAttributeInfo::DeserializeFrom(CClassReader& Reader)
     {
         Reader >> LocalVariableTable;
     }

@@ -9,13 +9,12 @@
 
 #include "Assert.h"
 #include "SerializedArray.h"
-#include "ClassReader.h"
 
-
-class CClassReader;
 
 namespace Parse
 {
+    class CClassReader;
+
     class CLocalVariable
     {
     public:

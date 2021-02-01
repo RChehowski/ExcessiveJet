@@ -9,6 +9,7 @@
 #include "ByteBuffer.h"
 #include "SerializedArray.h"
 
+using Util::TSerializedArray;
 using Util::TStandardSerializedArray;
 
 namespace Parse
@@ -70,7 +71,7 @@ namespace Parse
         }
 
         [[nodiscard]]
-        FORCEINLINE const TStandardSerializedArray<u1>& GetCode() const
+        FORCEINLINE const TSerializedArray<u4, u1>& GetCode() const
         {
             return Code;
         }
@@ -91,7 +92,7 @@ namespace Parse
         u2 MaxStack    = (u2)0;
         u2 MaxLocals   = (u2)0;
 
-        TStandardSerializedArray<u1> Code = {};
+        TSerializedArray<u4, u1> Code = {};
 
         TStandardSerializedArray<CExceptionTableEntry> ExceptionTable = {};
 

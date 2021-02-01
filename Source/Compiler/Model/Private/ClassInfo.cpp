@@ -6,6 +6,7 @@
 #include "ClassInfo.h"
 #include "ClassReader.h"
 
+
 namespace Parse
 {
     void CClassInfo::Deserialize(CClassReader& Reader, EClassInfoDeserializingMode ClassInfoDeserializingMode)
@@ -23,7 +24,8 @@ namespace Parse
         Reader >> ThisClass;
         Reader >> SuperClass;
 
-//        Reader >> Instance.Interfaces;
-//        Reader >> Instance.Fields;
+        Reader >> Interfaces;
+        Reader >> Fields;
+        Reader >> Methods;
     }
 }
