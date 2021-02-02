@@ -33,66 +33,53 @@ namespace Parse
     class CScopeAttributeInfoDeserializeTracker
     {
     public:
-        CScopeAttributeInfoDeserializeTracker(CAttributeInfo &InAttributeInfo, CClassReader &InReader);
-        ~CScopeAttributeInfoDeserializeTracker();
+        CScopeAttributeInfoDeserializeTracker(u4 InExpectedLength, CClassReader &InReader)
+            : ExpectedLength((usz)InExpectedLength)
+            , Reader(InReader)
+            , DeserializeBegin(InReader.Tell())
+        {
+        }
+
+        ~CScopeAttributeInfoDeserializeTracker()
+        {
+            const usz ActualLength = Reader.Tell() - DeserializeBegin;
+
+            ASSERT_MSG(ExpectedLength == ActualLength,
+               "Unexpected attribute length. Expected bytes: %llu, Actual bytes: %llu", (u8)ExpectedLength, (u8)ActualLength);
+        }
 
     private:
-        const CAttributeInfo& AttributeInfo;
+        const usz ExpectedLength;
         const CClassReader& Reader;
 
         const usz DeserializeBegin;
     };
-
-    CScopeAttributeInfoDeserializeTracker::CScopeAttributeInfoDeserializeTracker(
-            CAttributeInfo &InAttributeInfo,
-            CClassReader &InReader
-    )
-    : AttributeInfo(InAttributeInfo)
-    , Reader(InReader)
-    , DeserializeBegin(Reader.Tell())
-    {
-    }
-
-    CScopeAttributeInfoDeserializeTracker::~CScopeAttributeInfoDeserializeTracker()
-    {
-//        const usz BytesRead = Reader.Tell() - DeserializeBegin;
-//        ASSERT(BytesRead == AttributeInfo.GetAttributeLength());
-    }
     #pragma endregion
-
-
-    CClassReader& operator>>(CClassReader& Reader, CAttributeInfo& Instance)
-    {
-        CScopeAttributeInfoDeserializeTracker ScopeAttributeInfoDeserializeTracker(Instance, Reader);
-        Instance.DeserializeFrom(Reader);
-
-        return Reader;
-    }
 
 
     using CAttributeInfoSpawner = std::function<CSharedAttributeInfo()>;
     using CAttributeInfoSpawners = std::unordered_map<Util::IStringUtf8, CAttributeInfoSpawner>;
 
 
-    CAttributeInfoSpawners G_AttributeInfoSpawners {
-        DEFINE_ATTRIBUTE_INFO_SPAWNER(Deprecated),
-        DEFINE_ATTRIBUTE_INFO_SPAWNER(Code),
-        DEFINE_ATTRIBUTE_INFO_SPAWNER(LineNumberTable),
-        DEFINE_ATTRIBUTE_INFO_SPAWNER(LocalVariableTable),
-        DEFINE_ATTRIBUTE_INFO_SPAWNER(Exceptions),
-        DEFINE_ATTRIBUTE_INFO_SPAWNER(LocalVariableTypeTable),
-        // TODO: Support all of them!
-//        DEFINE_ATTRIBUTE_INFO_SPAWNER(RuntimeVisibleAnnotations),
-    };
-
     CSharedAttributeInfo NewAttributeInfo(const Util::CStringUtf8& AttributeNameString)
     {
-        auto It = G_AttributeInfoSpawners.find(AttributeNameString);
+        static const CAttributeInfoSpawners G_AttributeInfoSpawners {
+            DEFINE_ATTRIBUTE_INFO_SPAWNER(Deprecated),
+            DEFINE_ATTRIBUTE_INFO_SPAWNER(Code),
+            DEFINE_ATTRIBUTE_INFO_SPAWNER(LineNumberTable),
+            DEFINE_ATTRIBUTE_INFO_SPAWNER(LocalVariableTable),
+            DEFINE_ATTRIBUTE_INFO_SPAWNER(Exceptions),
+            DEFINE_ATTRIBUTE_INFO_SPAWNER(LocalVariableTypeTable),
+            // TODO: Support all of them!
+        };
 
-        ASSERT_MSG(It != G_AttributeInfoSpawners.end(),
-               "Attribute name \"%s\" is not present in the map", ((std::string)AttributeNameString).c_str());
+        CAttributeInfoSpawners::const_iterator It = G_AttributeInfoSpawners.find(AttributeNameString);
 
-        return It->second();
+        ASSERT_MSG(It != G_AttributeInfoSpawners.cend(),
+           "Attribute name \"%s\" is not present in the map", ((std::string)AttributeNameString).c_str());
+
+        const CAttributeInfoSpawner& AttributeInfoSpawner = It->second;
+        return AttributeInfoSpawner();
     }
 
     CClassReader& operator>>(CClassReader& Reader, CSerializedArrayOfAttributes& Instance)
@@ -117,7 +104,10 @@ namespace Parse
             CSharedAttributeInfo AttributeInfo = NewAttributeInfo(AttributeNameString);
             ASSERT(AttributeInfo != nullptr);
 
-            AttributeInfo->DeserializeFrom(Reader);
+            {
+                CScopeAttributeInfoDeserializeTracker ScopeTracker(AttributeLength, Reader);
+                AttributeInfo->DeserializeFrom(Reader);
+            }
 
             Instance.Items.push_back(std::shared_ptr<CAttributeInfo>(AttributeInfo));
         }
