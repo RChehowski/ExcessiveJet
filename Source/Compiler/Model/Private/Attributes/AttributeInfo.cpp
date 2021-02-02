@@ -109,7 +109,7 @@ namespace Parse
                 AttributeInfo->DeserializeFrom(Reader);
             }
 
-            Instance.Items.push_back(std::shared_ptr<CAttributeInfo>(AttributeInfo));
+            Instance.Items.push_back(std::move(AttributeInfo));
         }
 
         return Reader;
