@@ -1,0 +1,22 @@
+//
+// Created by ASUS on 02/02/2021.
+//
+
+#include "Attributes/LocalVariableTypeTableAttributeInfo.h"
+
+namespace Parse
+{
+    void operator>> (CClassReader& Reader, CLocalVariableTypeTableEntry& Instance)
+    {
+        Reader >> Instance.StartPc;
+        Reader >> Instance.Length;
+        Reader >> Instance.NameIndex;
+        Reader >> Instance.SignatureIndex;
+        Reader >> Instance.Index;
+    }
+
+    void CLocalVariableTypeTableAttributeInfo::DeserializeFrom(CClassReader& Reader)
+    {
+        Reader >> LocalVariableTypeTable;
+    }
+}
