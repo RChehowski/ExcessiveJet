@@ -4,8 +4,12 @@
 
 #pragma once
 
-#include "MemoryReader.h"
 #include <memory>
+
+#include "MemoryReader.h"
+#include "ByteOrder.h"
+
+using Util::CByteOrders;
 
 namespace Parse
 {
@@ -16,21 +20,36 @@ namespace Parse
         using Super = Util::CMemoryReader;
 
     public:
-        explicit CClassReader(const Util::WideString& InFileName);
+        FORCEINLINE explicit CClassReader(const Util::WideString& InFileName) : Super(InFileName)
+        {
+            // Java classes are serialized using big endian byte order
+            SetByteOrder(CByteOrders::GetBigEndian());
+        }
 
         [[nodiscard]]
-        std::shared_ptr<CConstantPool> GetConstantPool() const;
+        FORCEINLINE std::shared_ptr<CConstantPool> GetConstantPool() const
+        {
+            ASSERT(ConstantPool != nullptr);
+            return ConstantPool;
+        }
 
-        void SetConstantPool(const std::shared_ptr<CConstantPool>& InConstantPool);
+        FORCEINLINE void SetConstantPool(const std::shared_ptr<CConstantPool>& InConstantPool)
+        {
+            ASSERT(ConstantPool == nullptr);
+            ConstantPool = InConstantPool;
+        }
 
         template<class T>
-        friend void operator>> (CClassReader& Reader, std::shared_ptr<T> SharedPtrItem)
+        FORCEINLINE friend void operator>> (CClassReader& Reader, std::shared_ptr<T> SharedPtrItem)
         {
             ASSERT(SharedPtrItem != nullptr);
             Reader >> *(SharedPtrItem.get());
         }
 
     private:
+        /**
+         * To read attributes, the class reader must hold a reference to the deserialized ConstantPool.
+         */
         std::shared_ptr<CConstantPool> ConstantPool;
     };
 }

@@ -12,7 +12,9 @@ namespace Util
     void CMemoryReader::RangeCheck(usz AddOffset) const
     {
         const ssz NewPosition = (ssz)(Position + AddOffset);
-        ASSERT((NewPosition >= 0) && ((usz)NewPosition < (usz)GetSizeInMemory()));
+
+        ASSERT_MSG((NewPosition >= 0) && ((usz)NewPosition <= (usz)GetSizeInMemory()),
+               "NewPosition: %llu, SizeInMemory: %llu", (u8)NewPosition, (u8)GetSizeInMemory());
     }
 
     CMemoryReader::CMemoryReader(const WideString& InFileName) : FileName(InFileName)

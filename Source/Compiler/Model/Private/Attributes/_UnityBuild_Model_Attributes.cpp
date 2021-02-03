@@ -9,3 +9,5 @@
 #include "Compiler/Model/Private/Attributes/LocalVariableTableAttributeInfo.cpp"
 #include "Compiler/Model/Private/Attributes/LocalVariableTypeTableAttributeInfo.cpp"
 #include "Compiler/Model/Private/Attributes/ExceptionsAttributeInfo.cpp"
+#include "Compiler/Model/Private/Attributes/SourceFileAttributeInfo.cpp"
+#include "Compiler/Model/Private/Attributes/InnerClassesAttributeInfo.cpp"

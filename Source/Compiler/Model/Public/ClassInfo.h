@@ -49,5 +49,7 @@ namespace Parse
         Util::TStandardSerializedArray<u2> Interfaces;
         Util::TStandardSerializedArray<CFieldInfo> Fields;
         Util::TStandardSerializedArray<CMethodInfo> Methods;
+
+        Util::TStandardSerializedArray<CSharedAttributeInfo> Attributes;
     };
 }

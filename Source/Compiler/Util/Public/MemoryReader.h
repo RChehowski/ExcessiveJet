@@ -90,6 +90,18 @@ namespace Util
             return Position;
         }
 
+        [[nodiscard]]
+        FORCEINLINE bool IsAtBegin() const
+        {
+            return Tell() == 0;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE bool IsAtEnd() const
+        {
+            return Tell() == Allocation.GetSize();
+        }
+
         friend void operator>> (Util::CMemoryReader& Reader, u1& Instance);
         friend void operator>> (Util::CMemoryReader& Reader, u2& Instance);
         friend void operator>> (Util::CMemoryReader& Reader, u4& Instance);

@@ -11,6 +11,8 @@ namespace Parse
 {
     void CClassInfo::Deserialize(CClassReader& Reader, EClassInfoDeserializingMode ClassInfoDeserializingMode)
     {
+        ASSERT(Reader.IsAtBegin());
+
         Reader >> Magic;
         ASSERT(Magic == 0xCAFEBABE);
 
@@ -27,5 +29,9 @@ namespace Parse
         Reader >> Interfaces;
         Reader >> Fields;
         Reader >> Methods;
+
+        Reader >> Attributes;
+
+        ASSERT(Reader.IsAtEnd());
     }
 }
