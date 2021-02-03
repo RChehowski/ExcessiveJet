@@ -15,15 +15,13 @@ namespace Parse
     class CConstantValueAttributeInfo final : public CAttributeInfo
     {
     public:
-        using CAttributeInfo::CAttributeInfo;
-
         [[nodiscard]]
         FORCEINLINE u2 GetConstantValueIndex() const
         {
             return ConstantValueIndex;
         }
 
-        void DeserializeBody(CClassReader& Reader) override;
+        void DeserializeFrom(CClassReader& Reader) override;
 
     private:
         u2 ConstantValueIndex = (u2)0;

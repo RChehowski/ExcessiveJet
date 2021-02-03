@@ -67,12 +67,6 @@ namespace Parse
             return DescriptorIndex;
         }
 
-//        [[nodiscard]]
-//        FORCEINLINE u2 GetAttributesCount() const
-//        {
-//            return AttributesCount;
-//        }
-
         void DeserializeFrom(CClassReader& Reader);
 
         friend void operator>>(CClassReader& Reader, CFieldInfo& Instance);

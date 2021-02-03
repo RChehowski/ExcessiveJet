@@ -7,14 +7,15 @@
 #include "ConstantPool.h"
 #include "ConstantPool/ConstantUtf8Info.h"
 
-#include "Attributes/DeprecatedAttribute.h"
 #include "Attributes/CodeAttributeInfo.h"
-#include "Attributes/LineNumberTableAttributeInfo.h"
-#include "Attributes/LocalVariableTableAttributeInfo.h"
+#include "Attributes/DeprecatedAttribute.h"
 #include "Attributes/ExceptionsAttributeInfo.h"
-#include "Attributes/LocalVariableTypeTableAttributeInfo.h"
 #include "Attributes/SourceFileAttributeInfo.h"
 #include "Attributes/InnerClassesAttributeInfo.h"
+#include "Attributes/ConstantValueAttributeInfo.h"
+#include "Attributes/LineNumberTableAttributeInfo.h"
+#include "Attributes/LocalVariableTableAttributeInfo.h"
+#include "Attributes/LocalVariableTypeTableAttributeInfo.h"
 
 
 using Util::CLiteralStringUtf8;
@@ -82,6 +83,7 @@ namespace Parse
             ADD_ATTRIBUTE_INFO_SPAWNER(Deprecated),
             ADD_ATTRIBUTE_INFO_SPAWNER(SourceFile),
             ADD_ATTRIBUTE_INFO_SPAWNER(InnerClasses),
+            ADD_ATTRIBUTE_INFO_SPAWNER(ConstantValue),
             ADD_ATTRIBUTE_INFO_SPAWNER(LineNumberTable),
             ADD_ATTRIBUTE_INFO_SPAWNER(LocalVariableTable),
             ADD_ATTRIBUTE_INFO_SPAWNER(LocalVariableTypeTable),

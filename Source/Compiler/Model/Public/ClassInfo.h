@@ -35,6 +35,9 @@ namespace Parse
             Instance.Deserialize(Reader, EClassInfoDeserializingMode::All);
         }
 
+        void Debug_PrintFields() const;
+        void Debug_PrintMethods() const;
+
     private:
         u4 Magic = (u4) 0;
         u2 MinorVersion = (u2) 0;

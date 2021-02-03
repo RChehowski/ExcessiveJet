@@ -23,8 +23,14 @@
 #include <functional>
 #include <unordered_map>
 
-#define ADD_CONSTANT_INFO(Name)\
-    {EConstantPoolInfoTag::Name, [](EConstantPoolInfoTag Tag){return std::make_shared<CConstant##Name##Info>(Tag);}}
+#define ADD_CONSTANT_INFO(CONSTANT_NAME)                                \
+{                                                                       \
+    EConstantPoolInfoTag::CONSTANT_NAME,                                \
+    [](EConstantPoolInfoTag Tag)                                        \
+    {                                                                   \
+        return std::make_shared<CConstant##CONSTANT_NAME##Info>(Tag);   \
+    }                                                                   \
+}
 
 namespace Parse
 {
@@ -57,7 +63,8 @@ namespace Parse
     {
         auto It = G_TagToConstantInfoSpawnFunction.find(ConstantPoolInfoTag);
 
-        ASSERT(It != G_TagToConstantInfoSpawnFunction.end());
+        ASSERT_MSG(It != G_TagToConstantInfoSpawnFunction.end(),
+               "Unknown EConstantPoolInfoTag: %llu", (unsigned long long)ConstantPoolInfoTag);
 
         // Create a new instance
         return It->second(ConstantPoolInfoTag);

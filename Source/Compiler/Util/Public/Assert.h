@@ -5,6 +5,8 @@
 #ifndef CPP20_ASSERT_H
 #define CPP20_ASSERT_H
 
+void DebugBreakOrExit();
+
 #define WITH_ASSERT 1
 
 #if WITH_ASSERT
@@ -14,7 +16,7 @@
             fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
             fprintf(stderr, "Assertion failed: %s", LITERAL_TO_STRING(Condition));\
             fflush(stderr);\
-            exit(1);\
+            DebugBreakOrExit();\
         }
 
     #define ASSERT_MSG(Condition, Fmt, ...)\
@@ -24,7 +26,7 @@
             fprintf(stderr, "Assertion failed: %s\n", LITERAL_TO_STRING(Condition));\
             fprintf(stderr, Fmt, __VA_ARGS__);\
             fflush(stderr);\
-            exit(1);\
+            DebugBreakOrExit();\
         }
 #else
     #define ASSERT(Condition)

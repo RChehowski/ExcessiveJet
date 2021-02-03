@@ -11,3 +11,4 @@
 #include "Compiler/Model/Private/Attributes/ExceptionsAttributeInfo.cpp"
 #include "Compiler/Model/Private/Attributes/SourceFileAttributeInfo.cpp"
 #include "Compiler/Model/Private/Attributes/InnerClassesAttributeInfo.cpp"
+#include "Compiler/Model/Private/Attributes/ConstantValueAttributeInfo.cpp"

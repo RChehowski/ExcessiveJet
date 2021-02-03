@@ -65,12 +65,12 @@ namespace Util
         }
 
 
-        FORCEINLINE TConstIterator cbegin() const noexcept
+        FORCEINLINE TConstIterator begin() const noexcept
         {
             return Items.cbegin();
         }
 
-        FORCEINLINE TConstIterator cend() const noexcept
+        FORCEINLINE TConstIterator end() const noexcept
         {
             return Items.cend();
         }

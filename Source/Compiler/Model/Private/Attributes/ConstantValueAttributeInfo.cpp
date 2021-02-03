@@ -8,7 +8,7 @@
 
 namespace Parse
 {
-    void CConstantValueAttributeInfo::DeserializeBody(CClassReader& Reader)
+    void CConstantValueAttributeInfo::DeserializeFrom(CClassReader& Reader)
     {
         Reader >> ConstantValueIndex;
     }
