@@ -13,34 +13,37 @@ namespace Parse
 {
     class CClassReader;
 
-    struct EFieldAccessFlag
+    struct EFieldAccessFlags
     {
+        using Type = u2;
+
+
         // Declared public; may be accessed from outside its package.
-        static constexpr u2 ACC_PUBLIC      = 0x0001;
+        static constexpr Type ACC_PUBLIC      = 0x0001;
 
         // Declared private; usable only within the defining class.
-        static constexpr u2 ACC_PRIVATE     = 0x0002;
+        static constexpr Type ACC_PRIVATE     = 0x0002;
 
         // Declared protected; may be accessed within subclasses.
-        static constexpr u2 ACC_PROTECTED   = 0x0004;
+        static constexpr Type ACC_PROTECTED   = 0x0004;
 
         // Declared static.
-        static constexpr u2 ACC_STATIC      = 0x0008;
+        static constexpr Type ACC_STATIC      = 0x0008;
 
         // Declared final; never directly assigned to after object construction (JLS §17.5).
-        static constexpr u2 ACC_FINAL       = 0x0010;
+        static constexpr Type ACC_FINAL       = 0x0010;
 
         // Declared volatile; cannot be cached.
-        static constexpr u2 ACC_VOLATILE    = 0x0040;
+        static constexpr Type ACC_VOLATILE    = 0x0040;
 
         // Declared transient; not written or read by a persistent object manager.
-        static constexpr u2 ACC_TRANSIENT   = 0x0080;
+        static constexpr Type ACC_TRANSIENT   = 0x0080;
 
         // Declared synthetic; not present in the source code.
-        static constexpr u2 ACC_SYNTHETIC   = 0x1000;
+        static constexpr Type ACC_SYNTHETIC   = 0x1000;
 
         // Declared as an element of an enum.
-        static constexpr u2 ACC_ENUM        = 0x4000;
+        static constexpr Type ACC_ENUM        = 0x4000;
     };
 
     class CFieldInfo
@@ -72,9 +75,9 @@ namespace Parse
         friend void operator>>(CClassReader& Reader, CFieldInfo& Instance);
 
     private:
-        u2 AccessFlags = (u2)0;
-        u2 NameIndex = (u2)0;
-        u2 DescriptorIndex = (u2)0;
+        EFieldAccessFlags::Type AccessFlags = (EFieldAccessFlags::Type)0;
+        u2 NameIndex        = (u2)0;
+        u2 DescriptorIndex  = (u2)0;
 
         Util::TStandardSerializedArray<CSharedAttributeInfo> Attributes;
     };
