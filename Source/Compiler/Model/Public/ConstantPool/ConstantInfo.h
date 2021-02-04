@@ -78,13 +78,20 @@ namespace Parse
 
         static std::shared_ptr<CConstantInfo> NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
 
+        static const char* ConstantPoolInfoTagToString(EConstantPoolInfoTag ConstantPoolInfoTag);
+
         template <typename T>
         static std::shared_ptr<T> CastConstantInfo(std::shared_ptr<CConstantInfo>& ConstantInfo)
         {
             static_assert(std::is_base_of_v<CConstantInfo, T>, "T must be a subclass of CConstantInfo");
 
             ASSERT(ConstantInfo != nullptr);
-            ASSERT(ConstantInfo->IsA<T>());
+
+            ASSERT_MSG(ConstantInfo->IsA<T>(),
+                "Cannot cast \"%s\" to \"%s\". You can only cast from base CConstantInfo to it's subtype.",
+                ConstantPoolInfoTagToString(ConstantInfo->ConstantPoolInfoTag),
+                ConstantPoolInfoTagToString(T::StaticTag)
+            );
 
             return std::static_pointer_cast<T>(ConstantInfo);
         }

@@ -52,6 +52,35 @@ namespace Parse
         static constexpr Type ACC_ENUM 	        = 0x4000;
     };
 
+    class CClassVersion
+    {
+    public:
+        CClassVersion() = default;
+        ~CClassVersion() = default;
+
+        FORCEINLINE friend void operator>>(CClassReader& Reader, CClassVersion& Instance)
+        {
+            Reader >> Instance.MinorVersion;
+            Reader >> Instance.MajorVersion;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE u2 GetMinorVersion() const
+        {
+            return MinorVersion;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE u2 GetMajorVersion() const
+        {
+            return MajorVersion;
+        }
+
+    private:
+        u2 MinorVersion = (u2)0;
+        u2 MajorVersion = (u2)0;
+    };
+
     class CClassInfo
     {
     public:
@@ -64,13 +93,13 @@ namespace Parse
             Instance.Deserialize(Reader, EClassInfoDeserializingMode::All);
         }
 
+        void Debug_PrintClass() const;
         void Debug_PrintFields() const;
         void Debug_PrintMethods() const;
 
     private:
         u4 Magic        = (u4)0;
-        u2 MinorVersion = (u2)0;
-        u2 MajorVersion = (u2)0;
+        CClassVersion ClassVersion;
 
         std::shared_ptr<CConstantPool> ConstantPool = std::make_shared<CConstantPool>();
 

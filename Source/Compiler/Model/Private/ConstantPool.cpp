@@ -10,31 +10,6 @@
 
 namespace Parse
 {
-//    void CConstantPool::ForEach(const CBiConsumer& BiConsumer)
-//    {
-//        for (usz Index = 0; Index < (usz)ConstantInfos.size(); ++Index)
-//        {
-//            CConstantInfo* const ConstantInfo = ConstantInfos[Index];
-//            const usz IndexInConstantPool = Index + 1;
-//
-//            BiConsumer(IndexInConstantPool, ConstantInfo);
-//        }
-//    }
-//
-//    void CConstantPool::ForEach(const CBiConsumer& BiConsumer, EConstantPoolInfoTag ConstantPoolInfoTag)
-//    {
-//        for (usz Index = 0; Index < (usz)ConstantInfos.size(); ++Index)
-//        {
-//            CConstantInfo* const ConstantInfo = ConstantInfos[Index];
-//            const usz IndexInConstantPool = Index + 1;
-//
-//            if (ConstantInfo->GetConstantPoolInfoTag() == ConstantPoolInfoTag)
-//            {
-//                BiConsumer(IndexInConstantPool, ConstantInfo);
-//            }
-//        }
-//    }
-
     const CAttributeType* CConstantPool::GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool)
     {
         return CAttributeTypes::GetAttributeNameByName(Get<CConstantUtf8Info>((usz)IndexInConstantPool)->GetStringUtf8());
