@@ -62,6 +62,7 @@ namespace Parse
             Oss << ((AccessFlags & EClassAccessFlags::ACC_INTERFACE) ? "interface " : "class ");
             Oss << ThisClassNameInfo->GetStringUtf8();
         }
+        if (SuperClass != 0)
         {
             std::shared_ptr<CConstantClassInfo> SuperClassInfo =
                     ConstantPool->Get<CConstantClassInfo>(SuperClass);

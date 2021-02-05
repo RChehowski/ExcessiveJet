@@ -9,6 +9,7 @@
 
 #include "Attributes/CodeAttributeInfo.h"
 #include "Attributes/DeprecatedAttribute.h"
+#include "Attributes/SignatureAttributeInfo.h"
 #include "Attributes/ExceptionsAttributeInfo.h"
 #include "Attributes/SourceFileAttributeInfo.h"
 #include "Attributes/InnerClassesAttributeInfo.h"
@@ -79,6 +80,7 @@ namespace Parse
     {
         static const CAttributeInfoSpawners G_AttributeInfoSpawners {
             ADD_ATTRIBUTE_INFO_SPAWNER(Code),
+            ADD_ATTRIBUTE_INFO_SPAWNER(Signature),
             ADD_ATTRIBUTE_INFO_SPAWNER(Exceptions),
             ADD_ATTRIBUTE_INFO_SPAWNER(Deprecated),
             ADD_ATTRIBUTE_INFO_SPAWNER(SourceFile),

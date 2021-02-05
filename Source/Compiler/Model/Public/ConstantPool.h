@@ -26,10 +26,6 @@ namespace Parse
         )>;
 
     public:
-//        void ForEach(const CBiConsumer& BiConsumer);
-//
-//        void ForEach(const CBiConsumer& BiConsumer, EConstantPoolInfoTag ConstantPoolInfoTag);
-
         const CAttributeType* GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool);
 
         std::shared_ptr<CConstantInfo> operator[] (usz IndexInConstantPool);

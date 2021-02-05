@@ -488,10 +488,16 @@ int main()
 
     u8 dat = *(u8*)vec.data();
 
-    CClassReader MemoryReader(L"C:\\Users\\ASUS\\Desktop\\GenerateConstantPoolConstants.class");
+    CClassReader MemoryReader(
+            L"C:\\Users\\ASUS\\Desktop\\rt\\java\\lang\\Number.class"
+    );
 
     CClassInfo ClassInfo;
     MemoryReader >> ClassInfo;
+
+    ClassInfo.Debug_PrintClass();
+//    ClassInfo.Debug_PrintFields();
+//    ClassInfo.Debug_PrintMethods();
 //
 //    return 0;
 }

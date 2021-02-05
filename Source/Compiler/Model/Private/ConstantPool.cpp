@@ -15,13 +15,11 @@ namespace Parse
         return CAttributeTypes::GetAttributeNameByName(Get<CConstantUtf8Info>((usz)IndexInConstantPool)->GetStringUtf8());
     }
 
-
     std::shared_ptr<CConstantInfo> CConstantPool::operator[] (const usz IndexInConstantPool)
     {
         ASSERT((IndexInConstantPool >= 1) && (IndexInConstantPool <= ConstantInfos.size()));
         return ConstantInfos[IndexInConstantPool - 1];
     }
-
 
     void operator>>(CClassReader& Reader, CConstantPool& Instance)
     {
