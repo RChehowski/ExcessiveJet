@@ -133,7 +133,7 @@ namespace Debug
         }
     }
 
-    std::string DecodeFunctionReturnValue(const std::string& SignatureString)
+    std::string DecodeMethodReturnType(const std::string& SignatureString)
     {
         const std::string::size_type SecondParenIndex = SignatureString.find_last_of(')');
 
@@ -149,7 +149,7 @@ namespace Debug
         }
     }
 
-    std::string DecodeFunctionArgumentsJoined(const std::string& SignatureString)
+    std::string DecodeMethodArgumentTypesJoined(const std::string& SignatureString)
     {
         const std::string::size_type FirstParenIndex = SignatureString.find('(', 0);
         const std::string::size_type SecondParenIndex = SignatureString.find(')', FirstParenIndex);

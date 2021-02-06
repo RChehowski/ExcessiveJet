@@ -176,10 +176,10 @@ namespace Parse
 
             std::string FunctionSignature = (std::string)DescriptorString->GetStringUtf8();
 
-            Oss << Debug::DecodeFunctionReturnValue(FunctionSignature)
+            Oss << Debug::DecodeMethodReturnType(FunctionSignature)
                 << " " << NameString->GetStringUtf8()
                 << "("
-                << Debug::DecodeFunctionArgumentsJoined(FunctionSignature)
+                << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
                 << ")"
                 << std::endl;
         }

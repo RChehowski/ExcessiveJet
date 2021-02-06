@@ -14,7 +14,7 @@ namespace Debug
 {
     std::string DecodeType(const std::string& TypeString);
 
-    std::string DecodeFunctionReturnValue(const std::string& SignatureString);
+    std::string DecodeMethodReturnType(const std::string& SignatureString);
 
-    std::string DecodeFunctionArgumentsJoined(const std::string& SignatureString);
+    std::string DecodeMethodArgumentTypesJoined(const std::string& SignatureString);
 }
