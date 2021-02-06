@@ -8,10 +8,17 @@
 #include "SerializedArray.h"
 #include "Attributes/AttributeInfo.h"
 
+#if UNLOCK_DEBUG_METHODS
+    #include <string>
+#endif // UNLOCK_DEBUG_METHODS
 
 namespace Parse
 {
     class CClassReader;
+
+#if UNLOCK_DEBUG_METHODS
+    class CClassInfo;
+#endif // UNLOCK_DEBUG_METHODS
 
     struct EFieldAccessFlags
     {
@@ -73,6 +80,11 @@ namespace Parse
         void DeserializeFrom(CClassReader& Reader);
 
         friend void operator>>(CClassReader& Reader, CFieldInfo& Instance);
+
+#if UNLOCK_DEBUG_METHODS
+        [[nodiscard]]
+        std::string Debug_ToString(const CClassInfo& ClassInfo) const;
+#endif // UNLOCK_DEBUG_METHODS
 
     private:
         EFieldAccessFlags::Type AccessFlags = (EFieldAccessFlags::Type)0;

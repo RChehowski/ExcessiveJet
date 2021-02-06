@@ -9,6 +9,7 @@
 
 namespace Parse
 {
+    class CClassInfo;
     class CClassReader;
 
     class CAttributeInfo;
@@ -84,6 +85,11 @@ namespace Parse
         {
             return Attributes;
         }
+
+#if UNLOCK_DEBUG_METHODS
+    [[nodiscard]]
+    std::string Debug_ToString(const CClassInfo& ClassInfo) const;
+#endif // UNLOCK_DEBUG_METHODS
 
     private:
         EMethodAccessFlags::Type AccessFlags = (EMethodAccessFlags::Type)0;

@@ -20,6 +20,8 @@
     #define FORCEINLINE inline
 #endif
 
+#define UNLOCK_DEBUG_METHODS (1)
+
 using u1 = uint8_t;
 using s1 = int8_t;
 

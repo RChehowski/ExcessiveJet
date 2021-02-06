@@ -9,7 +9,7 @@
 
 #include "FieldInfo.h"
 #include "MethodInfo.h"
-
+#include "ClassVersion.h"
 #include "SerializedArray.h"
 
 namespace Parse
@@ -52,34 +52,6 @@ namespace Parse
         static constexpr Type ACC_ENUM 	        = 0x4000;
     };
 
-    class CClassVersion
-    {
-    public:
-        CClassVersion() = default;
-        ~CClassVersion() = default;
-
-        FORCEINLINE friend void operator>>(CClassReader& Reader, CClassVersion& Instance)
-        {
-            Reader >> Instance.MinorVersion;
-            Reader >> Instance.MajorVersion;
-        }
-
-        [[nodiscard]]
-        FORCEINLINE u2 GetMinorVersion() const
-        {
-            return MinorVersion;
-        }
-
-        [[nodiscard]]
-        FORCEINLINE u2 GetMajorVersion() const
-        {
-            return MajorVersion;
-        }
-
-    private:
-        u2 MinorVersion = (u2)0;
-        u2 MajorVersion = (u2)0;
-    };
 
     class CClassInfo
     {
@@ -91,6 +63,12 @@ namespace Parse
         FORCEINLINE friend void operator>>(CClassReader& Reader, CClassInfo& Instance)
         {
             Instance.Deserialize(Reader, EClassInfoDeserializingMode::All);
+        }
+
+        [[nodiscard]]
+        FORCEINLINE std::shared_ptr<const CConstantPool> GetConstantPool() const
+        {
+            return ConstantPool;
         }
 
         void Debug_PrintClass() const;

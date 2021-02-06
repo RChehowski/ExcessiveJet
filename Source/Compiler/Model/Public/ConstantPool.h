@@ -28,10 +28,10 @@ namespace Parse
     public:
         const CAttributeType* GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool);
 
-        std::shared_ptr<CConstantInfo> operator[] (usz IndexInConstantPool);
+        std::shared_ptr<CConstantInfo> operator[] (usz IndexInConstantPool) const;
 
         template<class T>
-        FORCEINLINE std::shared_ptr<T> Get(usz IndexInConstantPool)
+        FORCEINLINE std::shared_ptr<T> Get(usz IndexInConstantPool) const
         {
             return CConstantInfo::CastConstantInfo<T>((*this)[IndexInConstantPool]);
         }
