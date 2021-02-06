@@ -10,6 +10,7 @@
 
 #include "ConstantPool/ConstantUtf8Info.h"
 #include "ConstantPool/ConstantClassInfo.h"
+#include "Debug/DebugMisc.h"
 
 namespace Parse
 {
@@ -75,6 +76,29 @@ namespace Parse
             Oss << " extends " << SuperClassNameInfo->GetStringUtf8();
         }
 
+        if (!Interfaces.IsEmpty())
+        {
+            Oss << " implements ";
+
+            usz InterfacesLeft = Interfaces.Size();
+            for (u2 InterfaceClassIndex : Interfaces)
+            {
+                std::shared_ptr<CConstantClassInfo> InterfaceClassInfo =
+                        ConstantPool->Get<CConstantClassInfo>(InterfaceClassIndex);
+
+                std::shared_ptr<CConstantUtf8Info> InterfaceClassNameInfo =
+                        ConstantPool->Get<CConstantUtf8Info>(InterfaceClassInfo->GetNameIndex());
+                ASSERT(InterfaceClassNameInfo != nullptr);
+
+                Oss << InterfaceClassNameInfo->GetStringUtf8();
+
+                if (--InterfacesLeft > 0)
+                {
+                    Oss << ", ";
+                }
+            }
+        }
+
         Oss << std::endl;
         std::cout << Oss.str();
 
@@ -112,7 +136,9 @@ namespace Parse
             if (FieldAccessFlags & EFieldAccessFlags::ACC_SYNTHETIC)  Oss << "<synthetic> ";
             if (FieldAccessFlags & EFieldAccessFlags::ACC_ENUM)       Oss << "<enum> ";
 
-            Oss << DescriptorString->GetStringUtf8() << " " << NameString->GetStringUtf8() << std::endl;
+            std::string DecodedDescriptorType = Debug::DecodeType((std::string)DescriptorString->GetStringUtf8());
+
+            Oss << DecodedDescriptorType << " " << NameString->GetStringUtf8() << std::endl;
         }
 
         std::cout << Oss.str();
@@ -148,7 +174,14 @@ namespace Parse
             if (MethodAccessFlags & EMethodAccessFlags::ACC_STRICT)        Oss << "strict(fp) ";
             if (MethodAccessFlags & EMethodAccessFlags::ACC_SYNTHETIC)     Oss << "<synthetic> ";
 
-            Oss << DescriptorString->GetStringUtf8() << " " << NameString->GetStringUtf8() << std::endl;
+            std::string FunctionSignature = (std::string)DescriptorString->GetStringUtf8();
+
+            Oss << Debug::DecodeFunctionReturnValue(FunctionSignature)
+                << " " << NameString->GetStringUtf8()
+                << "("
+                << Debug::DecodeFunctionArgumentsJoined(FunctionSignature)
+                << ")"
+                << std::endl;
         }
 
         std::cout << Oss.str();

@@ -11,6 +11,7 @@ include_directories(Model/Public)
 set(UnityBuildFiles
     Source/Compiler/Util/Private/_UnityBuild_Util.cpp
     Source/Compiler/Model/Private/_UnityBuild_Model.cpp
+    Source/Compiler/Model/Private/Debug/_UnityBuild_Model_Debug.cpp
     Source/Compiler/Model/Private/Attributes/_UnityBuild_Model_Attributes.cpp
     Source/Compiler/Model/Private/ConstantPool/_UnityBuild_Model_ConstantPool.cpp
 )

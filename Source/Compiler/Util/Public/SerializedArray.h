@@ -82,6 +82,12 @@ namespace Util
             return (usz) Items.size();
         }
 
+        [[nodiscard]]
+        FORCEINLINE bool IsEmpty() const noexcept
+        {
+            return Size() == (usz)0;
+        }
+
         FORCEINLINE void Clear(ssz NewSize = -1) noexcept
         {
             Items.clear();

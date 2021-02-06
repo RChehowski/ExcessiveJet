@@ -1,0 +1,181 @@
+//
+// Created by ASUS on 06/02/2021.
+//
+
+#include "Debug/DebugMisc.h"
+
+#include <vector>
+#include <sstream>
+#include <algorithm>
+
+#include "Assert.h"
+
+namespace Debug
+{
+    std::string ArrayDimensionsToString(usz ArrayDimensions)
+    {
+        std::ostringstream Oss;
+
+        for (int Index = 0; Index < ArrayDimensions; ++Index)
+        {
+            Oss << "[]";
+        }
+
+        return std::move(Oss.str());
+    }
+
+    std::vector<std::string> SplitFunctionArguments(std::string& TypeString)
+    {
+        std::vector<std::string> Result;
+
+        std::string::size_type TypeStringLength = TypeString.length();
+
+        std::string::size_type Begin = 0;
+        bool ObjectScanInProgress = false;
+
+        for (std::string::size_type Index = 0; Index < TypeStringLength; ++Index)
+        {
+            if (!ObjectScanInProgress)
+            {
+                const char FirstChar = TypeString[Index];
+
+                bool IsPrimitive;
+                switch (FirstChar)
+                {
+                    case 'Z':
+                    case 'B':
+                    case 'C':
+                    case 'S':
+                    case 'I':
+                    case 'J':
+                    case 'F':
+                    case 'D':
+                        IsPrimitive = true;
+                        break;
+
+                    default:
+                        IsPrimitive = false;
+                }
+
+                if (IsPrimitive)
+                {
+                    Result.push_back(TypeString.substr(Index, 1));
+                }
+                else
+                {
+                    ASSERT_MSG((FirstChar == '[' || FirstChar == 'L'),
+                               "Unknown first char: %c. TypeString: %s, Index: %llu", FirstChar, TypeString.c_str(), Index)
+
+                    ObjectScanInProgress = true;
+                    Begin = Index;
+                }
+            }
+            else if (TypeString[Index] == ';')
+            {
+                Result.push_back(TypeString.substr(Begin, (Index - Begin) + 1));
+                ObjectScanInProgress = false;
+            }
+        }
+
+        return std::move(Result);
+    }
+
+    std::string DecodeType(const std::string& TypeString)
+    {
+        std::string::size_type TypeStringIndex = 0;
+
+        usz ArrayDimensions = 0;
+        for (std::string::size_type i = 0; TypeString[i] == '['; ++i)
+        {
+            ArrayDimensions++;
+            TypeStringIndex++;
+        }
+
+        if ((TypeString.size() - TypeStringIndex) == 1)
+        {
+            // Primitive
+            std::string PrimitiveTypeName;
+            switch (TypeString[TypeStringIndex])
+            {
+                case 'Z':   { PrimitiveTypeName = "boolean";    break; }
+                case 'B':   { PrimitiveTypeName = "byte";       break; }
+                case 'C':   { PrimitiveTypeName = "char";       break; }
+                case 'S':   { PrimitiveTypeName = "short";      break; }
+                case 'I':   { PrimitiveTypeName = "int";        break; }
+                case 'J':   { PrimitiveTypeName = "long";       break; }
+                case 'F':   { PrimitiveTypeName = "float";      break; }
+                case 'D':   { PrimitiveTypeName = "double";     break; }
+
+                default:    { PrimitiveTypeName.clear();        break; }
+            }
+
+            return PrimitiveTypeName + ArrayDimensionsToString(ArrayDimensions);
+        }
+        else if (TypeString[TypeStringIndex] == 'L')
+        {
+            // Object
+            const std::string::size_type IndexOfEnd = TypeString.find(';', TypeStringIndex);
+
+            std::string ClassName = TypeString.substr(
+                TypeStringIndex + 1,
+                IndexOfEnd - TypeStringIndex - 1
+            );
+            std::replace(ClassName.begin(), ClassName.end(), '/', '.');
+
+            return ClassName + ArrayDimensionsToString(ArrayDimensions);
+        }
+        else
+        {
+            ASSERT_MSG(false, "Unknown TypeString: \"%s\"", TypeString.c_str());
+
+            // No idea what was that
+            return TypeString;
+        }
+    }
+
+    std::string DecodeFunctionReturnValue(const std::string& SignatureString)
+    {
+        const std::string::size_type SecondParenIndex = SignatureString.find_last_of(')');
+
+        std::string ReturnTypeString = SignatureString.substr(SecondParenIndex + 1);
+
+        if (ReturnTypeString == "V")
+        {
+            return "void";
+        }
+        else
+        {
+            return DecodeType(ReturnTypeString);
+        }
+    }
+
+    std::string DecodeFunctionArgumentsJoined(const std::string& SignatureString)
+    {
+        const std::string::size_type FirstParenIndex = SignatureString.find('(', 0);
+        const std::string::size_type SecondParenIndex = SignatureString.find(')', FirstParenIndex);
+
+        std::string ArgumentsString = SignatureString.substr(FirstParenIndex + 1, SecondParenIndex - FirstParenIndex - 1);
+
+        if (!ArgumentsString.empty())
+        {
+            std::vector<std::string> VectorOfArguments = SplitFunctionArguments(ArgumentsString);
+
+            std::ostringstream Oss;
+            for (std::vector<std::string>::size_type i = 0; i < VectorOfArguments.size(); ++i)
+            {
+                Oss << DecodeType(VectorOfArguments[i]);
+
+                if (i < (VectorOfArguments.size() - 1))
+                {
+                    Oss << ", ";
+                }
+            }
+
+            return Oss.str();
+        }
+        else
+        {
+            return "";
+        }
+    }
+}
