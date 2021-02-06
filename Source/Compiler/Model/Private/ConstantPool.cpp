@@ -7,9 +7,40 @@
 
 #include "AttributeType.h"
 #include "ConstantPool/ConstantUtf8Info.h"
+#include "ConstantPool/ConstantLongInfo.h"
+#include "ConstantPool/ConstantDoubleInfo.h"
+
 
 namespace Parse
 {
+#pragma region CPhantomConstantInfo
+    /**
+     * Phantom constant info is used as the following dummy info for Long and Double constants.
+     */
+    class CPhantomConstantInfo final : public CConstantInfo
+    {
+    public:
+        CPhantomConstantInfo() : CConstantInfo(EConstantPoolInfoTag::Invalid_NotATag)
+        {
+        }
+
+        ~CPhantomConstantInfo() override = default;
+
+        [[nodiscard]]
+        std::string ToString() const override
+        {
+            return "CPhantomConstantInfo";
+        }
+
+        virtual void DeserializeFrom(CClassReader& Reader) override
+        {
+        }
+    };
+
+    std::shared_ptr<CConstantInfo> G_PhantomConstantInfo = std::make_shared<CPhantomConstantInfo>();
+#pragma endregion
+
+
     const CAttributeType* CConstantPool::GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool)
     {
         return CAttributeTypes::GetAttributeNameByName(Get<CConstantUtf8Info>((usz)IndexInConstantPool)->GetStringUtf8());
@@ -38,6 +69,16 @@ namespace Parse
             Reader >> ConstantInfo;
 
             Instance.ConstantInfos.push_back(ConstantInfo);
+
+            if (ConstantInfo->IsA<CConstantDoubleInfo>() || ConstantInfo->IsA<CConstantLongInfo>())
+            {
+                // @spec:
+                //  Additionally, two types of constants (longs and doubles) take up two consecutive slots in the table,
+                //  although the second such slot is a phantom index that is never directly used.
+                ConstantPoolIndex++;
+
+                Instance.ConstantInfos.push_back(G_PhantomConstantInfo);
+            }
         }
     }
 }
