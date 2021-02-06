@@ -24,7 +24,7 @@ namespace Debug
         return std::move(Oss.str());
     }
 
-    std::vector<std::string> SplitFunctionArguments(std::string& TypeString)
+    std::vector<std::string> SplitMethodArguments(std::string& TypeString)
     {
         std::vector<std::string> Result;
 
@@ -85,7 +85,7 @@ namespace Debug
         std::string::size_type TypeStringIndex = 0;
 
         usz ArrayDimensions = 0;
-        for (std::string::size_type i = 0; TypeString[i] == '['; ++i)
+        while (TypeString[TypeStringIndex] == '[')
         {
             ArrayDimensions++;
             TypeStringIndex++;
@@ -158,7 +158,7 @@ namespace Debug
 
         if (!ArgumentsString.empty())
         {
-            std::vector<std::string> VectorOfArguments = SplitFunctionArguments(ArgumentsString);
+            std::vector<std::string> VectorOfArguments = SplitMethodArguments(ArgumentsString);
 
             std::ostringstream Oss;
             for (std::vector<std::string>::size_type i = 0; i < VectorOfArguments.size(); ++i)
