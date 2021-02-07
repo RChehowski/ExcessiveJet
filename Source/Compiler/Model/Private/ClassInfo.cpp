@@ -88,7 +88,7 @@ namespace Parse
       //if (AccessFlags & EClassAccessFlags::ACC_INTERFACE)   Oss << "<interface> ";
         if (AccessFlags & EClassAccessFlags::ACC_ABSTRACT)    Oss << "abstract ";
         if (AccessFlags & EClassAccessFlags::ACC_SYNTHETIC)   Oss << "<synthetic> ";
-        if (AccessFlags & EClassAccessFlags::ACC_ANNOTATION)  Oss << "<annotation> ";
+      //if (AccessFlags & EClassAccessFlags::ACC_ANNOTATION)  Oss << "<annotation> ";
         if (AccessFlags & EClassAccessFlags::ACC_ENUM)        Oss << "<enum> ";
 
         {
@@ -100,8 +100,20 @@ namespace Parse
                     ConstantPool->Get<CConstantUtf8Info>(ThisClassInfo->GetNameIndex());
             ASSERT(ThisClassNameInfo != nullptr);
 
-            Oss << ((AccessFlags & EClassAccessFlags::ACC_INTERFACE) ? "interface " : "class ");
-            Oss << ThisClassNameInfo->GetStringUtf8();
+            const char* ClassKind;
+            if (AccessFlags & EClassAccessFlags::ACC_INTERFACE)
+            {
+                if (AccessFlags & EClassAccessFlags::ACC_ANNOTATION)
+                    ClassKind = "@interface";
+                else
+                    ClassKind = "interface";
+            }
+            else
+            {
+                ClassKind = "class";
+            }
+
+            Oss << ClassKind << " " << ThisClassNameInfo->GetStringUtf8();
         }
         if (SuperClass != 0)
         {

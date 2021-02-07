@@ -30,9 +30,11 @@ namespace Parse
         const std::shared_ptr<CConstantUtf8Info> DescriptorString =
                 ConstantPool->Get<CConstantUtf8Info>(DescriptorIndex);
 
-        if (AccessFlags & EMethodAccessFlags::ACC_PUBLIC)        Oss << "public ";
-        if (AccessFlags & EMethodAccessFlags::ACC_PRIVATE)       Oss << "private ";
-        if (AccessFlags & EMethodAccessFlags::ACC_PROTECTED)     Oss << "protected ";
+        if      (AccessFlags & EMethodAccessFlags::ACC_PUBLIC)        Oss << "public ";
+        else if (AccessFlags & EMethodAccessFlags::ACC_PRIVATE)       Oss << "private ";
+        else if (AccessFlags & EMethodAccessFlags::ACC_PROTECTED)     Oss << "protected ";
+        else Oss << "<package private> ";
+
         if (AccessFlags & EMethodAccessFlags::ACC_STATIC)        Oss << "static ";
         if (AccessFlags & EMethodAccessFlags::ACC_FINAL)         Oss << "final ";
         if (AccessFlags & EMethodAccessFlags::ACC_SYNCHRONIZED)  Oss << "synchronized ";

@@ -6,7 +6,7 @@
 
 namespace Parse
 {
-    std::shared_ptr<CElementValuePair> CElementValuePair::NewElementValue(EElementValueTag ElementValueTag)
+    FORCEINLINE std::shared_ptr<CElementValue> NewElementValue(EElementValueTag ElementValueTag)
     {
         switch (ElementValueTag)
         {
@@ -19,32 +19,60 @@ namespace Parse
             case EElementValueTag::Short:
             case EElementValueTag::Bool:
             case EElementValueTag::String:
-                return std::make_shared<CConstValueIndexElementValuePair>();
+                return std::make_shared<CConstValueIndexElementValue>();
             case EElementValueTag::EnumConstant:
-                return std::make_shared<CEnumConstValueElementValuePair>();
+                return std::make_shared<CEnumConstValueElementValue>();
             case EElementValueTag::Class:
-                return std::make_shared<CClassInfoIndexElementValuePair>();
+                return std::make_shared<CClassInfoIndexElementValue>();
             case EElementValueTag::AnnotationType:
-                return std::make_shared<CAnnotationValueElementValuePair>();
+                return std::make_shared<CAnnotationValueElementValue>();
             case EElementValueTag::Array:
-                return std::make_shared<CArrayValueElementValuePair>();
+                return std::make_shared<CArrayValueElementValue>();
 
             default:
                 ASSERT_MSG(false, "Unknown EElementValueTag: %d", (int)ElementValueTag);
-                return std::shared_ptr<CElementValuePair>(nullptr);
+                return std::shared_ptr<CElementValue>(nullptr);
+        }
+    }
+
+    FORCEINLINE std::shared_ptr<CElementValue> ReadElementValue(CClassReader& ClassReader)
+    {
+        EElementValueTag Tag;
+        ClassReader >> *((u1*)&Tag);
+
+        std::shared_ptr<CElementValue> ElementValue = NewElementValue(Tag);
+        ElementValue->DeserializeFrom(ClassReader);
+
+        return std::move(ElementValue);
+    }
+
+    void operator>> (CClassReader& ClassReader,
+                     Util::TStandardSerializedArray<std::shared_ptr<CElementValue>> ElementValues)
+    {
+        Util::TStandardSerializedArray<std::shared_ptr<CElementValue>>::NumItemsType NumItems = 0;
+        ClassReader >> NumItems;
+
+        for (int Index = 0; Index < NumItems; ++Index)
+        {
+            std::shared_ptr<CElementValue> ElementValue = ReadElementValue(ClassReader);
+            ElementValues.Items.push_back(std::move(ElementValue));
+
+            puts("");
         }
     }
 
     void operator>> (CClassReader& ClassReader, CAnnotation& Instance)
     {
         ClassReader >> Instance.TypeIndex;
-
-        // TODO: Define how to read and create ElementValuePairs
         ClassReader >> Instance.ElementValuePairs;
     }
 
+    void operator>> (CClassReader& ClassReader, CElementValuePair& Instance)
+    {
+        ClassReader >> Instance.ElementNameIndex;
+        Instance.Value = ReadElementValue(ClassReader);
+    }
 
-    CRuntimeVisibleAnnotationsAttributeInfo::~CRuntimeVisibleAnnotationsAttributeInfo() = default;
 
     void CRuntimeVisibleAnnotationsAttributeInfo::DeserializeFrom(CClassReader &Reader)
     {

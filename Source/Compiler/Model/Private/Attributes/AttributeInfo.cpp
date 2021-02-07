@@ -90,7 +90,7 @@ namespace Parse
             ADD_ATTRIBUTE_INFO_SPAWNER(LineNumberTable),
             ADD_ATTRIBUTE_INFO_SPAWNER(LocalVariableTable),
             ADD_ATTRIBUTE_INFO_SPAWNER(LocalVariableTypeTable),
-//            ADD_ATTRIBUTE_INFO_SPAWNER(RuntimeVisibleAnnotations),
+            ADD_ATTRIBUTE_INFO_SPAWNER(RuntimeVisibleAnnotations),
             // TODO: Support all of them!
         };
 

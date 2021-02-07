@@ -31,11 +31,12 @@ namespace Debug
         std::string::size_type TypeStringLength = TypeString.length();
 
         std::string::size_type Begin = 0;
-        bool ObjectScanInProgress = false;
+        bool bObjectScanInProgress = false;
+        bool bArrayScanInProgress = false;
 
         for (std::string::size_type Index = 0; Index < TypeStringLength; ++Index)
         {
-            if (!ObjectScanInProgress)
+            if (!bObjectScanInProgress)
             {
                 const char FirstChar = TypeString[Index];
 
@@ -59,21 +60,45 @@ namespace Debug
 
                 if (IsPrimitive)
                 {
-                    Result.push_back(TypeString.substr(Index, 1));
+                    Result.push_back(TypeString.substr(Begin, (Index - Begin) + 1));
+
+                    bObjectScanInProgress = false;
+                    bArrayScanInProgress = false;
+
+                    Begin = Index + 1;
                 }
                 else
                 {
-                    ASSERT_MSG((FirstChar == '[' || FirstChar == 'L'),
-                               "Unknown first char: %c. TypeString: %s, Index: %llu", FirstChar, TypeString.c_str(), Index)
+                    if (FirstChar == '[')
+                    {
+                        Begin = Index;
+                        bArrayScanInProgress = true;
+                    }
+                    else if (FirstChar == 'L')
+                    {
+                        if (!bArrayScanInProgress)
+                        {
+                            Begin = Index;
+                        }
+                        // Otherwise this is an an array of objects, we should not move `Begin`
 
-                    ObjectScanInProgress = true;
-                    Begin = Index;
+                        bObjectScanInProgress = true;
+                    }
+                    else
+                    {
+                        ASSERT_MSG(false,
+                           "Unknown first char: %c. TypeString: %s, Index: %llu", FirstChar, TypeString.c_str(), Index);
+                    }
                 }
             }
             else if (TypeString[Index] == ';')
             {
                 Result.push_back(TypeString.substr(Begin, (Index - Begin) + 1));
-                ObjectScanInProgress = false;
+
+                bObjectScanInProgress = false;
+                bArrayScanInProgress = false;
+
+                Begin = Index + 1;
             }
         }
 
@@ -156,26 +181,19 @@ namespace Debug
 
         std::string ArgumentsString = SignatureString.substr(FirstParenIndex + 1, SecondParenIndex - FirstParenIndex - 1);
 
-        if (!ArgumentsString.empty())
-        {
-            std::vector<std::string> VectorOfArguments = SplitMethodArguments(ArgumentsString);
+        std::vector<std::string> VectorOfArguments = SplitMethodArguments(ArgumentsString);
 
-            std::ostringstream Oss;
-            for (std::vector<std::string>::size_type i = 0; i < VectorOfArguments.size(); ++i)
+        std::ostringstream Oss;
+        for (std::vector<std::string>::size_type i = 0; i < VectorOfArguments.size(); ++i)
+        {
+            Oss << DecodeType(VectorOfArguments[i]);
+
+            if (i < (VectorOfArguments.size() - 1))
             {
-                Oss << DecodeType(VectorOfArguments[i]);
-
-                if (i < (VectorOfArguments.size() - 1))
-                {
-                    Oss << ", ";
-                }
+                Oss << ", ";
             }
+        }
 
-            return Oss.str();
-        }
-        else
-        {
-            return "";
-        }
+        return Oss.str();
     }
 }

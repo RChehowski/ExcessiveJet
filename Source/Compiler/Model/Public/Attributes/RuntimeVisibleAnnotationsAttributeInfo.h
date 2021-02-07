@@ -31,54 +31,60 @@ namespace Parse
         Array           = (u1)'[',
     };
 
+    class CElementValue;
     class CElementValuePair;
+
+    void operator>> (CClassReader& ClassReader,
+                     Util::TStandardSerializedArray<std::shared_ptr<CElementValue>> ElementValues);
 
     class CAnnotation
     {
     public:
-        CAnnotation() : TypeIndex((u2)-1) {}
+        CAnnotation() = default;
         ~CAnnotation() = default;
 
         friend void operator>> (CClassReader& ClassReader, CAnnotation& Instance);
 
     private:
-        u2 TypeIndex;
-        Util::TStandardSerializedArray<std::shared_ptr<CElementValuePair>> ElementValuePairs;
+        u2 TypeIndex = (u2)0;
+        Util::TStandardSerializedArray<CElementValuePair> ElementValuePairs;
     };
-
 
     class CElementValuePair
     {
     public:
         CElementValuePair() = default;
-        virtual ~CElementValuePair() = default;
+        ~CElementValuePair() = default;
 
-        virtual void DeserializeFrom(CClassReader &Reader)
-        {
-            // Overriden in subclasses
-            Reader >> ElementNameIndex;
-        }
-
-        friend void operator>> (CClassReader& ClassReader, CElementValuePair& Instance)
-        {
-            Instance.DeserializeFrom(ClassReader);
-        }
-
-        static std::shared_ptr<CElementValuePair> NewElementValue(EElementValueTag ElementValueTag);
+        friend void operator>> (CClassReader& ClassReader, CElementValuePair& Instance);
 
     private:
         u2 ElementNameIndex = (u2)0;
+        std::shared_ptr<CElementValue> Value;
     };
 
 
-    class CConstValueIndexElementValuePair : public CElementValuePair
+    class CElementValue
     {
     public:
-        using CElementValuePair::CElementValuePair;
+        explicit CElementValue() = default;
+        virtual ~CElementValue() = default;
+
+        virtual void DeserializeFrom(CClassReader &Reader) = 0;
+
+        friend void operator>> (CClassReader& ClassReader, CElementValue& Instance)
+        {
+            Instance.DeserializeFrom(ClassReader);
+        }
+    };
+
+    class CConstValueIndexElementValue : public CElementValue
+    {
+    public:
+        using CElementValue::CElementValue;
 
         void DeserializeFrom(CClassReader &Reader) override
         {
-            CElementValuePair::DeserializeFrom(Reader);
             Reader >> ConstValueIndex;
         }
 
@@ -86,15 +92,13 @@ namespace Parse
         u2 ConstValueIndex  = (u2)0;
     };
 
-    class CEnumConstValueElementValuePair : public CElementValuePair
+    class CEnumConstValueElementValue : public CElementValue
     {
     public:
-        using CElementValuePair::CElementValuePair;
+        using CElementValue::CElementValue;
 
         void DeserializeFrom(CClassReader &Reader) override
         {
-            CElementValuePair::DeserializeFrom(Reader);
-
             Reader >> TypeNameIndex;
             Reader >> ConstNameIndex;
         }
@@ -104,15 +108,13 @@ namespace Parse
         u2 ConstNameIndex   = (u2)0;
     };
 
-    class CClassInfoIndexElementValuePair : public CElementValuePair
+    class CClassInfoIndexElementValue : public CElementValue
     {
     public:
-        using CElementValuePair::CElementValuePair;
+        using CElementValue::CElementValue;
 
         void DeserializeFrom(CClassReader &Reader) override
         {
-            CElementValuePair::DeserializeFrom(Reader);
-
             Reader >> ClassInfoIndex;
         }
 
@@ -120,14 +122,13 @@ namespace Parse
         u2 ClassInfoIndex   = (u2)0;
     };
 
-    class CAnnotationValueElementValuePair : public CElementValuePair
+    class CAnnotationValueElementValue : public CElementValue
     {
     public:
-        using CElementValuePair::CElementValuePair;
+        using CElementValue::CElementValue;
 
         void DeserializeFrom(CClassReader &Reader) override
         {
-            CElementValuePair::DeserializeFrom(Reader);
             Reader >> AnnotationValue;
         }
 
@@ -135,26 +136,26 @@ namespace Parse
         CAnnotation AnnotationValue = {};
     };
 
-    class CArrayValueElementValuePair : public CElementValuePair
+    class CArrayValueElementValue : public CElementValue
     {
     public:
-        using CElementValuePair::CElementValuePair;
+        using CElementValue::CElementValue;
 
         void DeserializeFrom(CClassReader &Reader) override
         {
-            CElementValuePair::DeserializeFrom(Reader);
-            // TODO: Implement it
-//            Reader >> ArrayValue;
+            Reader >> ArrayValue;
         }
 
     private:
-        TStandardSerializedArray<std::shared_ptr<CElementValuePair>> ArrayValue;
+        TStandardSerializedArray<std::shared_ptr<CElementValue>> ArrayValue;
     };
+
+
 
     class CRuntimeVisibleAnnotationsAttributeInfo : public CAttributeInfo
     {
     public:
-        ~CRuntimeVisibleAnnotationsAttributeInfo() override;
+        ~CRuntimeVisibleAnnotationsAttributeInfo() override = default;
 
         void DeserializeFrom(CClassReader &Reader) override;
 
