@@ -3,9 +3,11 @@ project(Excessive)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(Util/Public)
-include_directories(Compiler/Bytecode/Public)
-include_directories(Model/Public)
+include_directories(Source/Compiler/Util/Public)
+include_directories(Source/Compiler/Bytecode/Public)
+include_directories(Source/Compiler/Model/Public)
+
+include_directories(Source/Common)
 
 
 set(UnityBuildFiles

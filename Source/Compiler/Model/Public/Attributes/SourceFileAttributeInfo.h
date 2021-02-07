@@ -20,6 +20,14 @@ namespace Parse
 
         void DeserializeFrom(CClassReader &Reader) override;
 
+        IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(SourceFile);
+
+        [[nodiscard]]
+        FORCEINLINE u2 GetSourcefileIndex() const
+        {
+            return SourcefileIndex;
+        }
+
     private:
         u2 SourcefileIndex;
     };

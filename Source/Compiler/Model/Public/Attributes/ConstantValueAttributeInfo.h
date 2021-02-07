@@ -23,6 +23,8 @@ namespace Parse
 
         void DeserializeFrom(CClassReader& Reader) override;
 
+        IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(ConstantValue);
+
     private:
         u2 ConstantValueIndex = (u2)0;
     };

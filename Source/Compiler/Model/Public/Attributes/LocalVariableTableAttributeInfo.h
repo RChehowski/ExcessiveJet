@@ -73,6 +73,8 @@ namespace Parse
 
         void DeserializeFrom(CClassReader& Reader) override;
 
+        IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(LocalVariableTable);
+
     private:
         Util::TSerializedArray<u2, CLocalVariable> LocalVariableTable;
     };

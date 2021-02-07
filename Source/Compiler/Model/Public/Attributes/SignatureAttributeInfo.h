@@ -20,6 +20,14 @@ namespace Parse
 
         void DeserializeFrom(CClassReader &Reader) override;
 
+        IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(Signature);
+
+        [[nodiscard]]
+        FORCEINLINE u2 GetSignatureIndex() const
+        {
+            return SignatureIndex;
+        }
+
     private:
         u2 SignatureIndex = (u2)0;
     };

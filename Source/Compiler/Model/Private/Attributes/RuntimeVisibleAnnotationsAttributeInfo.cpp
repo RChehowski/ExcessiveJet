@@ -6,11 +6,9 @@
 
 namespace Parse
 {
-    void operator>> (CClassReader& ClassReader, CElementValue& Instance)
+    std::shared_ptr<CElementValuePair> CElementValuePair::NewElementValue(EElementValueTag ElementValueTag)
     {
-        ClassReader >> Instance.Tag;
-
-        switch ((EElementValueTag)Instance.Tag)
+        switch (ElementValueTag)
         {
             case EElementValueTag::Byte:
             case EElementValueTag::Char:
@@ -21,34 +19,27 @@ namespace Parse
             case EElementValueTag::Short:
             case EElementValueTag::Bool:
             case EElementValueTag::String:
-                ClassReader >> Instance.Value.ConstValueIndex;
-                break;
+                return std::make_shared<CConstValueIndexElementValuePair>();
             case EElementValueTag::EnumConstant:
-                ClassReader >> Instance.Value.EnumConstValue.TypeNameIndex;
-                ClassReader >> Instance.Value.EnumConstValue.ConstNameIndex;
-                break;
+                return std::make_shared<CEnumConstValueElementValuePair>();
             case EElementValueTag::Class:
-                ClassReader >> Instance.Value.ClassInfoIndex;
-                break;
+                return std::make_shared<CClassInfoIndexElementValuePair>();
             case EElementValueTag::AnnotationType:
-                ClassReader >> Instance.Value.AnnotationValue;
-                break;
+                return std::make_shared<CAnnotationValueElementValuePair>();
             case EElementValueTag::Array:
-                ClassReader >> Instance.Value.ArrayValue;
-                break;
+                return std::make_shared<CArrayValueElementValuePair>();
+
+            default:
+                ASSERT_MSG(false, "Unknown EElementValueTag: %d", (int)ElementValueTag);
+                return std::shared_ptr<CElementValuePair>(nullptr);
         }
     }
-
-    void operator>> (CClassReader& ClassReader, CElementValuePair& Instance)
-    {
-        ClassReader >> Instance.ElementNameIndex;
-        ClassReader >> Instance.Value;
-    }
-
 
     void operator>> (CClassReader& ClassReader, CAnnotation& Instance)
     {
         ClassReader >> Instance.TypeIndex;
+
+        // TODO: Define how to read and create ElementValuePairs
         ClassReader >> Instance.ElementValuePairs;
     }
 

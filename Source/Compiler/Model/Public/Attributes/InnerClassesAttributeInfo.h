@@ -34,6 +34,8 @@ namespace Parse
 
         void DeserializeFrom(CClassReader &Reader) override;
 
+        IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(InnerClasses);
+
     private:
         TStandardSerializedArray<CInnerClassEntry> Classes;
     };

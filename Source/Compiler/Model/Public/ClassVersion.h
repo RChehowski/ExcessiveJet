@@ -6,11 +6,14 @@
 
 #include "Types.h"
 
+#include <sstream>
+#include "Interfaces/ToStringable.h"
+
 namespace Parse
 {
     class CClassReader;
 
-    class CClassVersion
+    class CClassVersion : public IToStringable
     {
     public:
         constexpr CClassVersion(u2 InMajorVersion, u2 InMinorVersion)
@@ -52,6 +55,15 @@ namespace Parse
             }
 
             return false;
+        }
+
+        [[nodiscard]]
+        std::string ToString() const override
+        {
+            std::ostringstream Oss;
+            Oss << MajorVersion << "." << MinorVersion;
+
+            return Oss.str();
         }
 
     private:

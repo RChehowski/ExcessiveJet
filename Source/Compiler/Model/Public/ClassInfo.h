@@ -12,6 +12,8 @@
 #include "ClassVersion.h"
 #include "SerializedArray.h"
 
+#include <vector>
+
 namespace Parse
 {
     class CClassReader;
@@ -69,6 +71,18 @@ namespace Parse
         FORCEINLINE std::shared_ptr<const CConstantPool> GetConstantPool() const
         {
             return ConstantPool;
+        }
+
+        template <class T>
+        std::shared_ptr<T> GetAttributeOfType() const
+        {
+            return CAttributeInfo::GetAttributeOfType<T>(Attributes);
+        }
+
+        template <class T>
+        std::vector<std::shared_ptr<T>> GetAttributesOfType() const
+        {
+            return CAttributeInfo::GetAttributesOfType<T>(Attributes);
         }
 
         void Debug_PrintClass() const;

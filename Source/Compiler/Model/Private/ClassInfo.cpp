@@ -8,6 +8,9 @@
 #include <iostream>
 #include <sstream>
 
+#include "Attributes/SignatureAttributeInfo.h"
+#include "Attributes/SourceFileAttributeInfo.h"
+
 #include "ConstantPool/ConstantUtf8Info.h"
 #include "ConstantPool/ConstantClassInfo.h"
 #include "Debug/DebugMisc.h"
@@ -42,6 +45,43 @@ namespace Parse
     void CClassInfo::Debug_PrintClass() const
     {
         std::ostringstream Oss;
+
+        // Original file
+        {
+            std::shared_ptr<CSourceFileAttributeInfo> SourceFileAttributeInfo =
+                    GetAttributeOfType<CSourceFileAttributeInfo>();
+
+            if (SourceFileAttributeInfo != nullptr)
+            {
+                std::shared_ptr<CConstantUtf8Info> SourceFileInfo =
+                    ConstantPool->Get<CConstantUtf8Info>(SourceFileAttributeInfo->GetSourcefileIndex());
+                ASSERT(SourceFileInfo != nullptr);
+
+                Oss << "Original file: \"" << SourceFileInfo->GetStringUtf8() << "\"" << std::endl;
+            }
+        }
+
+        // Signature
+        {
+            std::shared_ptr<CSignatureAttributeInfo> SignatureAttributeInfo =
+                GetAttributeOfType<CSignatureAttributeInfo>();
+
+            if (SignatureAttributeInfo != nullptr)
+            {
+                std::shared_ptr<CConstantUtf8Info> SignatureInfo =
+                    ConstantPool->Get<CConstantUtf8Info>(SignatureAttributeInfo->GetSignatureIndex());
+                ASSERT(SignatureInfo != nullptr);
+
+                Oss << "Signature: \"" << SignatureInfo->GetStringUtf8() << "\"" << std::endl;
+            }
+        }
+
+        // Version
+        {
+            Oss << "Class Version: " << ClassVersion.ToString() << std::endl;
+        }
+
+
         if (AccessFlags & EClassAccessFlags::ACC_PUBLIC)      Oss << "public ";
         if (AccessFlags & EClassAccessFlags::ACC_FINAL)       Oss << "final ";
         if (AccessFlags & EClassAccessFlags::ACC_SUPER)       Oss << "<super> ";

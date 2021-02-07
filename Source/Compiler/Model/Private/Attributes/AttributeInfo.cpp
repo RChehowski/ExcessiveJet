@@ -17,6 +17,7 @@
 #include "Attributes/LineNumberTableAttributeInfo.h"
 #include "Attributes/LocalVariableTableAttributeInfo.h"
 #include "Attributes/LocalVariableTypeTableAttributeInfo.h"
+#include "Attributes/RuntimeVisibleAnnotationsAttributeInfo.h"
 
 
 using Util::CLiteralStringUtf8;
@@ -89,6 +90,7 @@ namespace Parse
             ADD_ATTRIBUTE_INFO_SPAWNER(LineNumberTable),
             ADD_ATTRIBUTE_INFO_SPAWNER(LocalVariableTable),
             ADD_ATTRIBUTE_INFO_SPAWNER(LocalVariableTypeTable),
+//            ADD_ATTRIBUTE_INFO_SPAWNER(RuntimeVisibleAnnotations),
             // TODO: Support all of them!
         };
 

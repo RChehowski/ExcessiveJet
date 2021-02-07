@@ -9,7 +9,7 @@ using Parse::CClassReader;
 
 int main()
 {
-    CClassReader MemoryReader(L"C:\\Users\\ASUS\\Desktop\\rt\\java\\lang\\Object.class");
+    CClassReader MemoryReader(L"C:\\Users\\ASUS\\Desktop\\rt\\java\\lang\\Class.class");
 
     CClassInfo ClassInfo;
     MemoryReader >> ClassInfo;

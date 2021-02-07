@@ -22,6 +22,8 @@ namespace Parse
 
         void DeserializeFrom(CClassReader &Reader) override;
 
+        IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(Exceptions);
+
     private:
         TStandardSerializedArray<u2> ExceptionIndexTable;
     };

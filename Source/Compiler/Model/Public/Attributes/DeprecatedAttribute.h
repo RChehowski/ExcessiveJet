@@ -18,5 +18,7 @@ namespace Parse
         void DeserializeFrom(CClassReader &Reader) override
         {
         }
+
+        IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(Deprecated);
     };
 }

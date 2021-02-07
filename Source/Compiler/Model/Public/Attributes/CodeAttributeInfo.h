@@ -58,6 +58,8 @@ namespace Parse
     public:
         void DeserializeFrom(CClassReader &Reader) override;
 
+        IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(Code);
+
         [[nodiscard]]
         FORCEINLINE u2 GetMaxStack() const
         {
