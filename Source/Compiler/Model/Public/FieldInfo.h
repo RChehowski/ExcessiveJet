@@ -12,7 +12,7 @@
     #include <string>
 #endif // UNLOCK_DEBUG_METHODS
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
 

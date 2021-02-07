@@ -14,7 +14,7 @@
 
 #include <vector>
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
 

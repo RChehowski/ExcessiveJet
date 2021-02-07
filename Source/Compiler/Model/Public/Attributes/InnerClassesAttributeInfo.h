@@ -8,7 +8,7 @@
 
 using Util::TStandardSerializedArray;
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
 

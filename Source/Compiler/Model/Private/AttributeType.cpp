@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-namespace Parse
+namespace Compiler
 {
     constexpr const CAttributeType* G_AttributeNamesArray[] = {
         &CAttributeTypes::ConstantValue,

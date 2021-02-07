@@ -4,7 +4,7 @@
 
 #include "Attributes/SignatureAttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     void CSignatureAttributeInfo::DeserializeFrom(CClassReader &Reader)
     {

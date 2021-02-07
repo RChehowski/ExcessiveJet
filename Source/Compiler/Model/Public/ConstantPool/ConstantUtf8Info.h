@@ -3,7 +3,7 @@
 #include "ConstantPool/ConstantInfo.h"
 #include "StringUtf8.h"
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
     

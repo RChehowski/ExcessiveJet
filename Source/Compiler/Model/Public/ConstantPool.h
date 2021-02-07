@@ -12,7 +12,7 @@
 #include <functional>
 
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
     class CConstantInfo;

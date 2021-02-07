@@ -4,7 +4,7 @@
 
 #include "Attributes/RuntimeVisibleAnnotationsAttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     FORCEINLINE std::shared_ptr<CElementValue> NewElementValue(EElementValueTag ElementValueTag)
     {

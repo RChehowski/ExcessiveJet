@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-namespace Parse
+namespace Compiler
 {
     std::string CConstantMethodRefInfo::ToString() const
     {

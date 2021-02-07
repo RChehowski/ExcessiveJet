@@ -9,7 +9,7 @@
 #include <sstream>
 #include "Interfaces/ToStringable.h"
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
 

@@ -33,7 +33,7 @@
     }                                                                   \
 }
 
-namespace Parse
+namespace Compiler
 {
     using CConstantInfoSpawnFunction = std::function<std::shared_ptr<CConstantInfo>(EConstantPoolInfoTag)>;
     using CTagToConstantInfoSpawnFunction = std::unordered_map<EConstantPoolInfoTag, CConstantInfoSpawnFunction>;

@@ -15,7 +15,7 @@
 #include "ConstantPool/ConstantClassInfo.h"
 #include "Debug/DebugMisc.h"
 
-namespace Parse
+namespace Compiler
 {
     void CClassInfo::Deserialize(CClassReader& Reader, EClassInfoDeserializingMode ClassInfoDeserializingMode)
     {

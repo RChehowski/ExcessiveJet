@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
 }
@@ -39,10 +39,10 @@ namespace Util
 
 //        template<typename TNumItemsFunc, typename TItemFunc>
 //        friend void
-//        operator>>(Parse::CClassReader &Reader, TSerializedArray<TNumItemsFunc, TItemFunc> &SerializedArray);
+//        operator>>(Compiler::CClassReader &Reader, TSerializedArray<TNumItemsFunc, TItemFunc> &SerializedArray);
 
         friend void operator>>(
-                Parse::CClassReader &Reader,
+                Compiler::CClassReader &Reader,
                 TStandardSerializedArray<std::shared_ptr<class CAttributeInfo>> &Instance
         );
 
@@ -116,7 +116,7 @@ namespace Util
 
 
     template<typename TNumItems$, typename TItem$>
-    Parse::CClassReader& operator>>(Parse::CClassReader &Reader, TSerializedArray<TNumItems$, TItem$> &SerializedArray)
+    Compiler::CClassReader& operator>>(Compiler::CClassReader &Reader, TSerializedArray<TNumItems$, TItem$> &SerializedArray)
     {
         static_assert(std::is_arithmetic_v<TNumItems$>, "TNumItems$ must be arithmetic");
 
@@ -138,11 +138,11 @@ namespace Util
     }
 }
 
-namespace Parse
+namespace Compiler
 {
 //    template <typename TNumItems$, typename TItem$>
 //    CClassReader& operator>> (
-//        //Parse::CClassReader& Reader, Util::TSerializedArray<TNumItems$, std::shared_ptr<TItem$>>& SerializedArray
+//        //Compiler::CClassReader& Reader, Util::TSerializedArray<TNumItems$, std::shared_ptr<TItem$>>& SerializedArray
 //        CClassReader &,class Util::TSerializedArray<unsigned short,class std::shared_ptr<TItem$> > &
 //    )
 //    {

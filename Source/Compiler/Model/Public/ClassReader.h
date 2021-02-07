@@ -11,7 +11,7 @@
 
 using Util::CByteOrders;
 
-namespace Parse
+namespace Compiler
 {
     class CConstantPool;
 

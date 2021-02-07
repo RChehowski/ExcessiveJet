@@ -11,7 +11,7 @@
 #include "SerializedArray.h"
 
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
 

@@ -34,7 +34,7 @@ using Util::CLiteralStringUtf8;
     }                                                               \
 }
 
-namespace Parse
+namespace Compiler
 {
 #pragma region CAttributeInfoHeader
     Util::CMemoryReader& operator>> (Util::CMemoryReader& Reader, CAttributeInfoHeader& Instance)

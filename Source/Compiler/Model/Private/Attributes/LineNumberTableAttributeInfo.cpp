@@ -4,7 +4,7 @@
 
 #include "Compiler/Model/Public/Attributes/LineNumberTableAttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     void operator>> (CClassReader& Reader, CLineNumberTableAttributeInfoEntry& Instance)
     {

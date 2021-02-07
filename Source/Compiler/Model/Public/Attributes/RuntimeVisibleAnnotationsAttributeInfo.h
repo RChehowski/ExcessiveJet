@@ -9,7 +9,7 @@
 
 using Util::TStandardSerializedArray;
 
-namespace Parse
+namespace Compiler
 {
     enum class EElementValueTag : u1
     {

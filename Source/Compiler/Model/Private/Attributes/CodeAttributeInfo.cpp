@@ -4,7 +4,7 @@
 
 #include "Attributes/CodeAttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     CClassReader& operator>>(CClassReader& Reader, CExceptionTableEntry& Instance)
     {

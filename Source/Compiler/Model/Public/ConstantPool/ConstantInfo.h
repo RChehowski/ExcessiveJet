@@ -10,7 +10,7 @@
 
 #include <string>
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
 

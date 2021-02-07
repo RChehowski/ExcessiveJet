@@ -10,7 +10,7 @@
 
 class ConstantPool;
 
-namespace Parse
+namespace Compiler
 {
     class CAttributeType
     {

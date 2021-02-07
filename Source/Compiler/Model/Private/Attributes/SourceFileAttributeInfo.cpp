@@ -4,7 +4,7 @@
 
 #include "Attributes/SourceFileAttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     void CSourceFileAttributeInfo::DeserializeFrom(CClassReader &Reader)
     {

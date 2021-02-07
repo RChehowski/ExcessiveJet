@@ -4,7 +4,7 @@
 
 #include "Attributes/InnerClassesAttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     CClassReader& operator>> (CClassReader& Reader, CInnerClassEntry& Instance)
     {

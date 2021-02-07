@@ -6,7 +6,7 @@
 
 #include "Attributes/AttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     class CDeprecatedAttributeInfo : public CAttributeInfo
     {

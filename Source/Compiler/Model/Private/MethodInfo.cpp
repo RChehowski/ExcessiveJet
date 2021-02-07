@@ -6,7 +6,7 @@
 
 #include "ClassInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     void operator>>(CClassReader& Reader, CMethodInfo& Instance)
     {

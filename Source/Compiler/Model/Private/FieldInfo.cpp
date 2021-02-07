@@ -12,7 +12,7 @@
     #include <sstream>
 #endif // UNLOCK_DEBUG_METHODS
 
-namespace Parse
+namespace Compiler
 {
     void CFieldInfo::DeserializeFrom(CClassReader& Reader)
     {

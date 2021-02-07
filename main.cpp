@@ -3,8 +3,8 @@
 #include "ClassInfo.h"
 
 using Util::CByteOrders;
-using Parse::CClassInfo;
-using Parse::CClassReader;
+using Compiler::CClassInfo;
+using Compiler::CClassReader;
 
 
 #include <string>

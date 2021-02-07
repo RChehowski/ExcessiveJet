@@ -6,7 +6,7 @@
 
 #include "ClassReader.h"
 
-namespace Parse
+namespace Compiler
 {
     void CConstantValueAttributeInfo::DeserializeFrom(CClassReader& Reader)
     {

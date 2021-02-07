@@ -7,7 +7,7 @@
 #include "Types.h"
 #include "SerializedArray.h"
 
-namespace Parse
+namespace Compiler
 {
     class CClassInfo;
     class CClassReader;

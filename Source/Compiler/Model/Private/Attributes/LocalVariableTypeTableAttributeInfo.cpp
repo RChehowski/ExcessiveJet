@@ -4,7 +4,7 @@
 
 #include "Attributes/LocalVariableTypeTableAttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     void operator>> (CClassReader& Reader, CLocalVariableTypeTableEntry& Instance)
     {

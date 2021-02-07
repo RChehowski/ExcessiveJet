@@ -2,7 +2,7 @@
 
 #include "ConstantPool/ConstantInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     class CClassReader;
     

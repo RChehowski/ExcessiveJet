@@ -6,7 +6,7 @@
 
 #include "ClassReader.h"
 
-namespace Parse
+namespace Compiler
 {
     void CSyntheticAttributeInfo::DeserializeFrom(CClassReader& Reader)
     {

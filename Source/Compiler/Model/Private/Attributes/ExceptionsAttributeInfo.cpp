@@ -4,7 +4,7 @@
 
 #include "Attributes/ExceptionsAttributeInfo.h"
 
-namespace Parse
+namespace Compiler
 {
     void CExceptionsAttributeInfo::DeserializeFrom(CClassReader &Reader)
     {

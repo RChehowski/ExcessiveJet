@@ -11,7 +11,7 @@
 #include "ConstantPool/ConstantDoubleInfo.h"
 
 
-namespace Parse
+namespace Compiler
 {
 #pragma region CPhantomConstantInfo
     /**

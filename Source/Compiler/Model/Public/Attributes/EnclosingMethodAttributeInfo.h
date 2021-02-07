@@ -10,7 +10,7 @@
 
 class CClassReader;
 
-namespace Parse
+namespace Compiler
 {
     class CEnclosingMethodAttributeInfo final : public CAttributeInfo
     {
