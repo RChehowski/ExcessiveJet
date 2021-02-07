@@ -10,11 +10,13 @@
 #include "Attributes/CodeAttributeInfo.h"
 #include "Attributes/DeprecatedAttribute.h"
 #include "Attributes/SignatureAttributeInfo.h"
+#include "Attributes/SyntheticAttributeInfo.h"
 #include "Attributes/ExceptionsAttributeInfo.h"
 #include "Attributes/SourceFileAttributeInfo.h"
 #include "Attributes/InnerClassesAttributeInfo.h"
 #include "Attributes/ConstantValueAttributeInfo.h"
 #include "Attributes/LineNumberTableAttributeInfo.h"
+#include "Attributes/EnclosingMethodAttributeInfo.h"
 #include "Attributes/LocalVariableTableAttributeInfo.h"
 #include "Attributes/LocalVariableTypeTableAttributeInfo.h"
 #include "Attributes/RuntimeVisibleAnnotationsAttributeInfo.h"
@@ -81,6 +83,7 @@ namespace Parse
     {
         static const CAttributeInfoSpawners G_AttributeInfoSpawners {
             ADD_ATTRIBUTE_INFO_SPAWNER(Code),
+            ADD_ATTRIBUTE_INFO_SPAWNER(Synthetic),
             ADD_ATTRIBUTE_INFO_SPAWNER(Signature),
             ADD_ATTRIBUTE_INFO_SPAWNER(Exceptions),
             ADD_ATTRIBUTE_INFO_SPAWNER(Deprecated),
@@ -88,6 +91,7 @@ namespace Parse
             ADD_ATTRIBUTE_INFO_SPAWNER(InnerClasses),
             ADD_ATTRIBUTE_INFO_SPAWNER(ConstantValue),
             ADD_ATTRIBUTE_INFO_SPAWNER(LineNumberTable),
+            ADD_ATTRIBUTE_INFO_SPAWNER(EnclosingMethod),
             ADD_ATTRIBUTE_INFO_SPAWNER(LocalVariableTable),
             ADD_ATTRIBUTE_INFO_SPAWNER(LocalVariableTypeTable),
             ADD_ATTRIBUTE_INFO_SPAWNER(RuntimeVisibleAnnotations),

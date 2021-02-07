@@ -6,10 +6,10 @@
 
 namespace Util
 {
-    CAllocation FileUtils::ReadFile(const WideString& FileName)
+    CAllocation FileUtils::ReadFile(const std::string& FileName)
     {
         FILE* File = nullptr;
-        _wfopen_s(&File, FileName.c_str(), L"rb");
+        fopen_s(&File, FileName.c_str(), "rb");
 
         if (File != nullptr)
         {

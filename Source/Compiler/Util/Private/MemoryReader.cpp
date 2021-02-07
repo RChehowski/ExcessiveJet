@@ -17,7 +17,7 @@ namespace Util
                "NewPosition: %llu, SizeInMemory: %llu", (u8)NewPosition, (u8)GetSizeInMemory());
     }
 
-    CMemoryReader::CMemoryReader(const WideString& InFileName) : FileName(InFileName)
+    CMemoryReader::CMemoryReader(const std::string& InFileName) : FileName(InFileName)
     {
         Allocation = FileUtils::ReadFile(FileName);
     }

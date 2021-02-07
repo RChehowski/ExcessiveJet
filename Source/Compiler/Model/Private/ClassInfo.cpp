@@ -46,6 +46,8 @@ namespace Parse
     {
         std::ostringstream Oss;
 
+        Oss << "=========== CLASS ==========" << std::endl;
+
         // Original file
         {
             std::shared_ptr<CSourceFileAttributeInfo> SourceFileAttributeInfo =
@@ -157,6 +159,8 @@ namespace Parse
 
         Debug_PrintFields();
         Debug_PrintMethods();
+
+        std::cout.flush();
     }
 
     void CClassInfo::Debug_PrintFields() const

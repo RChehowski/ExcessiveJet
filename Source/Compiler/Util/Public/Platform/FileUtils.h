@@ -13,7 +13,7 @@ namespace Util
     class FileUtils
     {
     public:
-        static CAllocation ReadFile(const WideString& FileName);
+        static CAllocation ReadFile(const std::string& FileName);
     };
 }
 

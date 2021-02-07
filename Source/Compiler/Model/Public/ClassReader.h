@@ -20,7 +20,7 @@ namespace Parse
         using Super = Util::CMemoryReader;
 
     public:
-        FORCEINLINE explicit CClassReader(const Util::WideString& InFileName) : Super(InFileName)
+        FORCEINLINE explicit CClassReader(const std::string& InFileName) : Super(InFileName)
         {
             // Java classes are serialized using big endian byte order
             SetByteOrder(CByteOrders::GetBigEndian());

@@ -33,7 +33,7 @@ namespace Util
         void RangeCheck(usz AddOffset) const;
 
     public:
-        explicit CMemoryReader(const WideString& InFileName);
+        explicit CMemoryReader(const std::string& InFileName);
 
         ~CMemoryReader();
 
@@ -109,7 +109,7 @@ namespace Util
         friend void operator>> (Util::CMemoryReader& Reader, Util::CStringUtf8& StringUtf8);
 
     private:
-        std::wstring FileName;
+        std::string FileName;
 
         CAllocation Allocation;
 
