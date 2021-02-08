@@ -22,7 +22,13 @@ include_directories(Source)
 include_directories(Source/Compiler/Model/Public)
 include_directories(Source/Compiler/Util/Public)
 
+add_subdirectory(third-party/zlib)
+include_directories(third-party/zlib)
+
 add_executable(${CMAKE_PROJECT_NAME}
     main.cpp
     "${UnityBuildFiles}"
 )
+
+add_dependencies(${CMAKE_PROJECT_NAME} zlibstatic)
+target_link_libraries(${CMAKE_PROJECT_NAME} zlibstatic)
