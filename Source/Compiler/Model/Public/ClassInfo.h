@@ -85,6 +85,24 @@ namespace Compiler
             return CAttributeInfo::GetAttributesOfType<T>(Attributes);
         }
 
+        [[nodiscard]]
+        FORCEINLINE const Util::TStandardSerializedArray<u2>& GetInterfaces() const
+        {
+            return Interfaces;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE const Util::TStandardSerializedArray<Compiler::CFieldInfo>& GetFields() const
+        {
+            return Fields;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE const Util::TStandardSerializedArray<Compiler::CMethodInfo>& GetMethods() const
+        {
+            return Methods;
+        }
+
         void Debug_PrintClass() const;
         void Debug_PrintFields() const;
         void Debug_PrintMethods() const;

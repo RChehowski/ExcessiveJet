@@ -42,7 +42,7 @@ public class GenerateConstantPoolConstants
 
     private static class Const
     {
-        private static final String GenNamespace = "Parse";
+        private static final String GenNamespace = "Compiler";
 
         private static final String GenReaderClass = "ClassReader";
         private static final String GenBaseClass = "ConstantInfo";

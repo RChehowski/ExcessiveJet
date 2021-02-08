@@ -1,6 +1,7 @@
 
 #include "ClassReader.h"
 #include "ClassInfo.h"
+#include "MethodInfo.h"
 
 using Util::CByteOrders;
 using Compiler::CClassInfo;
@@ -30,9 +31,11 @@ void TraverseDirectory(const std::string& Root, std::function<void(const std::st
 int main()
 {
     std::string ClassFileExtension = ".class";
-    usz NumParsedClasses = 0;
 
-    TraverseDirectory("C:\\Users\\ASUS\\Desktop\\rt", [&](const std::string FileName)
+    usz NumParsedClasses = 0;
+    usz NumNativeMethods = 0;
+
+    TraverseDirectory("C:\\Users\\ASUS\\Desktop\\rt\\java\\awt", [&](const std::string FileName)
     {
         if (FileName.find(ClassFileExtension, FileName.size() - ClassFileExtension.size()) != std::string::npos)
         {
@@ -43,11 +46,18 @@ int main()
             CClassInfo ClassInfo;
             MemoryReader >> ClassInfo;
 
-            ++NumParsedClasses;
+            for (const auto& Item : ClassInfo.GetMethods())
+            {
+                if (Item.GetAccessFlags() & Compiler::EMethodAccessFlags::ACC_NATIVE)
+                {
+                    ++NumNativeMethods;
+                }
+            }
 
-//            ClassInfo.Debug_PrintClass();
+            ++NumParsedClasses;
         }
     });
 
     std::cout << ">> Number of parsed classes: " << NumParsedClasses << std::endl;
+    std::cout << ">> Number of native methods: " << NumNativeMethods << std::endl;
 }

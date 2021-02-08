@@ -55,9 +55,8 @@ namespace Compiler
         for (int Index = 0; Index < NumItems; ++Index)
         {
             std::shared_ptr<CElementValue> ElementValue = ReadElementValue(ClassReader);
-            ElementValues.Items.push_back(std::move(ElementValue));
 
-            puts("");
+            ElementValues.Items.push_back(std::move(ElementValue));
         }
     }
 
