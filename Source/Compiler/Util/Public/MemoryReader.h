@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Types.h"
-#include "Assert.h"
+#include "ExcessiveAssert.h"
 #include "ByteOrder.h"
 #include "MathUtils.h"
 #include "Allocation.h"

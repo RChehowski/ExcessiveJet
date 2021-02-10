@@ -7,7 +7,7 @@
 
 #include "Attributes/AttributeInfo.h"
 
-#include "Assert.h"
+#include "ExcessiveAssert.h"
 #include "SerializedArray.h"
 
 

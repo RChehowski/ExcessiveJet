@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Types.h"
-#include "Assert.h"
+#include "ExcessiveAssert.h"
 #include "StringUtf8.h"
 
 class ConstantPool;

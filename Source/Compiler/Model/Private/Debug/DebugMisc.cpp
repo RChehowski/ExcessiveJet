@@ -8,7 +8,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include "Assert.h"
+#include "ExcessiveAssert.h"
 
 namespace Debug
 {

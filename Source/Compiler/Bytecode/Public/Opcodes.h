@@ -6,7 +6,7 @@
 #define CPP20_OPCODES_H
 
 #include "Types.h"
-#include "Assert.h"
+#include "ExcessiveAssert.h"
 
 
 #define PRESERVE_OPCODE_METADATA 1
