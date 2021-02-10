@@ -22,6 +22,7 @@ set(UnityBuildFiles
 include_directories(Source)
 include_directories(Source/Compiler/Model/Public)
 include_directories(Source/Compiler/Util/Public)
+include_directories(Source/Filesystem/Zip/Public)
 
 add_executable(${CMAKE_PROJECT_NAME}
     main.cpp
