@@ -8,13 +8,12 @@ namespace Util
 {
     CAllocation FileUtils::ReadFile(const std::string& FileName)
     {
-        FILE* File = nullptr;
-        fopen_s(&File, FileName.c_str(), "rb");
+        FILE* File = fopen(FileName.c_str(), "rb");
 
         if (File != nullptr)
         {
             fseek(File, 0, SEEK_END);
-            const usz FileSize = (usz)_ftelli64(File);
+            const usz FileSize = (usz)ftell(File);
             fseek(File, 0, SEEK_SET);
 
             CAllocation Allocation(FileSize);

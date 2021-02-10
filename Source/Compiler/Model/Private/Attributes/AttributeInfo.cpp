@@ -2,6 +2,8 @@
 // Created by ASUS on 04/01/2021.
 //
 
+#include <unordered_map>
+
 #include "StringUtf8.h"
 #include "ClassReader.h"
 #include "ConstantPool.h"

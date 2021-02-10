@@ -3,18 +3,9 @@
 //
 
 #include "Assert.h"
-
-#define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
+#include "debugbreak/debugbreak.h"
 
 void DebugBreakOrExit()
 {
-    if (IsDebuggerPresent() != FALSE)
-    {
-        DebugBreak();
-    }
-    else
-    {
-        exit(1);
-    }
+    debug_break();
 }

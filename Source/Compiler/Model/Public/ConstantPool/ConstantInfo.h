@@ -81,7 +81,7 @@ namespace Compiler
         static const char* ConstantPoolInfoTagToString(EConstantPoolInfoTag ConstantPoolInfoTag);
 
         template <typename T>
-        static std::shared_ptr<T> CastConstantInfo(std::shared_ptr<CConstantInfo>& ConstantInfo)
+        static std::shared_ptr<T> CastConstantInfo(const std::shared_ptr<CConstantInfo>& ConstantInfo)
         {
             static_assert(std::is_base_of_v<CConstantInfo, T>, "T must be a subclass of CConstantInfo");
 
