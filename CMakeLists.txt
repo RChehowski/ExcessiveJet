@@ -9,6 +9,7 @@ include_directories(Source/Compiler/Model/Public)
 
 include_directories(Source/Common)
 
+include_directories(third-party)
 
 set(UnityBuildFiles
     Source/Compiler/Util/Private/_UnityBuild_Util.cpp
