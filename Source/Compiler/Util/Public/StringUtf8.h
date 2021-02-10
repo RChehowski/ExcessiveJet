@@ -62,7 +62,7 @@ namespace Util
             }
 
             [[nodiscard]]
-            constexpr bool EqualsBytes(const char* Other) const
+            bool EqualsBytes(const char* Other) const
             {
                 return EqualsBytes(IStringUtf8((u1*)Other, (usz)std::char_traits<char>::length(Other)));
             }
@@ -103,7 +103,7 @@ namespace Util
     class CLiteralStringUtf8 final : public IStringUtf8
     {
     public:
-        constexpr CLiteralStringUtf8(const char* String)
+        CLiteralStringUtf8(const char* String)
             : IStringUtf8((const u1*)String, std::char_traits<char>::length(String))
         {
         }
