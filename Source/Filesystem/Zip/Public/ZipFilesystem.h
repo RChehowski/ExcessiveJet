@@ -50,6 +50,8 @@ namespace Filesystem
 
         FORCEINLINE const Util::CAllocation& GetAllocation() const
         {
+            using Byte = unsigned char;
+
             if (!OptionalAllocation.has_value())
             {
                 Util::CAllocation* Allocation = new Util::CAllocation(ZipFileHandle->FileSize);
@@ -57,8 +59,9 @@ namespace Filesystem
                 miniz_cpp::zip_file ZipFile = miniz_cpp::zip_file(ZipFileHandle->ArchivePath);
                 std::ostream& Stream = ZipFile.open(ZipFileHandle->FileName);
 
-                unsigned char* Data = Allocation->Get<unsigned char>();
-                auto StreamBuffer = Stream.rdbuf();
+                Byte* Data = Allocation->Get<Byte>();
+
+                std::streambuf* StreamBuffer = Stream.rdbuf();
                 for (int i = 0; i < Allocation->GetSize(); i++)
                 {
                     Data[i] = StreamBuffer->sbumpc();
