@@ -50,16 +50,14 @@ namespace Filesystem
 
         FORCEINLINE const Util::CAllocation& GetAllocation() const
         {
-            using Byte = unsigned char;
-
             if (!OptionalAllocation.has_value())
             {
                 Util::CAllocation* Allocation = new Util::CAllocation(ZipFileHandle->FileSize);
 
-                miniz_cpp::zip_file ZipFile = miniz_cpp::zip_file(ZipFileHandle->ArchivePath);
+                miniz_cpp::zip_file ZipFile = miniz_cpp::zip_file(ZipFileHandle->ArchivePath.string());
                 std::ostream& Stream = ZipFile.open(ZipFileHandle->FileName);
 
-                Byte* Data = Allocation->Get<Byte>();
+                u1* Data = Allocation->Get<u1>();
 
                 std::streambuf* StreamBuffer = Stream.rdbuf();
                 for (int i = 0; i < Allocation->GetSize(); i++)
