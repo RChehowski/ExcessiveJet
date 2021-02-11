@@ -34,6 +34,7 @@ namespace Util
 
     public:
         explicit CMemoryReader(const std::string& InFileName);
+        explicit CMemoryReader(Util::CAllocation&& InAllocation);
 
         ~CMemoryReader();
 

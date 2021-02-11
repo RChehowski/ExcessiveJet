@@ -26,6 +26,12 @@ namespace Compiler
             SetByteOrder(CByteOrders::GetBigEndian());
         }
 
+        FORCEINLINE explicit CClassReader(Util::CAllocation&& InAllocation) : Super(std::move(InAllocation))
+        {
+            // Java classes are serialized using big endian byte order
+            SetByteOrder(CByteOrders::GetBigEndian());
+        }
+
         [[nodiscard]]
         FORCEINLINE std::shared_ptr<CConstantPool> GetConstantPool() const
         {

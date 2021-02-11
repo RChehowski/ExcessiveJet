@@ -22,6 +22,10 @@ namespace Util
         Allocation = FileUtils::ReadFile(FileName);
     }
 
+    CMemoryReader::CMemoryReader(CAllocation&& InAllocation) : Allocation(std::move(InAllocation))
+    {
+    }
+
     CMemoryReader::~CMemoryReader()
     {
     }
