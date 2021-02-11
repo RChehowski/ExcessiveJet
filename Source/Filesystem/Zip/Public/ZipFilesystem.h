@@ -61,7 +61,7 @@ namespace Filesystem
                 auto StreamBuffer = Stream.rdbuf();
                 for (int i = 0; i < Allocation->GetSize(); i++)
                 {
-                    Data[i] = StreamBuffer->sgetc();
+                    Data[i] = StreamBuffer->sbumpc();
                 }
 
                 ZipFile.reset();
