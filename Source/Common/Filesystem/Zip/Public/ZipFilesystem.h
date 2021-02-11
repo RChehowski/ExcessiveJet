@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <functional>
 #include <optional>
@@ -26,8 +27,17 @@ namespace Filesystem
         const std::string FileName;
         const std::size_t FileSize;
 
+        miniz_cpp::zip_file& GetZipFile()
+        {
+            ASSERT(ZipFilePtr);
+            return *ZipFilePtr;
+        }
+
     private:
-        CZipFileHandle(const std::string& InArchivePath, const std::string& InFileName, std::size_t InFileSize) : ArchivePath(InArchivePath), FileName(InFileName), FileSize(InFileSize)
+        std::shared_ptr<miniz_cpp::zip_file> ZipFilePtr;
+
+    private:
+        CZipFileHandle(const std::string& InArchivePath, const std::string& InFileName, std::size_t InFileSize, std::shared_ptr<miniz_cpp::zip_file>  InZipFilePtr) : ArchivePath(InArchivePath), FileName(InFileName), FileSize(InFileSize), ZipFilePtr(std::move(InZipFilePtr))
         {
         }
     };
@@ -54,7 +64,7 @@ namespace Filesystem
             {
                 Util::CAllocation* Allocation = new Util::CAllocation(ZipFileHandle->FileSize);
 
-                miniz_cpp::zip_file ZipFile = miniz_cpp::zip_file(ZipFileHandle->ArchivePath.string());
+                miniz_cpp::zip_file& ZipFile = ZipFileHandle->GetZipFile();
                 std::ostream& Stream = ZipFile.open(ZipFileHandle->FileName);
 
                 u1* Data = Allocation->Get<u1>();
@@ -65,7 +75,6 @@ namespace Filesystem
                     Data[i] = StreamBuffer->sbumpc();
                 }
 
-                ZipFile.reset();
                 Stream.flush();
 
                 return *Allocation;
@@ -90,14 +99,12 @@ namespace Filesystem
     public:
         FORCEINLINE void Walk(const std::string& PathToArchive, std::function<void(const CZipFileEntry&)> Consumer)
         {
-            miniz_cpp::zip_file ZipFile = miniz_cpp::zip_file(PathToArchive);
-            for (const auto& ZipInfo : ZipFile.infolist())
+            std::shared_ptr<miniz_cpp::zip_file> ZipFile = std::make_shared<miniz_cpp::zip_file>(PathToArchive);
+            for (const auto& ZipInfo : ZipFile->infolist())
             {
-                CZipFileHandle* ZipFileHandle = new CZipFileHandle(PathToArchive, ZipInfo.filename, ZipInfo.file_size);
+                CZipFileHandle* ZipFileHandle = new CZipFileHandle(PathToArchive, ZipInfo.filename, ZipInfo.file_size, ZipFile);
                 Consumer(CZipFileEntry(ZipInfo.filename, ZipFileHandle));
             }
-
-            ZipFile.reset();
         }
     };
 }
