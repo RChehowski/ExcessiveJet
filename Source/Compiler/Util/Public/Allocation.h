@@ -19,9 +19,8 @@ namespace Util
         }
 
         FORCEINLINE CAllocation(const usz InSize, const usz InAlignment = CMemory::DefaultMallocAlignment)
-            : Data(CMemory::Malloc<u1>(InSize, InAlignment))
-            , Size(InSize)
         {
+            Allocate(InSize, InAlignment);
         }
 
         CAllocation(const CAllocation&) = delete;
@@ -35,7 +34,7 @@ namespace Util
 
         FORCEINLINE ~CAllocation()
         {
-            CMemory::Free(Data);
+            Deallocate();
         }
 
         CAllocation& operator= (const CAllocation&) = delete;
@@ -48,6 +47,23 @@ namespace Util
             InOther.Size = (usz)0;
 
             return *this;
+        }
+
+        FORCEINLINE void Allocate(const usz InSize, const usz InAlignment = CMemory::DefaultMallocAlignment)
+        {
+            Data = CMemory::Malloc<u1>(InSize, InAlignment);
+            Size = InSize;
+        }
+
+        FORCEINLINE void Deallocate()
+        {
+            if (IsPresent())
+            {
+                CMemory::Free(Data);
+                Data = nullptr;
+
+                Size = 0;
+            }
         }
 
         [[nodiscard]]
