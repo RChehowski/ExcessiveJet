@@ -24,7 +24,7 @@ void DebugBreakOrExit();
         {\
             fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
             fprintf(stderr, "Assertion failed: %s\n", LITERAL_TO_STRING(Condition));\
-            fprintf(stderr, Fmt, __VA_ARGS__);\
+            fprintf(stderr, Fmt, ##__VA_ARGS__);\
             fflush(stderr);\
             DebugBreakOrExit();\
         }
