@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <limits>
@@ -515,7 +516,7 @@ typedef unsigned short mz_uint16;
 typedef unsigned int mz_uint32;
 typedef unsigned int mz_uint;
 typedef long long mz_int64;
-typedef unsigned long long mz_uint64;
+typedef std::uint64_t mz_uint64;
 typedef int mz_bool;
 
 #define MZ_FALSE (0)
@@ -562,7 +563,7 @@ typedef struct
 } mz_zip_archive_file_stat;
 
 typedef size_t (*mz_file_read_func)(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_t n);
-typedef size_t (*mz_file_write_func)(void *pOpaque, mz_uint64 file_ofs, const void *pBuf, size_t n);
+typedef std::size_t (*mz_file_write_func)(void *pOpaque, mz_uint64 file_ofs, const void *pBuf, std::size_t n);
 
 struct mz_zip_internal_state_tag;
 typedef struct mz_zip_internal_state_tag mz_zip_internal_state;
