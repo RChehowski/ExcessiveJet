@@ -14,9 +14,11 @@
 
 namespace Util
 {
+
     class CZipFileEntry
     {
-    public:
+        friend bool Walk(const std::string&, const std::function<void(const CZipFileEntry&)>&);
+
         CZipFileEntry(
             std::string InName,
             usz InSize,
@@ -31,21 +33,39 @@ namespace Util
             , AllocationForDecompression(InAllocationForDecompression)
         {}
 
+        FORCEINLINE void AssertIsUsable() const
+        {
+            ASSERT_MSG(bUsable, "Should not be used outsize of Walk()'s lambda consumer");
+        }
+
+    public:
+        CZipFileEntry() = delete;
+
+        CZipFileEntry(const CZipFileEntry&) = delete;
+        CZipFileEntry(CZipFileEntry&&) = delete;
+
+        CZipFileEntry& operator=(const CZipFileEntry&) = delete;
+        CZipFileEntry&& operator=(CZipFileEntry&&) = delete;
+
         [[nodiscard]]
         FORCEINLINE const std::string& GetName() const
         {
+            AssertIsUsable();
             return Name;
         }
 
         [[nodiscard]]
         FORCEINLINE usz GetSize() const
         {
+            AssertIsUsable();
             return Size;
         }
 
         [[nodiscard]]
         Util::CAllocation GetData() const
         {
+            AssertIsUsable();
+
             Util::CAllocation Allocation(Size);
 
             if (!AllocationForDecompression.IsPresent())
@@ -74,8 +94,10 @@ namespace Util
         mz_zip_archive& ZipArchive;
         mz_uint ZipFileIndex;
 
-        // Should be valid until CZipFileEntry is inside Walk's scope
+        // Should be safe until CZipFileEntry is within Walk's scope
         Util::CAllocation& AllocationForDecompression;
+
+        bool bUsable = true;
     };
 
     /**
@@ -96,7 +118,7 @@ namespace Util
 
         mz_zip_archive_file_stat ZipArchiveFileStat;
 
-        Util::CAllocation AllocationForDecompression;
+        Util::CAllocation AllocationForDecompression; // don't allocate anything now
 
         for (mz_uint ZipFileIndex = 0; ZipFileIndex < ZipReaderNumFiles; ZipFileIndex++)
         {
@@ -118,6 +140,8 @@ namespace Util
                     );
 
                     Consumer(ZipFileEntry);
+
+                    ZipFileEntry.bUsable = false;
                 }
             }
         }
