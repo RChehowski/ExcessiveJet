@@ -27,17 +27,20 @@ namespace Filesystem
         const std::string FileName;
         const std::size_t FileSize;
 
-        miniz_cpp::zip_file& GetZipFile()
+        FORCEINLINE miniz_cpp::zip_file& GetZipFile()
         {
-            ASSERT(ZipFilePtr);
-            return *ZipFilePtr;
+            return ZipFilePtr;
         }
 
     private:
-        std::shared_ptr<miniz_cpp::zip_file> ZipFilePtr;
+        miniz_cpp::zip_file& ZipFilePtr;
 
     private:
-        CZipFileHandle(const std::string& InArchivePath, const std::string& InFileName, std::size_t InFileSize, std::shared_ptr<miniz_cpp::zip_file>  InZipFilePtr) : ArchivePath(InArchivePath), FileName(InFileName), FileSize(InFileSize), ZipFilePtr(std::move(InZipFilePtr))
+        CZipFileHandle(const std::string& InArchivePath, const std::string& InFileName, std::size_t InFileSize, miniz_cpp::zip_file& InZipFilePtr)
+            : ArchivePath(InArchivePath)
+            , FileName(InFileName)
+            , FileSize(InFileSize)
+            , ZipFilePtr(InZipFilePtr)
         {
         }
     };
@@ -97,12 +100,12 @@ namespace Filesystem
     class CZipFileSystem
     {
     public:
-        FORCEINLINE void Walk(const std::string& PathToArchive, std::function<void(const CZipFileEntry&)> Consumer)
+        FORCEINLINE static void Walk(const std::string& PathToArchive, std::function<void(const CZipFileEntry&)> Consumer)
         {
-            std::shared_ptr<miniz_cpp::zip_file> ZipFile = std::make_shared<miniz_cpp::zip_file>(PathToArchive);
-            for (const auto& ZipInfo : ZipFile->infolist())
+            miniz_cpp::zip_file ZipFile(PathToArchive);
+            for (const auto& ZipInfo : ZipFile.infolist())
             {
-                CZipFileHandle* ZipFileHandle = new CZipFileHandle(PathToArchive, ZipInfo.filename, ZipInfo.file_size, ZipFile);
+                CZipFileHandle* const ZipFileHandle = new CZipFileHandle(PathToArchive, ZipInfo.filename, ZipInfo.file_size, ZipFile);
                 Consumer(CZipFileEntry(ZipInfo.filename, ZipFileHandle));
             }
         }

@@ -3,7 +3,7 @@
 //
 
 #include "MemoryReader.h"
-#include "Platform/FileUtils.h"
+#include "FileUtils.h"
 #include "StringUtf8.h"
 
 
@@ -19,7 +19,7 @@ namespace Util
 
     CMemoryReader::CMemoryReader(const std::string& InFileName) : FileName(InFileName)
     {
-        Allocation = FileUtils::ReadFile(FileName);
+        Allocation = CFileUtils::ReadFile(FileName);
     }
 
     CMemoryReader::CMemoryReader(CAllocation&& InAllocation) : Allocation(std::move(InAllocation))

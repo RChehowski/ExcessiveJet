@@ -10,10 +10,10 @@
 
 namespace Util
 {
-    class FileUtils
+    class CFileUtils
     {
     public:
-        static CAllocation ReadFile(const std::string& FileName);
+        static CAllocation ReadFile(const std::string& FileName, usz* OutFileSizePtr = nullptr);
     };
 }
 

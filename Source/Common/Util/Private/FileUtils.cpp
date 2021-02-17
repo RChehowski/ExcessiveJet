@@ -2,11 +2,11 @@
 // Created by ASUS on 29/12/2020.
 //
 
-#include "Platform/FileUtils.h"
+#include "FileUtils.h"
 
 namespace Util
 {
-    CAllocation FileUtils::ReadFile(const std::string& FileName)
+    CAllocation CFileUtils::ReadFile(const std::string& FileName, usz* OutFileSizePtr)
     {
         FILE* File = fopen(FileName.c_str(), "rb");
 
@@ -15,6 +15,11 @@ namespace Util
             fseek(File, 0, SEEK_END);
             const usz FileSize = (usz)ftell(File);
             fseek(File, 0, SEEK_SET);
+
+            if (OutFileSizePtr != nullptr)
+            {
+                *OutFileSizePtr = FileSize;
+            }
 
             CAllocation Allocation(FileSize);
 

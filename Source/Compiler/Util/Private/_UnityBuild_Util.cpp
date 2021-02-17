@@ -7,6 +7,5 @@
 #include "Compiler/Util/Private/ExcessiveAssert.cpp"
 
 // Platform
-#include "Compiler/Util/Private/Platform/FileUtils.cpp"
 #include "Compiler/Util/Private/Platform/Memory.cpp"
 #include "Compiler/Util/Private/Platform/Misc.cpp"

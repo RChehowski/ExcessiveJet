@@ -86,6 +86,18 @@ namespace Compiler
             return Attributes;
         }
 
+        template <class T>
+        std::shared_ptr<T> GetAttribute() const
+        {
+            return CAttributeInfo::GetAttributeOfType<T>(Attributes);
+        }
+
+        template <class T>
+        std::vector<std::shared_ptr<T>> GetAttributes() const
+        {
+            return CAttributeInfo::GetAttributesOfType<T>(Attributes);
+        }
+
         [[nodiscard]]
         std::string Debug_ToString(const CClassInfo& ClassInfo) const;
 

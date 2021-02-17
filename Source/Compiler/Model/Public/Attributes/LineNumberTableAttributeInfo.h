@@ -14,6 +14,7 @@ namespace Compiler
     {
         friend void operator>> (CClassReader& Reader, CLineNumberTableAttributeInfoEntry& Instance);
 
+    public:
         [[nodiscard]]
         FORCEINLINE u2 GetStartPc() const
         {
@@ -44,7 +45,7 @@ namespace Compiler
         IMPLEMENT_GET_ATTRIBUTE_INFO_TYPE(LineNumberTable);
 
         [[nodiscard]]
-        FORCEINLINE const TStandardSerializedArray<CLineNumberTableAttributeInfoEntry>& GetLineNumber() const
+        FORCEINLINE const TStandardSerializedArray<CLineNumberTableAttributeInfoEntry>& GetLineNumberTable() const
         {
             return LineNumberTable;
         }

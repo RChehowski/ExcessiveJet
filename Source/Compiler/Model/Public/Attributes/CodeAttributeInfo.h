@@ -90,6 +90,18 @@ namespace Compiler
             return Attributes;
         }
 
+        template <class T>
+        std::shared_ptr<T> GetAttribute() const
+        {
+            return CAttributeInfo::GetAttributeOfType<T>(Attributes);
+        }
+
+        template <class T>
+        std::vector<std::shared_ptr<T>> GetAttributes() const
+        {
+            return CAttributeInfo::GetAttributesOfType<T>(Attributes);
+        }
+
     private:
         u2 MaxStack    = (u2)0;
         u2 MaxLocals   = (u2)0;

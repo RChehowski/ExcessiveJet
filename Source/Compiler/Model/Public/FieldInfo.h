@@ -77,6 +77,18 @@ namespace Compiler
             return DescriptorIndex;
         }
 
+        template <class T>
+        std::shared_ptr<T> GetAttributeOfType() const
+        {
+            return CAttributeInfo::GetAttributeOfType<T>(Attributes);
+        }
+
+        template <class T>
+        std::vector<std::shared_ptr<T>> GetAttributesOfType() const
+        {
+            return CAttributeInfo::GetAttributesOfType<T>(Attributes);
+        }
+
         void DeserializeFrom(CClassReader& Reader);
 
         friend void operator>>(CClassReader& Reader, CFieldInfo& Instance);

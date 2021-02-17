@@ -7,6 +7,7 @@ include_directories(Source/Compiler/Util/Public)
 include_directories(Source/Compiler/Bytecode/Public)
 include_directories(Source/Compiler/Model/Public)
 include_directories(Source/Common/Filesystem/Zip/Public)
+include_directories(Source/Common/Util/Public)
 
 include_directories(Source/Common)
 
@@ -18,6 +19,8 @@ set(UnityBuildFiles
     Source/Compiler/Model/Private/Debug/_UnityBuild_Model_Debug.cpp
     Source/Compiler/Model/Private/Attributes/_UnityBuild_Model_Attributes.cpp
     Source/Compiler/Model/Private/ConstantPool/_UnityBuild_Model_ConstantPool.cpp
+
+    Source/Common/Util/Private/_UnityBuild_Common_Util.cpp
 )
 
 include_directories(Source)

@@ -11,7 +11,7 @@ void DebugBreakOrExit();
 
 #if WITH_ASSERT
     #define ASSERT(Condition)\
-        if (!(Condition))\
+        while (!(Condition))\
         {\
             fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
             fprintf(stderr, "Assertion failed: %s", LITERAL_TO_STRING(Condition));\
@@ -20,7 +20,7 @@ void DebugBreakOrExit();
         }
 
     #define ASSERT_MSG(Condition, Fmt, ...)\
-        if (!(Condition))\
+        while (!(Condition))\
         {\
             fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
             fprintf(stderr, "Assertion failed: %s\n", LITERAL_TO_STRING(Condition));\
@@ -30,7 +30,10 @@ void DebugBreakOrExit();
         }
 #else
     #define ASSERT(Condition)
+    #define ASSERT_MSG(Condition, Fmt, ...)
 #endif // WITH_ASSERT
+
+#define ASSERT_NOT_NULLPTR(Item) ASSERT_MSG(((Item) != nullptr), "%s must not be nullptr", LITERAL_TO_STRING(Item))
 
 #define CONSTEXPR_ASSERT(Condition, Str) []<bool _flag = Condition>() { static_assert(_flag, Str); }()
 
