@@ -30,6 +30,8 @@ namespace Compiler
 {
     typedef std::shared_ptr<CConstantInfo> (*CConstantInfoSpawnFunction)();
 
+    typedef std::array<CConstantInfoSpawnFunction, (usz)EConstantPoolInfoTag::Num> CConstantInfoSpawnFunctionTable;
+
     namespace Private
     {
         FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantUtf8Info()
@@ -101,39 +103,44 @@ namespace Compiler
         {
             return std::make_shared<CConstantInvokeDynamicInfo>();
         }
-    }
 
-    std::array<CConstantInfoSpawnFunction, (usz)EConstantPoolInfoTag::Num> GetConstantInfoSpawnFunctions()
-    {
-        std::array<CConstantInfoSpawnFunction, (usz)EConstantPoolInfoTag::Num> ConstantInfoSpawnFunctions {};
 
-        // Note that there will be "holes" in this array (by default assigned to nullptr) because these tags are not consecutive
-        // but the losses are minor and array a lot faster than map.
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Utf8] = Private::New_ConstantUtf8Info;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Integer] = Private::New_ConstantIntegerInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Float] = Private::New_ConstantFloatInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Long] = Private::New_ConstantLongInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Double] = Private::New_ConstantDoubleInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Class] = Private::New_ConstantClassInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::String] = Private::New_ConstantStringInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::FieldRef] = Private::New_ConstantFieldRefInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::MethodRef] = Private::New_ConstantMethodRefInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::InterfaceMethodRef] = Private::New_ConstantInterfaceMethodRefInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::NameAndType] = Private::New_ConstantNameAndTypeInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::MethodHandle] = Private::New_ConstantMethodHandleInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::MethodType] = Private::New_ConstantMethodTypeInfo;
-        ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::InvokeDynamic] = Private::New_ConstantInvokeDynamicInfo;
+        FORCEINLINE CConstantInfoSpawnFunctionTable GetConstantInfoSpawnFunctions()
+        {
+            CConstantInfoSpawnFunctionTable ConstantInfoSpawnFunctions {};
 
-        return ConstantInfoSpawnFunctions;
+            // Note that there will be "holes" in this array (by default assigned to nullptr) because these tags are not consecutive
+            // but the losses are minor and array a lot faster than map.
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Utf8] = New_ConstantUtf8Info;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Integer] = New_ConstantIntegerInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Float] = New_ConstantFloatInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Long] = New_ConstantLongInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Double] = New_ConstantDoubleInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::Class] = New_ConstantClassInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::String] = New_ConstantStringInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::FieldRef] = New_ConstantFieldRefInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::MethodRef] = New_ConstantMethodRefInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::InterfaceMethodRef] = New_ConstantInterfaceMethodRefInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::NameAndType] = New_ConstantNameAndTypeInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::MethodHandle] = New_ConstantMethodHandleInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::MethodType] = New_ConstantMethodTypeInfo;
+            ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::InvokeDynamic] = New_ConstantInvokeDynamicInfo;
+
+            return ConstantInfoSpawnFunctions;
+        }
     }
 
     std::shared_ptr<CConstantInfo> CConstantInfo::NewConstantInfo(const EConstantPoolInfoTag ConstantPoolInfoTag)
     {
-        static const std::array<CConstantInfoSpawnFunction, (usz)EConstantPoolInfoTag::Num> ConstantInfoSpawnFunctions = GetConstantInfoSpawnFunctions();
+        static const CConstantInfoSpawnFunctionTable ConstantInfoSpawnFunctions = Private::GetConstantInfoSpawnFunctions();
 
-        const CConstantInfoSpawnFunction ConstantInfoSpawnFunction = ConstantInfoSpawnFunctions[(usz)ConstantPoolInfoTag];
+        const usz ConstantPoolInfoTagAsSize = (usz)ConstantPoolInfoTag;
+        ASSERT((ConstantPoolInfoTagAsSize >= (usz)0) && (ConstantPoolInfoTagAsSize < (usz)ConstantInfoSpawnFunctions.size()));
+
+        const CConstantInfoSpawnFunction ConstantInfoSpawnFunction = ConstantInfoSpawnFunctions[ConstantPoolInfoTagAsSize];
         ASSERT(ConstantInfoSpawnFunction != nullptr);
 
+        // Invoke the spawner function that will create an instance for us.
         return ConstantInfoSpawnFunction();
     }
 
