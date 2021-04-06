@@ -9,7 +9,7 @@ namespace Compiler
     class CConstantLongInfo : public CConstantInfo
     {
     public:
-        using CConstantInfo::CConstantInfo;
+        CConstantLongInfo() : CConstantInfo(CConstantLongInfo::StaticTag) {}
 
         [[nodiscard]]
         std::string ToString() const override;

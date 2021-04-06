@@ -9,7 +9,7 @@ namespace Compiler
     class CConstantInterfaceMethodRefInfo : public CConstantInfo
     {
     public:
-        using CConstantInfo::CConstantInfo;
+        CConstantInterfaceMethodRefInfo() : CConstantInfo(CConstantInterfaceMethodRefInfo::StaticTag) {}
 
         [[nodiscard]]
         std::string ToString() const override;

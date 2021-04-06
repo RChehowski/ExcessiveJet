@@ -10,7 +10,7 @@ namespace Compiler
     class CConstantUtf8Info : public CConstantInfo
     {
     public:
-        using CConstantInfo::CConstantInfo;
+        CConstantUtf8Info() : CConstantInfo(CConstantUtf8Info::StaticTag) {}
 
         [[nodiscard]]
         std::string ToString() const override;

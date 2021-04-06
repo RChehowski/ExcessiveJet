@@ -9,7 +9,7 @@ namespace Compiler
     class CConstantInvokeDynamicInfo : public CConstantInfo
     {
     public:
-        using CConstantInfo::CConstantInfo;
+        CConstantInvokeDynamicInfo() : CConstantInfo(CConstantInvokeDynamicInfo::StaticTag) {}
 
         [[nodiscard]]
         std::string ToString() const override;

@@ -45,12 +45,19 @@ namespace Compiler
 
     class CConstantInfo
     {
-    public:
+    protected:
+        /**
+         * Constructor is protected: only callable from subclasses, no CConstantInfo instances for you.
+         *
+         * @param InConstantPoolInfoTag Tag to identify CConstantInfo instances.
+         */
         FORCEINLINE explicit CConstantInfo(const EConstantPoolInfoTag InConstantPoolInfoTag)
             : ConstantPoolInfoTag(InConstantPoolInfoTag)
         {
         }
 
+    public:
+        CConstantInfo() = delete;
         virtual ~CConstantInfo() = default;
 
         [[nodiscard]]
