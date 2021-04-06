@@ -1,0 +1,1 @@
+This directory is directly copied to the end application

@@ -17,6 +17,7 @@ namespace Compiler
     enum class EConstantPoolInfoTag : u1
     {
         Utf8 = 1,
+        // Note that there is no index '2'
         Integer = 3,
         Float = 4,
         Long = 5,
@@ -27,9 +28,16 @@ namespace Compiler
         MethodRef = 10,
         InterfaceMethodRef = 11,
         NameAndType = 12,
+        // 13, 14 are also skipped
         MethodHandle = 15,
         MethodType = 16,
+        // ... and 17 also
         InvokeDynamic = 18,
+
+        /**
+         * Number of tags, do not add new tags (except for Invalid_NotATag) after it.
+         */
+        Num,
 
         Invalid_NotATag = 255
     };

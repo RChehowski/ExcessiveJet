@@ -20,13 +20,14 @@ namespace Compiler
 
     class CConstantPool
     {
-        using CBiConsumer = std::function<void(
-            usz,            // Index in ConstantInfos
-            CConstantInfo*  // CConstantInfo
-        )>;
+//        using CBiConsumer = std::function<void(
+//            usz,            // Index in ConstantInfos
+//            CConstantInfo*  // CConstantInfo
+//        )>;
 
     public:
-        const CAttributeType* GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool);
+        [[nodiscard]]
+        const CAttributeType* GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool) const;
 
         std::shared_ptr<CConstantInfo> operator[] (usz IndexInConstantPool) const;
 

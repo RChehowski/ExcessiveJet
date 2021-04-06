@@ -21,7 +21,9 @@ set(UnityBuildFiles
     Source/Compiler/Model/Private/ConstantPool/_UnityBuild_Model_ConstantPool.cpp
 
     Source/Common/Util/Private/_UnityBuild_Common_Util.cpp
-)
+
+    # Common
+    Source/Common/Service/Private/_UnityBuild_Service.cpp)
 
 include_directories(Source)
 include_directories(Source/Compiler/Model/Public)

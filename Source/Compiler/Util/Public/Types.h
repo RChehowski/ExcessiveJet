@@ -34,6 +34,9 @@ using s4 = int32_t;
 using u8 = uint64_t;
 using s8 = int64_t;
 
+using f4 = float;
+using f8 = double;
+
 // Macro for checking bitness (safer macros borrowed from
 // https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/)
 #define IS_BITNESS( X ) IS_BITNESS_PRIVATE_DEFINITION_##X()
@@ -92,6 +95,12 @@ namespace Util
 //    // Declared as an enum type.
 //    ACC_ENUM        = 0x4000
 //};
+
+/**
+ * Ordinary Object Pointer
+ * Forced 64 bits for now
+ */
+using oop = u8;
 
 #define STRIP_DEBUG_INFO 0
 

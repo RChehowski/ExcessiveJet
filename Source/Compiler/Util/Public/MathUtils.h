@@ -151,5 +151,28 @@ namespace Util
 
             return (T)((((u8)Val + Alignment - 1) / Alignment) * Alignment);
         }
+
+
+        FORCEINLINE static constexpr u8 Convert2U32ToU64(const u4 HighBytes, const u4 LowBytes)
+        {
+            return  (u8)(((u8)HighBytes << 32) & 0xFFFFFFFF00000000ULL) |
+                    (u8)(((u8)LowBytes) & 0x00000000FFFFFFFFULL);
+        }
+
+        FORCEINLINE static constexpr u2 Convert2U1To1U2(const u1 HighByte, const u1 LowByte)
+        {
+            const u2 HighHalf   = (u2)((u2)HighByte << (u2)8) & (u2)0xFF00;
+            const u2 LowHalf    = (u2)LowByte & (u2)0x00FF;
+
+            return HighByte | LowByte;
+        }
+
+        template<class T>
+        FORCEINLINE static constexpr usz ConvertToUsz(const T Value)
+        {
+            static_assert(std::is_integral_v<T>, "T must be integral");
+
+            return static_cast<T>(Value);
+        }
     };
 }

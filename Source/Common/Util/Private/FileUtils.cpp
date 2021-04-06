@@ -6,7 +6,7 @@
 
 namespace Util
 {
-    CAllocation CFileUtils::ReadFile(const std::string& FileName, usz* OutFileSizePtr)
+    CAllocation CFileUtils::ReadFile(const std::string& FileName, usz& OutFileSizePtr)
     {
         FILE* File = fopen(FileName.c_str(), "rb");
 
@@ -16,10 +16,7 @@ namespace Util
             const usz FileSize = (usz)ftell(File);
             fseek(File, 0, SEEK_SET);
 
-            if (OutFileSizePtr != nullptr)
-            {
-                *OutFileSizePtr = FileSize;
-            }
+            OutFileSizePtr = FileSize;
 
             CAllocation Allocation(FileSize);
 

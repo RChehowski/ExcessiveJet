@@ -512,12 +512,18 @@ namespace Bytecode
 
     constexpr usz NumOpcodes = sizeof(G_OpcodesArray) / sizeof(void*);
 
-    const COpcode& GetOpcodeForByte(u1 Byte)
+    const COpcode* GetOpcodeForByte(u1 Byte)
     {
         static_assert((NumOpcodes - 1) == (G_OpcodesArray[NumOpcodes - 1]->GetOperation()),
                       "Check opcode table: inconsistency between opcode numbers and indices");
 
-        return *G_OpcodesArray[(usz)Byte];
+        if ((usz)Byte < NumOpcodes)
+        {
+            return G_OpcodesArray[(usz) Byte];
+        }
+
+        // Unable to decode this opcode (maybe it's an argument for another opcode)
+        return nullptr;
     }
 }
 

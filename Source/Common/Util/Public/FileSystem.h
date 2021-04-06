@@ -19,6 +19,9 @@ namespace Util
         CFileEntry() = default;
 
     public:
+        virtual ~CFileEntry() = default;
+
+    public:
         [[nodiscard]]
         virtual const std::string &GetName() const = 0;
 

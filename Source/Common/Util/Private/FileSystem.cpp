@@ -48,7 +48,7 @@ namespace Util
         Util::CAllocation GetData() const override
         {
             usz LocalSize = 0;
-            Util::CAllocation Allocation = CFileUtils::ReadFile(Name, &LocalSize);
+            Util::CAllocation Allocation = CFileUtils::ReadFile(Name, LocalSize);
 
             if (!OptionalSize.has_value())
                 OptionalSize = LocalSize;

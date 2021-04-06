@@ -14,7 +14,7 @@ void DebugBreakOrExit();
         while (!(Condition))\
         {\
             fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
-            fprintf(stderr, "Assertion failed: %s", LITERAL_TO_STRING(Condition));\
+            fprintf(stderr, "Assertion failed: %s\n", LITERAL_TO_STRING(Condition));\
             fflush(stderr);\
             DebugBreakOrExit();\
         }
@@ -24,7 +24,8 @@ void DebugBreakOrExit();
         {\
             fprintf(stderr, "In %s:%d\n", __FILE__, __LINE__);\
             fprintf(stderr, "Assertion failed: %s\n", LITERAL_TO_STRING(Condition));\
-            fprintf(stderr, Fmt, ##__VA_ARGS__);\
+            fprintf(stderr, Fmt, ##__VA_ARGS__);              \
+            fprintf(stderr, "\n");\
             fflush(stderr);\
             DebugBreakOrExit();\
         }

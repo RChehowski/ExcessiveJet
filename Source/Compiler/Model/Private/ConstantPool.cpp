@@ -32,23 +32,29 @@ namespace Compiler
             return "CPhantomConstantInfo";
         }
 
-        virtual void DeserializeFrom(CClassReader& Reader) override
+        void DeserializeFrom(CClassReader& Reader) override
         {
         }
-    };
 
-    std::shared_ptr<CConstantInfo> G_PhantomConstantInfo = std::make_shared<CPhantomConstantInfo>();
+        static std::shared_ptr<CConstantInfo> GetPhantomConstantInfo()
+        {
+            static std::shared_ptr<CConstantInfo> PhantomConstantInfo = std::make_shared<CPhantomConstantInfo>();
+            return PhantomConstantInfo;
+        }
+    };
 #pragma endregion
 
 
-    const CAttributeType* CConstantPool::GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool)
+    const CAttributeType* CConstantPool::GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool) const
     {
         return CAttributeTypes::GetAttributeNameByName(Get<CConstantUtf8Info>((usz)IndexInConstantPool)->GetStringUtf8());
     }
 
     std::shared_ptr<CConstantInfo> CConstantPool::operator[] (const usz IndexInConstantPool) const
     {
-        ASSERT((IndexInConstantPool >= 1) && (IndexInConstantPool <= ConstantInfos.size()));
+        ASSERT_MSG((IndexInConstantPool >= 1) && (IndexInConstantPool <= ConstantInfos.size()),
+                   "Requested index: %llu", (unsigned long long)IndexInConstantPool
+        );
         return ConstantInfos[IndexInConstantPool - 1];
     }
 
@@ -70,14 +76,17 @@ namespace Compiler
 
             Instance.ConstantInfos.push_back(ConstantInfo);
 
-            if (ConstantInfo->IsA<CConstantDoubleInfo>() || ConstantInfo->IsA<CConstantLongInfo>())
+            /**
+             * @spec:
+             * Additionally, two types of constants (longs and doubles) take up two consecutive slots in the table,
+             * although the second such slot is a phantom index that is never directly used.
+             */
+            const bool bNeedsPhantomConstantInfo = ConstantInfo->IsA<CConstantDoubleInfo>() || ConstantInfo->IsA<CConstantLongInfo>();
+            if (bNeedsPhantomConstantInfo)
             {
-                // @spec:
-                //  Additionally, two types of constants (longs and doubles) take up two consecutive slots in the table,
-                //  although the second such slot is a phantom index that is never directly used.
                 ConstantPoolIndex++;
 
-                Instance.ConstantInfos.push_back(G_PhantomConstantInfo);
+                Instance.ConstantInfos.push_back(CPhantomConstantInfo::GetPhantomConstantInfo());
             }
         }
     }

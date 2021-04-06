@@ -30,6 +30,12 @@ namespace Util
 
         static void MemZero(void* Ptr, usz Size);
 
+        template<class T>
+        static void MemZero(T& Item)
+        {
+            MemZero((void*)&Item, sizeof(T));
+        }
+
 
         template<typename TDst, typename TSrc>
         static void Memcpy(TDst* const Dst, const TSrc* const Src, const usz NumBytes)
