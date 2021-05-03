@@ -69,7 +69,9 @@ namespace Compiler
         [[nodiscard]]
         virtual std::string ToString() const = 0;
 
+#ifndef EXCESSIVE_RUNTIME
         virtual void DeserializeFrom(CClassReader& Reader) = 0;
+#endif // #ifndef EXCESSIVE_RUNTIME
 
         [[nodiscard]]
         FORCEINLINE bool IsA(EConstantPoolInfoTag InConstantPoolInfoTag) const

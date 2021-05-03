@@ -103,6 +103,9 @@ namespace Compiler
             return Methods;
         }
 
+        [[nodiscard]]
+        const Util::IStringUtf8& GetNameString() const;
+
         void Debug_PrintClass() const;
         void Debug_PrintFields() const;
         void Debug_PrintMethods() const;

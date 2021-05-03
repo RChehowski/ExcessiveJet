@@ -20,7 +20,7 @@ namespace Compiler
     class CAttributeInfoType
     {
     public:
-        constexpr CAttributeInfoType(const char* InName, const CClassVersion InClassVersion)
+        constexpr CAttributeInfoType(const char* InName, const CClassVersion& InClassVersion)
             : Name(InName)
             , ClassVersion(InClassVersion)
         {

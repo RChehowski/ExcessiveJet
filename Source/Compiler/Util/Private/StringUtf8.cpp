@@ -22,7 +22,7 @@ namespace Util
         return Bytes;
     }
 
-    CStringUtf8::CStringUtf8() : IStringUtf8(nullptr, (usz)0)
+    CStringUtf8::CStringUtf8() : IStringUtf8(nullptr, (usz)0, false)
     {
     }
 
@@ -30,7 +30,7 @@ namespace Util
     {
     }
 
-    CStringUtf8::CStringUtf8(const u1* InBytes, usz InNumBytes) : IStringUtf8(CopyBytes(InBytes, InNumBytes), InNumBytes)
+    CStringUtf8::CStringUtf8(const u1* InBytes, usz InNumBytes) : IStringUtf8(CopyBytes(InBytes, InNumBytes), InNumBytes, true)
     {
     }
 
@@ -38,24 +38,10 @@ namespace Util
     {
     }
 
-    CStringUtf8::CStringUtf8(CStringUtf8&& Other) noexcept : IStringUtf8(Other.Bytes, Other.NumBytes)
+    CStringUtf8::CStringUtf8(CStringUtf8&& Other) noexcept : IStringUtf8(Other.Bytes, Other.NumBytes, true)
     {
         Other.Bytes = nullptr;
         Other.NumBytes = 0;
-    }
-
-    CStringUtf8::~CStringUtf8()
-    {
-        if (Bytes)
-        {
-            CMemory::Free(Bytes);
-        }
-    }
-
-    CStringUtf8::operator std::string() const
-    {
-        std::string AsString((char*)Bytes, NumBytes);
-        return std::move(AsString);
     }
 
     CStringUtf8& CStringUtf8::operator=(CStringUtf8&& Other) noexcept

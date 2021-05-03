@@ -79,6 +79,6 @@ namespace Compiler
 
         static constexpr usz GetNumAttributeNames();
 
-        static const CAttributeType* GetAttributeNameByName(const Util::CStringUtf8& String);
+        static const CAttributeType* GetAttributeNameByName(const Util::IStringUtf8& String);
     };
 }

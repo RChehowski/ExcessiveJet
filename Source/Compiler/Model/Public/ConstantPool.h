@@ -6,7 +6,9 @@
 
 #include "Types.h"
 #include "ExcessiveAssert.h"
-#include "ConstantPool/ConstantInfo.h"
+
+// Include all constant info subclasses to avoid including them explicitly
+#include "ConstantPool/ConstantInfos.h"
 
 #include <vector>
 #include <functional>
@@ -20,11 +22,6 @@ namespace Compiler
 
     class CConstantPool
     {
-//        using CBiConsumer = std::function<void(
-//            usz,            // Index in ConstantInfos
-//            CConstantInfo*  // CConstantInfo
-//        )>;
-
     public:
         [[nodiscard]]
         const CAttributeType* GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool) const;
@@ -35,6 +32,45 @@ namespace Compiler
         FORCEINLINE std::shared_ptr<T> Get(usz IndexInConstantPool) const
         {
             return CConstantInfo::CastConstantInfo<T>((*this)[IndexInConstantPool]);
+        }
+
+        template<
+            typename TConstantInfo,
+            std::enable_if_t<std::is_base_of<CConstantInfo, TConstantInfo>::value, bool> = true
+        >
+        FORCEINLINE void ForEachOfType(const std::function<void(const TConstantInfo&)>& Consumer) const
+        {
+            for (const std::shared_ptr<CConstantInfo>& ConstantInfo : ConstantInfos)
+            {
+                if (ConstantInfo->IsA<TConstantInfo>())
+                {
+                    const std::shared_ptr<TConstantInfo> CastConstantInfo =
+                            CConstantInfo::CastConstantInfo<TConstantInfo>(ConstantInfo);
+
+                    Consumer(*CastConstantInfo);
+                }
+            }
+        }
+
+        template<
+            typename TConstantInfo,
+            std::enable_if_t<std::is_base_of<CConstantInfo, TConstantInfo>::value, bool> = true
+        >
+        FORCEINLINE std::vector<std::shared_ptr<TConstantInfo>> GetEachOfType() const
+        {
+            std::vector<std::shared_ptr<TConstantInfo>> Result;
+            for (const std::shared_ptr<CConstantInfo>& ConstantInfo : ConstantInfos)
+            {
+                if (ConstantInfo->IsA<TConstantInfo>())
+                {
+                    std::shared_ptr<TConstantInfo> CastConstantInfo =
+                        CConstantInfo::CastConstantInfo<TConstantInfo>(ConstantInfo);
+
+                    Result.push_back(std::move(CastConstantInfo));
+                }
+            }
+
+            return Result;
         }
 
         friend void operator>>(CClassReader& Reader, CConstantPool& Instance);

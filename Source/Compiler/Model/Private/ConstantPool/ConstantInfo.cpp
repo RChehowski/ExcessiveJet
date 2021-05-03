@@ -2,29 +2,11 @@
 // Created by ASUS on 02/01/2021.
 //
 
-#include "ConstantPool/ConstantInfo.h"
-
-#include "ConstantPool/ConstantUtf8Info.h"
-#include "ConstantPool/ConstantLongInfo.h"
-#include "ConstantPool/ConstantFloatInfo.h"
-#include "ConstantPool/ConstantClassInfo.h"
-#include "ConstantPool/ConstantStringInfo.h"
-#include "ConstantPool/ConstantDoubleInfo.h"
-#include "ConstantPool/ConstantIntegerInfo.h"
-#include "ConstantPool/ConstantFieldRefInfo.h"
-#include "ConstantPool/ConstantMethodRefInfo.h"
-#include "ConstantPool/ConstantMethodTypeInfo.h"
-#include "ConstantPool/ConstantNameAndTypeInfo.h"
-#include "ConstantPool/ConstantMethodHandleInfo.h"
-#include "ConstantPool/ConstantInvokeDynamicInfo.h"
-#include "ConstantPool/ConstantInterfaceMethodRefInfo.h"
+#include "ConstantPool/ConstantInfos.h"
 
 #include "ClassReader.h"
 
-#include <functional>
-#include <unordered_map>
 #include <array>
-
 
 namespace Compiler
 {
@@ -137,7 +119,7 @@ namespace Compiler
         const usz ConstantPoolInfoTagAsSize = (usz)ConstantPoolInfoTag;
         ASSERT((ConstantPoolInfoTagAsSize >= (usz)0) && (ConstantPoolInfoTagAsSize < (usz)ConstantInfoSpawnFunctions.size()));
 
-        const CConstantInfoSpawnFunction ConstantInfoSpawnFunction = ConstantInfoSpawnFunctions[ConstantPoolInfoTagAsSize];
+        const CConstantInfoSpawnFunction& ConstantInfoSpawnFunction = ConstantInfoSpawnFunctions[ConstantPoolInfoTagAsSize];
         ASSERT(ConstantInfoSpawnFunction != nullptr);
 
         // Invoke the spawner function that will create an instance for us.

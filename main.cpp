@@ -1,4 +1,6 @@
 
+#include <array>
+
 #include "ClassReader.h"
 #include "ClassInfo.h"
 #include "MethodInfo.h"
@@ -8,10 +10,6 @@
 #include "Attributes/CodeAttributeInfo.h"
 #include "Attributes/LineNumberTableAttributeInfo.h"
 
-#include "ConstantPool/ConstantClassInfo.h"
-#include "ConstantPool/ConstantMethodRefInfo.h"
-#include "ConstantPool/ConstantNameAndTypeInfo.h"
-#include "ConstantPool/ConstantUtf8Info.h"
 
 using Util::CByteOrders;
 using Compiler::CClassInfo;
@@ -21,10 +19,7 @@ using Compiler::CCodeAttributeInfo;
 using Compiler::CLineNumberTableAttributeInfo;
 using Compiler::CLineNumberTableAttributeInfoEntry;
 
-using Compiler::CConstantClassInfo;
-using Compiler::CConstantMethodRefInfo;
-using Compiler::CConstantNameAndTypeInfo;
-using Compiler::CConstantUtf8Info;
+USING_ALL_CONSTANT_INFOS;
 
 using Util::CMathUtils;
 
@@ -564,57 +559,199 @@ void FillBytecodeExecFuncsTable()
 #pragma endregion
 }
 
+#include <Windows.h>
+
+
+enum class EClassLoadStatus
+{
+    NotLoaded,
+    Loading,
+    Loaded,
+    Unloading
+};
+
+class CClass
+{
+public:
+    void Load()
+    {
+        std::cout << "Loading class..." << std::endl;
+    }
+
+    void Unload()
+    {
+        std::cout << "Unloading class..." << std::endl;
+    }
+};
+
+extern "C" __declspec(dllexport) CClass* _$New_Class()
+{
+    return new CClass();
+}
+
+#include "StringUtils.h"
+#include <fstream>
+#include <variant>
+
+#include <cstddef>
+
+#include "MathUtils.h"
+
+
+#define STRUCT_FIELD_OFFSETOF(Struct, Field) ((usz)&(((Struct*)(nullptr))->Field))
+#define STRUCT_METHOD_ADDROF(Struct, Method) (*reinterpret_cast<const void**>(&(&Struct::Method)))
+
+struct CFieldMeta
+{
+    const u2 ConstantPoolIndex;
+    const usz FieldOffset;
+};
+
+struct CMethodMeta
+{
+    const u2 ConstantPoolIndex;
+    const void* MethodAddress;
+};
+
+struct alignas(sizeof(void*)) CGeneratedSample
+{
+    char c;
+    short s;
+    int i;
+    long long ll;
+
+    void f1() {}
+    void f2() {}
+    void f3() {}
+
+    // Meta
+    const static CFieldMeta FieldMetas[];
+    const static CMethodMeta MethodMetas[];
+
+    static FORCEINLINE void GetFieldMetas(const CFieldMeta** FieldMetasPtr, usz* NumFieldsPtr);
+    static FORCEINLINE void GetMethodMetas(const CMethodMeta** MethodMetasPtr, usz* NumMethodsPtr);
+};
+
+const CFieldMeta CGeneratedSample::FieldMetas[] = {
+    {0, STRUCT_FIELD_OFFSETOF(CGeneratedSample, c)},
+    {1, STRUCT_FIELD_OFFSETOF(CGeneratedSample, s)},
+    {2, STRUCT_FIELD_OFFSETOF(CGeneratedSample, i)},
+    {3, STRUCT_FIELD_OFFSETOF(CGeneratedSample, ll)}
+};
+const CMethodMeta CGeneratedSample::MethodMetas[] = {
+    {0, STRUCT_METHOD_ADDROF(CGeneratedSample, f1) },
+    {1, STRUCT_METHOD_ADDROF(CGeneratedSample, f2) },
+    {2, STRUCT_METHOD_ADDROF(CGeneratedSample, f3) }
+};
+
+void CGeneratedSample::GetFieldMetas(const CFieldMeta** FieldMetasPtr, usz* NumFieldsPtr)
+{
+    if (FieldMetasPtr)
+        *FieldMetasPtr = FieldMetas;
+
+    if (NumFieldsPtr)
+        *NumFieldsPtr = sizeof(FieldMetas) / sizeof(*FieldMetas);
+}
+void CGeneratedSample::GetMethodMetas(const CMethodMeta** MethodMetasPtr, usz* NumMethodsPtr)
+{
+    if (MethodMetasPtr)
+        *MethodMetasPtr = MethodMetas;
+
+    if (NumMethodsPtr)
+        *NumMethodsPtr = sizeof(MethodMetas) / sizeof(*MethodMetas);
+}
+
+struct JMarkWord
+{
+    s4 HashCode;
+
+    oop Klass;
+
+    u1 Reserved[4];
+};
+
+static_assert(Util::CMathUtils::IsAligned(sizeof(JMarkWord), sizeof(oop)));
+
+
+void test()
+{
+    puts("Hello");
+}
+
+#include "Bits.h"
+#include <algorithm>
+#include <random>
+
+#include "Compiler/Printer/CppPrinter.h"
+
+#include "ww898/utf_converters.hpp"
+
+FORCEINLINE void ConvertUtf8ToUtf16LEBytes(const Util::IStringUtf8& StringUtf8, std::vector<u1>& StringUtf16Bytes)
+{
+    using namespace ww898::utf;
+    static thread_local std::u16string U16String;
+    {
+        U16String.clear();
+        U16String.reserve(StringUtf8.GetNumBytes());
+    }
+
+    convz<utf_selector_t<u1>, utf16>(StringUtf8.GetBytes(), std::back_inserter(U16String));
+
+    StringUtf16Bytes.reserve(StringUtf16Bytes.size() + (U16String.length() * sizeof(char16_t)));
+    for (const char16_t& U16Char : U16String)
+    {
+        u1 Byte0 = (u1)0;
+        u1 Byte1 = (u1)0;
+
+        Util::ExplodeBytes(Util::CByteOrders::GetLittleEndian(), U16Char, &Byte0, &Byte1);
+
+        StringUtf16Bytes.push_back(Byte0);
+        StringUtf16Bytes.push_back(Byte1);
+    }
+}
 
 int main()
 {
-    CConstantUtf8Info::NewConstantInfo(Compiler::EConstantPoolInfoTag::Utf8);
+//    $StringMeta stringMeta;
 
-    FillBytecodeExecFuncsTable();
-
-    Service::CThreadStack ThreadStack(512 * 1024);
-    Service::CLocalVariables LocalVariables;
-//    ThreadStack.Push8(2);
-//    ThreadStack.Push8(-42);
-
-    Compiler::CConstantPool Pool;
-
-    ExecuteBytecode(COpcodes::LDC, ThreadStack, LocalVariables, Pool, { 42 });
-
-
-
-    CExcessiveInvocationInfo ExcessiveInvocationInfo(__FUNCTION__, __LINE__);
-    InvokeExcessiveMethod(Sum, &ThreadStack, ExcessiveInvocationInfo);
-
-//
-//    return 1;
-//    Util::CFileSystem::Walk(R"(C:\Users\ASUS\Desktop\rt.jar)", [](const Util::CFileEntry& FileEntry)
-//    {
-//        std::function<bool(const std::string&)> IsClass = [](const std::string& S) -> bool
-//        {
-//            static const std::string Suffix(".class");
-//            return S.find(Suffix, S.size() - Suffix.size()) != std::string::npos;
-//        };
-//
-//        if (IsClass(FileEntry.GetName()))
-//        {
-//            CClassReader ClassReader(FileEntry.GetData());
-//
-//            CClassInfo ClassInfo;
-//            ClassReader >> ClassInfo;
-//        }
-//    });
-
-
-#if 1
-
-
+    Compiler::CCppPrinter P;
     CClassReader ClassReader(R"(C:\Users\ASUS\Desktop\rt\java\lang\String.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;
 
+    std::shared_ptr<const Compiler::CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
+
+    CConstantUtf8Info ConstantInfo(Util::CLiteralStringUtf8("AAA"));
+
+    {
+        std::vector<std::shared_ptr<CConstantUtf8Info>> ConstantUtf8Infos = ConstantPool->GetEachOfType<CConstantUtf8Info>();
+
+
+        P.Append("const std::array<Util::CConstantUtf8Info, ").Append((usz)ConstantUtf8Infos.size()).Append("> ConstantUtf8Infos = ");
+        P.ScopeBegin();
+
+        std::vector<u1> Utf16LEBytes;
+        for (const std::shared_ptr<CConstantUtf8Info>& ConstantUtf8Info : ConstantUtf8Infos)
+        {
+            Utf16LEBytes.clear();
+            ConvertUtf8ToUtf16LEBytes(ConstantUtf8Info->GetStringUtf8(), Utf16LEBytes);
+
+            P
+                .Append("CConstantUtf8Info(Util::CLiteralStringUtf8(")
+                .AppendNTBS(Utf16LEBytes)
+                .Append(")),")
+                .NewLine();
+        }
+        P.ScopeEnd().SemicolonNewLine();
+    }
+
+    std::cout << P;
+
+#if 0
     for (const auto& Method : ClassInfo.GetMethods())
     {
+
         if (std::shared_ptr<CCodeAttributeInfo> CodeAttributeInfo =
                 Method.GetAttribute<CCodeAttributeInfo>())
         {
@@ -638,109 +775,109 @@ int main()
 
                 std::shared_ptr<const Compiler::CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
 
-                for (usz OpcodeIndex = 0; OpcodeIndex < Code.Size();)
-                {
-                    const u1 RawOpcode = Code[OpcodeIndex];
-                    if (const Bytecode::COpcode* Opcode = Bytecode::GetOpcodeForByte(Code[OpcodeIndex]))
-                    {
-                        switch (Opcode->GetOperation())
-                        {
-                            case COpcodes::ALOAD_0.GetOperation():
-                            {
-                                std::cout << COpcodes::ALOAD_0.GetLabel() << std::endl;
-                                break;
-                            }
-                            case COpcodes::INVOKESPECIAL.GetOperation():
-                            {
-                                std::cout << COpcodes::INVOKESPECIAL.GetLabel() << std::endl;
-
-                                const u1 IndexByte1 = Code[++OpcodeIndex];
-                                const u1 IndexByte2 = Code[++OpcodeIndex];
-
-                                const u2 MethodRefIndex =
-                                        Util::CombineBytes(Util::CByteOrders::GetBigEndian(), IndexByte1, IndexByte2);
-
-                                std::shared_ptr<CConstantMethodRefInfo> ConstantMethodRefInfo =
-                                        ConstantPool->Get<CConstantMethodRefInfo>((usz) MethodRefIndex);
-                                ASSERT_NOT_NULLPTR(ConstantMethodRefInfo);
-
-
-                                std::shared_ptr<CConstantClassInfo> ConstantClassInfo =
-                                        ConstantPool->Get<CConstantClassInfo>(
-                                                (usz) ConstantMethodRefInfo->GetClassIndex());
-                                ASSERT_NOT_NULLPTR(ConstantClassInfo);
-
-                                std::shared_ptr<CConstantNameAndTypeInfo> ConstantNameAndTypeInfo =
-                                        ConstantPool->Get<CConstantNameAndTypeInfo>(
-                                                (usz) ConstantMethodRefInfo->GetNameAndTypeIndex());
-                                ASSERT_NOT_NULLPTR(ConstantNameAndTypeInfo);
-
-
-                                // Class name
-                                std::shared_ptr<CConstantUtf8Info> ClassName =
-                                        ConstantPool->Get<CConstantUtf8Info>((usz) ConstantClassInfo->GetNameIndex());
-                                ASSERT_NOT_NULLPTR(ClassName);
-
-
-                                // Name and type
-                                std::shared_ptr<CConstantUtf8Info> MethodName =
-                                        ConstantPool->Get<CConstantUtf8Info>(
-                                                (usz) ConstantNameAndTypeInfo->GetNameIndex());
-                                ASSERT_NOT_NULLPTR(MethodName);
-
-                                std::shared_ptr<CConstantUtf8Info> MethodDescriptor =
-                                        ConstantPool->Get<CConstantUtf8Info>(
-                                                (usz) ConstantNameAndTypeInfo->GetDescriptorIndex());
-                                ASSERT_NOT_NULLPTR(MethodDescriptor);
-
-                                break;
-                            }
-                            case COpcodes::ICONST_0.GetOperation():
-                            {
-                                std::cout << COpcodes::ICONST_0.GetLabel() << std::endl;
-                                break;
-                            }
-                            case COpcodes::PUTFIELD.GetOperation():
-                            {
-                                std::cout << COpcodes::PUTFIELD.GetLabel() << std::endl;
-                                OpcodeIndex += 2;
-                                break;
-                            }
-                            case COpcodes::DSTORE_1.GetOperation():
-                            {
-                                std::cout << COpcodes::DSTORE_1.GetLabel() << std::endl;
-                                break;
-                            }
-                            case COpcodes::NEWARRAY.GetOperation():
-                            {
-                                std::cout << COpcodes::NEWARRAY.GetLabel() << std::endl;
-                                OpcodeIndex += 1; // atype
-                                break;
-                            }
-                            case COpcodes::ACONST_NULL.GetOperation():
-                            {
-                                std::cout << COpcodes::ACONST_NULL.GetLabel() << std::endl;
-                                break;
-                            }
-                            case COpcodes::ASTORE_0.GetOperation():
-                            {
-                                std::cout << COpcodes::ASTORE_0.GetLabel() << std::endl;
-                                break;
-                            }
-                            case COpcodes::RETURN.GetOperation():
-                            {
-                                std::cout << COpcodes::RETURN.GetLabel() << std::endl;
-                                break;
-                            }
-                            default:
-                            {
-                                std::cout << "<< SOMETHING ELSE >>" << std::endl;
-                                break;
-                            }
-                        }
-                    }
-                    OpcodeIndex++;
-                }
+//                for (usz OpcodeIndex = 0; OpcodeIndex < Code.Size();)
+//                {
+//                    const u1 RawOpcode = Code[OpcodeIndex];
+//                    if (const Bytecode::COpcode* Opcode = Bytecode::GetOpcodeForByte(Code[OpcodeIndex]))
+//                    {
+//                        switch (Opcode->GetOperation())
+//                        {
+//                            case COpcodes::ALOAD_0.GetOperation():
+//                            {
+//                                std::cout << COpcodes::ALOAD_0.GetLabel() << std::endl;
+//                                break;
+//                            }
+//                            case COpcodes::INVOKESPECIAL.GetOperation():
+//                            {
+//                                std::cout << COpcodes::INVOKESPECIAL.GetLabel() << std::endl;
+//
+//                                const u1 IndexByte1 = Code[++OpcodeIndex];
+//                                const u1 IndexByte2 = Code[++OpcodeIndex];
+//
+//                                const u2 MethodRefIndex =
+//                                        Util::CombineBytes(Util::CByteOrders::GetBigEndian(), IndexByte1, IndexByte2);
+//
+//                                std::shared_ptr<CConstantMethodRefInfo> ConstantMethodRefInfo =
+//                                        ConstantPool->Get<CConstantMethodRefInfo>((usz) MethodRefIndex);
+//                                ASSERT_NOT_NULLPTR(ConstantMethodRefInfo);
+//
+//
+//                                std::shared_ptr<CConstantClassInfo> ConstantClassInfo =
+//                                        ConstantPool->Get<CConstantClassInfo>(
+//                                                (usz) ConstantMethodRefInfo->GetClassIndex());
+//                                ASSERT_NOT_NULLPTR(ConstantClassInfo);
+//
+//                                std::shared_ptr<CConstantNameAndTypeInfo> ConstantNameAndTypeInfo =
+//                                        ConstantPool->Get<CConstantNameAndTypeInfo>(
+//                                                (usz) ConstantMethodRefInfo->GetNameAndTypeIndex());
+//                                ASSERT_NOT_NULLPTR(ConstantNameAndTypeInfo);
+//
+//
+//                                // Class name
+//                                std::shared_ptr<CConstantUtf8Info> ClassName =
+//                                        ConstantPool->Get<CConstantUtf8Info>((usz) ConstantClassInfo->GetNameIndex());
+//                                ASSERT_NOT_NULLPTR(ClassName);
+//
+//
+//                                // Name and type
+//                                std::shared_ptr<CConstantUtf8Info> MethodName =
+//                                        ConstantPool->Get<CConstantUtf8Info>(
+//                                                (usz) ConstantNameAndTypeInfo->GetNameIndex());
+//                                ASSERT_NOT_NULLPTR(MethodName);
+//
+//                                std::shared_ptr<CConstantUtf8Info> MethodDescriptor =
+//                                        ConstantPool->Get<CConstantUtf8Info>(
+//                                                (usz) ConstantNameAndTypeInfo->GetDescriptorIndex());
+//                                ASSERT_NOT_NULLPTR(MethodDescriptor);
+//
+//                                break;
+//                            }
+//                            case COpcodes::ICONST_0.GetOperation():
+//                            {
+//                                std::cout << COpcodes::ICONST_0.GetLabel() << std::endl;
+//                                break;
+//                            }
+//                            case COpcodes::PUTFIELD.GetOperation():
+//                            {
+//                                std::cout << COpcodes::PUTFIELD.GetLabel() << std::endl;
+//                                OpcodeIndex += 2;
+//                                break;
+//                            }
+//                            case COpcodes::DSTORE_1.GetOperation():
+//                            {
+//                                std::cout << COpcodes::DSTORE_1.GetLabel() << std::endl;
+//                                break;
+//                            }
+//                            case COpcodes::NEWARRAY.GetOperation():
+//                            {
+//                                std::cout << COpcodes::NEWARRAY.GetLabel() << std::endl;
+//                                OpcodeIndex += 1; // atype
+//                                break;
+//                            }
+//                            case COpcodes::ACONST_NULL.GetOperation():
+//                            {
+//                                std::cout << COpcodes::ACONST_NULL.GetLabel() << std::endl;
+//                                break;
+//                            }
+//                            case COpcodes::ASTORE_0.GetOperation():
+//                            {
+//                                std::cout << COpcodes::ASTORE_0.GetLabel() << std::endl;
+//                                break;
+//                            }
+//                            case COpcodes::RETURN.GetOperation():
+//                            {
+//                                std::cout << COpcodes::RETURN.GetLabel() << std::endl;
+//                                break;
+//                            }
+//                            default:
+//                            {
+//                                std::cout << "<< SOMETHING ELSE >>" << std::endl;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    OpcodeIndex++;
+//                }
             }
         }
     }

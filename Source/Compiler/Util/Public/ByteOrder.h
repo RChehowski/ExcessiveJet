@@ -60,6 +60,11 @@ namespace Util
 #endif
         }
 
+        static constexpr bool IsNativeEndian(const CByteOrder* const ByteOrder)
+        {
+            return GetNativeEndian() == ByteOrder;
+        }
+
     private:
         static constexpr const CByteOrder BigEndian = CByteOrder("Big Endian");
         static constexpr const CByteOrder LittleEndian = CByteOrder("Little Endian");

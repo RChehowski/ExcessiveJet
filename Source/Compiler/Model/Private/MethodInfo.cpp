@@ -45,13 +45,13 @@ namespace Compiler
         if (AccessFlags & EMethodAccessFlags::ACC_STRICT)        Oss << "strict(fp) ";
         if (AccessFlags & EMethodAccessFlags::ACC_SYNTHETIC)     Oss << "<synthetic> ";
 
-        std::string FunctionSignature = (std::string)DescriptorString->GetStringUtf8();
-
-        Oss << Debug::DecodeMethodReturnType(FunctionSignature)
-            << " " << NameString->GetStringUtf8()
-            << "("
-            << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
-            << ")";
+//        std::string FunctionSignature = (std::string)DescriptorString->GetStringUtf8();
+//
+//        Oss << Debug::DecodeMethodReturnType(FunctionSignature)
+//            << " " << NameString->GetStringUtf8()
+//            << "("
+//            << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
+//            << ")";
 
         return Oss.str();
     }

@@ -16,73 +16,121 @@
 
 namespace Util
 {
-    namespace
+    u1* CopyBytes(const u1* InBytes, usz InNumBytes);
+
+    class IStringUtf8
     {
-        /* PRIVATE */ class IStringUtf8
+    protected:
+        constexpr IStringUtf8(const u1* InBytes, usz InNumBytes, bool bInOwnsItsBytes)
+            : Bytes(InBytes)
+            , NumBytes(InNumBytes)
+            , bOwnsItsBytes(bInOwnsItsBytes)
         {
-        protected:
-            constexpr IStringUtf8(const u1* InBytes, usz InNumBytes)
-                : Bytes(InBytes)
-                , NumBytes(InNumBytes)
-            {
-            }
+        }
 
-        public:
-            [[nodiscard]]
-            constexpr u1 GetByteAt(usz Index) const
-            {
-                return Bytes[Index];
-            }
+    public:
+        IStringUtf8(const IStringUtf8& Other)
+            : Bytes(Other.bOwnsItsBytes ? CopyBytes(Other.Bytes, Other.NumBytes) : Other.Bytes)
+            , NumBytes(Other.NumBytes)
+            , bOwnsItsBytes(Other.bOwnsItsBytes)
+        {
+        }
 
-            [[nodiscard]]
-            constexpr usz GetNumBytes() const
+        ~IStringUtf8()
+        {
+            if (Bytes && bOwnsItsBytes)
             {
-                return NumBytes;
+                CMemory::Free(Bytes);
             }
+        }
 
-            [[nodiscard]]
-            constexpr bool EqualsBytes(const IStringUtf8& Other) const
+        [[nodiscard]]
+        constexpr u1 GetByteAt(usz Index) const
+        {
+            return Bytes[Index];
+        }
+
+        [[nodiscard]]
+        constexpr usz GetNumBytes() const
+        {
+            return NumBytes;
+        }
+
+        [[nodiscard]]
+        constexpr const u1* GetBytes() const
+        {
+            return Bytes;
+        }
+
+        [[nodiscard]]
+        constexpr bool EqualsBytes(const IStringUtf8& Other) const
+        {
+            if (NumBytes == Other.NumBytes)
             {
-                if (NumBytes == Other.NumBytes)
+                for (usz Index = 0; Index < NumBytes; ++Index)
                 {
-                    for (usz Index = 0; Index < NumBytes; ++Index)
+                    if (GetByteAt(Index) != Other.GetByteAt(Index))
                     {
-                        if (GetByteAt(Index) != Other.GetByteAt(Index))
-                        {
-                            return false;
-                        }
+                        return false;
                     }
-
-                    return true;
                 }
-                else
-                {
-                    return false;
-                }
-            }
 
-            [[nodiscard]]
-            bool EqualsBytes(const char* Other) const
+                return true;
+            }
+            else
             {
-                return EqualsBytes(IStringUtf8((u1*)Other, (usz)std::char_traits<char>::length(Other)));
+                return false;
             }
+        }
 
-            constexpr bool operator==(const IStringUtf8& Other) const
-            {
-                return EqualsBytes(Other);
-            }
+        [[nodiscard]]
+        bool EqualsBytes(const char* Other) const
+        {
+            return EqualsBytes(IStringUtf8((u1*)Other, (usz)std::char_traits<char>::length(Other), false));
+        }
 
-            friend std::ostream& operator<< (std::ostream& ostream, const IStringUtf8& Instance)
-            {
-                ostream.write(reinterpret_cast<const char*>(Instance.Bytes), Instance.NumBytes);
-                return ostream;
-            }
+        constexpr bool operator==(const IStringUtf8& Other) const
+        {
+            return EqualsBytes(Other);
+        }
 
-        protected:
-            const u1* Bytes;
-            usz NumBytes;
-        };
-    }
+        friend std::ostream& operator<< (std::ostream& ostream, const IStringUtf8& Instance)
+        {
+            ostream.write(reinterpret_cast<const char*>(Instance.Bytes), (std::streamsize)Instance.NumBytes);
+            return ostream;
+        }
+
+        explicit operator std::string() const
+        {
+            std::string AsString((char*)Bytes, NumBytes);
+            return std::move(AsString);
+        }
+
+        IStringUtf8& operator=(IStringUtf8&& Other) noexcept
+        {
+            if (bOwnsItsBytes)
+                CMemory::Free((void*)Bytes);
+
+            Bytes = Other.Bytes;
+
+            if (Other.bOwnsItsBytes)
+                Other.Bytes = nullptr;
+
+            NumBytes = Other.NumBytes;
+
+            if (Other.bOwnsItsBytes)
+                Other.NumBytes = 0;
+
+            return *this;
+        }
+
+    protected:
+        const u1* Bytes;
+        usz NumBytes;
+
+    private:
+        const bool bOwnsItsBytes;
+    };
 
     class CStringUtf8 final : public IStringUtf8
     {
@@ -93,18 +141,18 @@ namespace Util
         CStringUtf8(const CStringUtf8& Other);
         CStringUtf8(CStringUtf8&& Other) noexcept;
 
-        ~CStringUtf8();
-
-        explicit operator std::string() const;
-
         CStringUtf8& operator=(CStringUtf8&& Other) noexcept;
     };
 
     class CLiteralStringUtf8 final : public IStringUtf8
     {
     public:
-        CLiteralStringUtf8(const char* String)
-            : IStringUtf8((const u1*)String, std::char_traits<char>::length(String))
+        explicit CLiteralStringUtf8(const char* String)
+            : IStringUtf8(
+                (const u1*)String,
+                std::char_traits<char>::length(String),
+                false
+            )
         {
         }
     };

@@ -42,6 +42,19 @@ namespace Compiler
         ASSERT(Reader.IsAtEnd());
     }
 
+    const Util::IStringUtf8& CClassInfo::GetNameString() const
+    {
+        std::shared_ptr<CConstantClassInfo> ThisClassInfo =
+                ConstantPool->Get<CConstantClassInfo>(ThisClass);
+        ASSERT(ThisClassInfo != nullptr);
+
+        std::shared_ptr<CConstantUtf8Info> ThisClassNameInfo =
+                ConstantPool->Get<CConstantUtf8Info>(ThisClassInfo->GetNameIndex());
+        ASSERT(ThisClassNameInfo != nullptr);
+
+        return ThisClassNameInfo->GetStringUtf8();
+    }
+
     void CClassInfo::Debug_PrintClass() const
     {
         std::ostringstream Oss;
@@ -119,7 +132,7 @@ namespace Compiler
         }
         if (SuperClass != 0)
         {
-            // The only class that does not have a superclass is java.lang.Object
+            // The only class that does not have a superclass is java.lang.ObjectBase
             std::shared_ptr<CConstantClassInfo> SuperClassInfo =
                     ConstantPool->Get<CConstantClassInfo>(SuperClass);
             ASSERT(SuperClassInfo != nullptr);

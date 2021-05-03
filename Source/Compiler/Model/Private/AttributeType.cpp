@@ -39,7 +39,7 @@ namespace Compiler
         return (usz)(sizeof(G_AttributeNamesArray) / sizeof(void*));
     }
 
-    const CAttributeType* CAttributeTypes::GetAttributeNameByName(const Util::CStringUtf8& String)
+    const CAttributeType* CAttributeTypes::GetAttributeNameByName(const Util::IStringUtf8& String)
     {
         const auto It = G_AttributeNamesMap.find(String);
         return (It != G_AttributeNamesMap.cend()) ? It->second : nullptr;

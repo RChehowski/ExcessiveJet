@@ -15,9 +15,15 @@ namespace Compiler
         return std::move(oss.str());
     }
 
+#ifndef EXCESSIVE_RUNTIME
     void CConstantUtf8Info::DeserializeFrom(CClassReader& Reader)
     {
-        Reader >> StringUtf8;
+        Util::CStringUtf8 LocalStringUtf8;
+        Reader >> LocalStringUtf8;
+
+        StringUtf8 = std::move(LocalStringUtf8);
+
+        return;
     }
 
     void operator>>(CClassReader& Reader, CConstantUtf8Info& Instance)
@@ -25,4 +31,9 @@ namespace Compiler
         Instance.DeserializeFrom(Reader);
     }
 
+    void operator<<(std::ostream& Os, const CConstantUtf8Info& Instance)
+    {
+
+    }
+#endif // #ifndef EXCESSIVE_RUNTIME
 }

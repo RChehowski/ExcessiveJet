@@ -23,7 +23,7 @@ set(UnityBuildFiles
     Source/Common/Util/Private/_UnityBuild_Common_Util.cpp
 
     # Common
-    Source/Common/Service/Private/_UnityBuild_Service.cpp)
+    Source/Common/Service/Private/_UnityBuild_Service.cpp Source/Compiler/Printer/CppPrinter.cpp Source/Compiler/Printer/CppPrinter.h Source/Runtime/ObjectBase.cpp Source/Runtime/ObjectBase.h Source/Runtime/CMeta.cpp Source/Runtime/CMeta.h)
 
 include_directories(Source)
 include_directories(Source/Compiler/Model/Public)

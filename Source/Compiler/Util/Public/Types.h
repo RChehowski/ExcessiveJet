@@ -20,6 +20,9 @@
     #define FORCEINLINE inline
 #endif
 
+#define LIKELY(...) __VA_ARGS__
+#define UNLIKELY(...) __VA_ARGS__
+
 #define UNLOCK_DEBUG_METHODS (1)
 
 using u1 = uint8_t;
@@ -97,7 +100,7 @@ namespace Util
 //};
 
 /**
- * Ordinary Object Pointer
+ * Ordinary ObjectBase Pointer
  * Forced 64 bits for now
  */
 using oop = u8;

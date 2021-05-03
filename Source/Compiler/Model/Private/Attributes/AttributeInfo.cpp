@@ -81,7 +81,7 @@ namespace Compiler
     using CAttributeInfoSpawners = std::unordered_map<Util::IStringUtf8, CAttributeInfoSpawner>;
 
 
-    CSharedAttributeInfo NewAttributeInfo(const Util::CStringUtf8& AttributeNameString)
+    CSharedAttributeInfo NewAttributeInfo(const Util::IStringUtf8& AttributeNameString)
     {
         static const CAttributeInfoSpawners G_AttributeInfoSpawners {
             ADD_ATTRIBUTE_INFO_SPAWNER(Code),

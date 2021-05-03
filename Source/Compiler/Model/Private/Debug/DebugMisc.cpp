@@ -138,7 +138,7 @@ namespace Debug
         }
         else if (TypeString[TypeStringIndex] == 'L')
         {
-            // Object
+            // ObjectBase
             const std::string::size_type IndexOfEnd = TypeString.find(';', TypeStringIndex);
 
             std::string ClassName = TypeString.substr(

@@ -52,9 +52,9 @@ namespace Compiler
         if (AccessFlags & EFieldAccessFlags::ACC_SYNTHETIC)  Oss << "<synthetic> ";
         if (AccessFlags & EFieldAccessFlags::ACC_ENUM)       Oss << "<enum> ";
 
-        std::string DecodedDescriptorType = Debug::DecodeType((std::string)DescriptorString->GetStringUtf8());
+//        std::string DecodedDescriptorType = Debug::DecodeType((std::string)DescriptorString->GetStringUtf8());
 
-        Oss << DecodedDescriptorType << " " << NameString->GetStringUtf8();
+//        Oss << DecodedDescriptorType << " " << NameString->GetStringUtf8();
 
         return Oss.str();
     }
