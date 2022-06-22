@@ -12,7 +12,7 @@ namespace Compiler
         oss << "ConstantStringInfo {" << std::endl;
         oss << "         StringIndex: " << StringIndex << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantStringInfo::DeserializeFrom(CClassReader& Reader)

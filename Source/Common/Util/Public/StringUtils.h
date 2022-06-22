@@ -30,7 +30,7 @@ namespace Util
                 const CStringSizeType SubstringLen = EndIndex - BeginIndex;
                 if (SubstringLen > 0)
                 {
-                    Result.push_back(std::move(String.substr(BeginIndex, SubstringLen)));
+                    Result.push_back(String.substr(BeginIndex, SubstringLen));
                 }
             };
 

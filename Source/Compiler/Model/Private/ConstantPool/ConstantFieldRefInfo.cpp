@@ -13,7 +13,7 @@ namespace Compiler
         oss << "          ClassIndex: " << ClassIndex << std::endl;
         oss << "    NameAndTypeIndex: " << NameAndTypeIndex << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantFieldRefInfo::DeserializeFrom(CClassReader& Reader)

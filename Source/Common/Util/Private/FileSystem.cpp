@@ -53,7 +53,7 @@ namespace Util
             if (!OptionalSize.has_value())
                 OptionalSize = LocalSize;
 
-            return std::move(Allocation);
+            return Allocation;
         }
 
         [[nodiscard]]

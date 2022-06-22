@@ -12,7 +12,7 @@ namespace Compiler
         oss << "ConstantUtf8Info {" << std::endl;
         oss << "          StringUtf8: " << StringUtf8 << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantUtf8Info::DeserializeFrom(CClassReader& Reader)
@@ -21,8 +21,6 @@ namespace Compiler
         Reader >> LocalStringUtf8;
 
         StringUtf8 = std::move(LocalStringUtf8);
-
-        return;
     }
 
     void operator>>(CClassReader& Reader, CConstantUtf8Info& Instance)

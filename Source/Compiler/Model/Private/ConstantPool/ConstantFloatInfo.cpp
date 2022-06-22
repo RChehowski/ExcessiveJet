@@ -12,7 +12,7 @@ namespace Compiler
         oss << "ConstantFloatInfo {" << std::endl;
         oss << "               Bytes: " << Bytes << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantFloatInfo::DeserializeFrom(CClassReader& Reader)

@@ -12,7 +12,7 @@ namespace Compiler
         oss << "ConstantIntegerInfo {" << std::endl;
         oss << "               Bytes: " << Bytes << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantIntegerInfo::DeserializeFrom(CClassReader& Reader)

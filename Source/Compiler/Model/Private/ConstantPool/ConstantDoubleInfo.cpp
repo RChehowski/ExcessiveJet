@@ -13,7 +13,7 @@ namespace Compiler
         oss << "           HighBytes: " << HighBytes << std::endl;
         oss << "            LowBytes: " << LowBytes << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantDoubleInfo::DeserializeFrom(CClassReader& Reader)

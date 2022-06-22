@@ -13,7 +13,7 @@ namespace Compiler
         oss << "           NameIndex: " << NameIndex << std::endl;
         oss << "     DescriptorIndex: " << DescriptorIndex << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantNameAndTypeInfo::DeserializeFrom(CClassReader& Reader)

@@ -12,7 +12,7 @@ namespace Compiler
         oss << "ConstantMethodTypeInfo {" << std::endl;
         oss << "     DescriptorIndex: " << DescriptorIndex << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantMethodTypeInfo::DeserializeFrom(CClassReader& Reader)

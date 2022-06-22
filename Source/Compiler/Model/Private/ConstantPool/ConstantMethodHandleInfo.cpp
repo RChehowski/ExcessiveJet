@@ -13,7 +13,7 @@ namespace Compiler
         oss << "       ReferenceKind: " << ReferenceKind << std::endl;
         oss << "      ReferenceIndex: " << ReferenceIndex << std::endl;
         oss << "}" << std::endl;
-        return std::move(oss.str());
+        return oss.str();
     }
 
     void CConstantMethodHandleInfo::DeserializeFrom(CClassReader& Reader)

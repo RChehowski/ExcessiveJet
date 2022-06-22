@@ -55,8 +55,9 @@ namespace Compiler
 
         for (const CAttributeType* AttributeName : G_AttributeNamesArray)
         {
-            Map.insert({
-                std::move(Util::CStringUtf8(AttributeName->GetName())),
+            Map.insert
+            ({
+                Util::CStringUtf8(AttributeName->GetName()),
                 AttributeName
             });
         }
