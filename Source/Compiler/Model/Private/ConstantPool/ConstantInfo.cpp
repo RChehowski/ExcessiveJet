@@ -7,81 +7,82 @@
 #include "ClassReader.h"
 
 #include <array>
+#include <functional>
 
 namespace Compiler
 {
-    typedef std::shared_ptr<CConstantInfo> (*CConstantInfoSpawnFunction)();
+    using CConstantInfoSpawnFunction = std::function<std::shared_ptr<CConstantInfo>()>;
 
     typedef std::array<CConstantInfoSpawnFunction, (usz)EConstantPoolInfoTag::Num> CConstantInfoSpawnFunctionTable;
 
     namespace Private
     {
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantUtf8Info()
+        std::shared_ptr<CConstantInfo> New_ConstantUtf8Info()
         {
             return std::make_shared<CConstantUtf8Info>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantIntegerInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantIntegerInfo()
         {
             return std::make_shared<CConstantIntegerInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantFloatInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantFloatInfo()
         {
             return std::make_shared<CConstantFloatInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantLongInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantLongInfo()
         {
             return std::make_shared<CConstantLongInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantDoubleInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantDoubleInfo()
         {
             return std::make_shared<CConstantDoubleInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantClassInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantClassInfo()
         {
             return std::make_shared<CConstantClassInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantStringInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantStringInfo()
         {
             return std::make_shared<CConstantStringInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantFieldRefInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantFieldRefInfo()
         {
             return std::make_shared<CConstantFieldRefInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantMethodRefInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantMethodRefInfo()
         {
             return std::make_shared<CConstantMethodRefInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantInterfaceMethodRefInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantInterfaceMethodRefInfo()
         {
             return std::make_shared<CConstantInterfaceMethodRefInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantNameAndTypeInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantNameAndTypeInfo()
         {
             return std::make_shared<CConstantNameAndTypeInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantMethodHandleInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantMethodHandleInfo()
         {
             return std::make_shared<CConstantMethodHandleInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantMethodTypeInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantMethodTypeInfo()
         {
             return std::make_shared<CConstantMethodTypeInfo>();
         }
 
-        FORCEINLINE std::shared_ptr<CConstantInfo> New_ConstantInvokeDynamicInfo()
+        std::shared_ptr<CConstantInfo> New_ConstantInvokeDynamicInfo()
         {
             return std::make_shared<CConstantInvokeDynamicInfo>();
         }
@@ -107,6 +108,18 @@ namespace Compiler
             ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::MethodHandle] = New_ConstantMethodHandleInfo;
             ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::MethodType] = New_ConstantMethodTypeInfo;
             ConstantInfoSpawnFunctions[(usz)EConstantPoolInfoTag::InvokeDynamic] = New_ConstantInvokeDynamicInfo;
+
+            // Fill the holes (unused tags)
+            for (const u1 UnusedConstantPoolInfoTag : UnusedConstantPoolInfoTags)
+            {
+                ConstantInfoSpawnFunctions[(usz)UnusedConstantPoolInfoTag] = [UnusedConstantPoolInfoTag]()
+                {
+                    ASSERT_MSG(false, "Unsupported tag: %d", (int)UnusedConstantPoolInfoTag);
+
+                    // Never supposed to be returned
+                    return std::shared_ptr<CConstantInfo>{ nullptr };
+                };
+            }
 
             return ConstantInfoSpawnFunctions;
         }

@@ -50,8 +50,13 @@ namespace Compiler
         const u2 AddedInMinorVersion;
     };
 
-    #define DEFINE_ATTRIBUTE_NAME(Name, AddedInVersion, AddedInMinorVersion) static constexpr CAttributeType Name =\
-        CAttributeType(LITERAL_TO_STRING(Name), AddedInVersion, AddedInMinorVersion)
+    #define DEFINE_ATTRIBUTE_NAME(Name, AddedInVersion, AddedInMinorVersion) \
+        static constexpr CAttributeType Name                                 \
+        {                                                                    \
+            LITERAL_TO_STRING(Name),                                         \
+            AddedInVersion,                                                  \
+            AddedInMinorVersion                                              \
+        }
 
     class CAttributeTypes
     {
@@ -81,4 +86,6 @@ namespace Compiler
 
         static const CAttributeType* GetAttributeNameByName(const Util::IStringUtf8& String);
     };
+
+    #undef DEFINE_ATTRIBUTE_NAME
 }

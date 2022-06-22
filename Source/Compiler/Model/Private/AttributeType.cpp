@@ -8,7 +8,8 @@
 
 namespace Compiler
 {
-    constexpr const CAttributeType* G_AttributeNamesArray[] = {
+    constexpr const CAttributeType* G_AttributeNamesArray[]
+    {
         &CAttributeTypes::ConstantValue,
         &CAttributeTypes::Code,
         &CAttributeTypes::StackMapTable,
@@ -19,6 +20,7 @@ namespace Compiler
         &CAttributeTypes::Signature,
         &CAttributeTypes::SourceFile,
         &CAttributeTypes::SourceDebugExtension,
+
         &CAttributeTypes::LineNumberTable,
         &CAttributeTypes::LocalVariableTable,
         &CAttributeTypes::LocalVariableTypeTable,

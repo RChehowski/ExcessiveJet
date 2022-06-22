@@ -13,6 +13,7 @@
 #include "SerializedArray.h"
 
 #include <vector>
+#include <limits>
 
 namespace Compiler
 {

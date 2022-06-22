@@ -15,7 +15,6 @@ namespace Compiler
         return std::move(oss.str());
     }
 
-#ifndef EXCESSIVE_RUNTIME
     void CConstantUtf8Info::DeserializeFrom(CClassReader& Reader)
     {
         Util::CStringUtf8 LocalStringUtf8;
@@ -35,5 +34,4 @@ namespace Compiler
     {
 
     }
-#endif // #ifndef EXCESSIVE_RUNTIME
 }

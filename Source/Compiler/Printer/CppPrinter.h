@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <ostream>
 #include <sstream>
+#include <limits>
 
 #ifdef min
     #undef min

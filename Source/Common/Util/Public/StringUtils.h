@@ -15,7 +15,8 @@ namespace Util
     class CStringUtils
     {
     public:
-        static void ParseIntoVector(const CString& String, const CString& Separator, std::vector<CString>& Result)
+        template<typename TAllocator>
+        static void ParseIntoVector(const CString& String, const CString& Separator, std::vector<CString, TAllocator>& Result)
         {
             using CStringSizeType = CString::size_type;
 

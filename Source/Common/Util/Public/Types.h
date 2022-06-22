@@ -14,6 +14,8 @@
 #define __STRINGIFY(x) #x
 #define LITERAL_TO_STRING(x) __STRINGIFY(x)
 
+#define ARRAY_COUNT(x) (sizeof(x) / sizeof(x[0]))
+
 #if defined(_MSC_VER)
     #define FORCEINLINE __forceinline
 #else
@@ -71,33 +73,6 @@ namespace Util
 {
     using WideString = std::wstring;
 }
-
-//enum class ClassAccessFlags : uint16_t
-//{
-//    // Declared public; may be accessed from outside its package.
-//    ACC_PUBLIC      = 0x0001,
-//
-//    // Declared final; no subclasses allowed.
-//    ACC_FINAL       = 0x0010,
-//
-//    // Treat superclass methods specially when invoked by the invokespecial instruction.
-//    ACC_SUPER       = 0x0020,
-//
-//    // Is an interface, not a class.
-//    ACC_INTERFACE   = 0x0200,
-//
-//    // Declared abstract; must not be instantiated.
-//    ACC_ABSTRACT 	= 0x0400,
-//
-//    // Declared synthetic; not present in the source code.
-//    ACC_SYNTHETIC 	= 0x1000,
-//
-//    // Declared as an annotation type.
-//    ACC_ANNOTATION 	= 0x2000,
-//
-//    // Declared as an enum type.
-//    ACC_ENUM        = 0x4000
-//};
 
 /**
  * Ordinary ObjectBase Pointer

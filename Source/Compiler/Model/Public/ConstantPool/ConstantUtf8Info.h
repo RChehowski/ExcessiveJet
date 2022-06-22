@@ -28,13 +28,10 @@ namespace Compiler
              return StringUtf8;
         }
 
-#ifndef EXCESSIVE_RUNTIME
         void DeserializeFrom(CClassReader& Reader) override;
 
         friend void operator>>(CClassReader& Reader, CConstantUtf8Info& Instance);
-
         friend void operator<<(std::ostream& Os, const CConstantUtf8Info& Instance);
-#endif // #ifndef EXCESSIVE_RUNTIME
 
     public:
         static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Utf8;

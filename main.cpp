@@ -599,7 +599,7 @@ extern "C" __declspec(dllexport) CClass* _$New_Class()
 
 
 #define STRUCT_FIELD_OFFSETOF(Struct, Field) ((usz)&(((Struct*)(nullptr))->Field))
-#define STRUCT_METHOD_ADDROF(Struct, Method) (*reinterpret_cast<const void**>(&(&Struct::Method)))
+#define STRUCT_METHOD_ADDROF(Struct, Method) 0//(*reinterpret_cast<const void**>(&(Struct::Method)))
 
 struct CFieldMeta
 {

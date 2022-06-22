@@ -28,11 +28,12 @@ namespace Compiler
         MethodRef = 10,
         InterfaceMethodRef = 11,
         NameAndType = 12,
+
         // 13, 14 are also skipped
-        MethodHandle = 15,
-        MethodType = 16,
+        MethodHandle = 15,  // Java7+
+        MethodType = 16,    // Java7+
         // ... and 17 also
-        InvokeDynamic = 18,
+        InvokeDynamic = 18, // Java8+
 
         /**
          * Number of tags, do not add new tags (except for Invalid_NotATag) after it.
@@ -41,6 +42,9 @@ namespace Compiler
 
         Invalid_NotATag = 255
     };
+
+    // For debugging purposes, to fill holes in the jump table
+    constexpr u1 UnusedConstantPoolInfoTags[] = { 2, 13, 14, 17 };
 
 
     class CConstantInfo
@@ -69,9 +73,7 @@ namespace Compiler
         [[nodiscard]]
         virtual std::string ToString() const = 0;
 
-#ifndef EXCESSIVE_RUNTIME
         virtual void DeserializeFrom(CClassReader& Reader) = 0;
-#endif // #ifndef EXCESSIVE_RUNTIME
 
         [[nodiscard]]
         FORCEINLINE bool IsA(EConstantPoolInfoTag InConstantPoolInfoTag) const

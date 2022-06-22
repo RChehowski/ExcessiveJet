@@ -9,10 +9,6 @@
 #include "ExcessiveAssert.h"
 
 
-#define DEFINE_OPCODE(Byte, Name) static constexpr COpcode Name =\
-        COpcode((u1)Byte, LITERAL_TO_STRING(Name))
-
-
 namespace Bytecode
 {
     class COpcode
@@ -56,6 +52,9 @@ namespace Bytecode
         const u1 Operation;
         const char* const Label;
     };
+
+#define DEFINE_OPCODE(Byte, Name) static constexpr COpcode Name =\
+        COpcode((u1)Byte, LITERAL_TO_STRING(Name))
 
     class COpcodes
     {
@@ -305,7 +304,11 @@ namespace Bytecode
         DEFINE_OPCODE(201, JSR_W);
     };
 
-    constexpr const COpcode* G_OpcodesArray[] = {
+#undef DEFINE_OPCODE
+
+    constexpr const COpcode* const G_OpcodesArray[]
+    {
+        // 0 - 9
         &COpcodes::NOP,
         &COpcodes::ACONST_NULL,
         &COpcodes::ICONST_M1,
@@ -316,6 +319,8 @@ namespace Bytecode
         &COpcodes::ICONST_4,
         &COpcodes::ICONST_5,
         &COpcodes::LCONST_0,
+
+        // 10 - 19
         &COpcodes::LCONST_1,
         &COpcodes::FCONST_0,
         &COpcodes::FCONST_1,
@@ -326,6 +331,8 @@ namespace Bytecode
         &COpcodes::SIPUSH,
         &COpcodes::LDC,
         &COpcodes::LDC_W,
+
+        // 20 - 29
         &COpcodes::LDC2_W,
         &COpcodes::ILOAD,
         &COpcodes::LLOAD,
@@ -336,6 +343,8 @@ namespace Bytecode
         &COpcodes::ILOAD_1,
         &COpcodes::ILOAD_2,
         &COpcodes::ILOAD_3,
+
+        // 30 - 39
         &COpcodes::LLOAD_0,
         &COpcodes::LLOAD_1,
         &COpcodes::LLOAD_2,
@@ -346,6 +355,8 @@ namespace Bytecode
         &COpcodes::FLOAD_3,
         &COpcodes::DLOAD_0,
         &COpcodes::DLOAD_1,
+
+        // 40 - 49
         &COpcodes::DLOAD_2,
         &COpcodes::DLOAD_3,
         &COpcodes::ALOAD_0,
@@ -356,6 +367,8 @@ namespace Bytecode
         &COpcodes::LALOAD,
         &COpcodes::FALOAD,
         &COpcodes::DALOAD,
+
+        // 50 - 59
         &COpcodes::AALOAD,
         &COpcodes::BALOAD,
         &COpcodes::CALOAD,
@@ -366,6 +379,8 @@ namespace Bytecode
         &COpcodes::DSTORE,
         &COpcodes::ASTORE,
         &COpcodes::ISTORE_0,
+
+        // 60 - 69
         &COpcodes::ISTORE_1,
         &COpcodes::ISTORE_2,
         &COpcodes::ISTORE_3,
@@ -376,6 +391,8 @@ namespace Bytecode
         &COpcodes::FSTORE_0,
         &COpcodes::FSTORE_1,
         &COpcodes::FSTORE_2,
+
+        // 70 - 79
         &COpcodes::FSTORE_3,
         &COpcodes::DSTORE_0,
         &COpcodes::DSTORE_1,
@@ -386,6 +403,8 @@ namespace Bytecode
         &COpcodes::ASTORE_2,
         &COpcodes::ASTORE_3,
         &COpcodes::IASTORE,
+
+        // 80 - 89
         &COpcodes::LASTORE,
         &COpcodes::FASTORE,
         &COpcodes::DASTORE,
@@ -396,6 +415,8 @@ namespace Bytecode
         &COpcodes::POP,
         &COpcodes::POP2,
         &COpcodes::DUP,
+
+        // 90 - 99
         &COpcodes::DUP_X1,
         &COpcodes::DUP_X2,
         &COpcodes::DUP2,
@@ -406,6 +427,8 @@ namespace Bytecode
         &COpcodes::LADD,
         &COpcodes::FADD,
         &COpcodes::DADD,
+
+        // 100 - 109
         &COpcodes::ISUB,
         &COpcodes::LSUB,
         &COpcodes::FSUB,
@@ -416,6 +439,8 @@ namespace Bytecode
         &COpcodes::DMUL,
         &COpcodes::IDIV,
         &COpcodes::LDIV,
+
+        // 110 - 119
         &COpcodes::FDIV,
         &COpcodes::DDIV,
         &COpcodes::IREM,
@@ -426,6 +451,8 @@ namespace Bytecode
         &COpcodes::LNEG,
         &COpcodes::FNEG,
         &COpcodes::DNEG,
+
+        // 120 - 129
         &COpcodes::ISHL,
         &COpcodes::LSHL,
         &COpcodes::ISHR,
@@ -436,6 +463,8 @@ namespace Bytecode
         &COpcodes::LAND,
         &COpcodes::IOR,
         &COpcodes::LOR,
+
+        // 130 - 139
         &COpcodes::IXOR,
         &COpcodes::LXOR,
         &COpcodes::IINC,
@@ -446,6 +475,8 @@ namespace Bytecode
         &COpcodes::L2F,
         &COpcodes::L2D,
         &COpcodes::F2I,
+
+        // 140 - 149
         &COpcodes::F2L,
         &COpcodes::F2D,
         &COpcodes::D2I,
@@ -456,6 +487,8 @@ namespace Bytecode
         &COpcodes::I2S,
         &COpcodes::LCMP,
         &COpcodes::FCMPL,
+
+        // 150 - 159
         &COpcodes::FCMPG,
         &COpcodes::DCMPL,
         &COpcodes::DCMPG,
@@ -466,6 +499,8 @@ namespace Bytecode
         &COpcodes::IFGT,
         &COpcodes::IFLE,
         &COpcodes::IF_ICMPEQ,
+
+        // 160 - 169
         &COpcodes::IF_ICMPNE,
         &COpcodes::IF_ICMPLT,
         &COpcodes::IF_ICMPGE,
@@ -476,6 +511,8 @@ namespace Bytecode
         &COpcodes::GOTO,
         &COpcodes::JSR,
         &COpcodes::RET,
+
+        // 170 - 179
         &COpcodes::TABLESWITCH,
         &COpcodes::LOOKUPSWITCH,
         &COpcodes::IRETURN,
@@ -486,6 +523,8 @@ namespace Bytecode
         &COpcodes::RETURN,
         &COpcodes::GETSTATIC,
         &COpcodes::PUTSTATIC,
+
+        // 180 - 189
         &COpcodes::GETFIELD,
         &COpcodes::PUTFIELD,
         &COpcodes::INVOKEVIRTUAL,
@@ -496,6 +535,8 @@ namespace Bytecode
         &COpcodes::NEW,
         &COpcodes::NEWARRAY,
         &COpcodes::ANEWARRAY,
+
+        // 190 - 199
         &COpcodes::ARRAYLENGTH,
         &COpcodes::ATHROW,
         &COpcodes::CHECKCAST,
@@ -506,17 +547,22 @@ namespace Bytecode
         &COpcodes::MULTIANEWARRAY,
         &COpcodes::IFNULL,
         &COpcodes::IFNONNULL,
+
+        // 200 - 201
         &COpcodes::GOTO_W,
         &COpcodes::JSR_W,
     };
 
-    constexpr usz NumOpcodes = sizeof(G_OpcodesArray) / sizeof(void*);
+    constexpr usz NumOpcodes = ARRAY_COUNT(G_OpcodesArray);
 
-    const COpcode* GetOpcodeForByte(u1 Byte)
+    static_assert
+    (
+        (NumOpcodes - 1) == (G_OpcodesArray[NumOpcodes - 1]->GetOperation()),
+        "Check opcode table: inconsistency between opcode operations and indices"
+    );
+
+    constexpr const COpcode* GetOpcodeForByte(u1 Byte)
     {
-        static_assert((NumOpcodes - 1) == (G_OpcodesArray[NumOpcodes - 1]->GetOperation()),
-                      "Check opcode table: inconsistency between opcode numbers and indices");
-
         if ((usz)Byte < NumOpcodes)
         {
             return G_OpcodesArray[(usz) Byte];
