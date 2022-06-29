@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 #include "Platform/Memory.h"
 
 namespace Util
@@ -126,10 +126,10 @@ namespace Util
          *
          * @return true if the pointer is aligned to the specified alignment, false otherwise.
          */
-        template <typename T>
-        FORCEINLINE static constexpr bool IsAligned(T Val, u8 Alignment)
+        template <typename TValue>
+        FORCEINLINE static constexpr bool IsAligned(TValue Val, u8 Alignment)
         {
-            static_assert(std::is_integral_v<T> || std::is_pointer_v<T>,
+            static_assert(std::is_integral_v<TValue> || std::is_pointer_v<TValue>,
                           "IsAligned expects an integer or pointer type");
 
             return !((u8)Val & (Alignment - 1));
@@ -173,6 +173,12 @@ namespace Util
             static_assert(std::is_integral_v<T>, "T must be integral");
 
             return static_cast<T>(Value);
+        }
+
+        template <typename TEnum>
+        FORCEINLINE static constexpr bool EnumHasFlag(TEnum Test, TEnum Flags)
+        {
+            return (Test & Flags) != 0;
         }
     };
 }

@@ -3,10 +3,10 @@
 //
 
 #include "Platform/Memory.h"
+#include "Util/MathUtils.h"
 
 #include <cstdlib>
 #include <cstring>
-#include <MathUtils.h>
 
 namespace Util
 {

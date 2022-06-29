@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 #include "ExcessiveAssert.h"
 #include "ClassReader.h"
 
@@ -95,9 +95,30 @@ namespace Compiler
             }
         }
 
-        static std::shared_ptr<CConstantInfo> NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
+        static std::shared_ptr<CConstantInfo> NewConstantInfo(const EConstantPoolInfoTag ConstantPoolInfoTag);
 
-        static const char* ConstantPoolInfoTagToString(EConstantPoolInfoTag ConstantPoolInfoTag);
+        static constexpr const char* ConstantPoolInfoTagToString(const EConstantPoolInfoTag ConstantPoolInfoTag)
+        {
+            switch (ConstantPoolInfoTag)
+            {
+                case EConstantPoolInfoTag::Utf8:                return "Utf8";
+                case EConstantPoolInfoTag::Integer:             return "Integer";
+                case EConstantPoolInfoTag::Float:               return "Float";
+                case EConstantPoolInfoTag::Long:                return "Long";
+                case EConstantPoolInfoTag::Double:              return "Double";
+                case EConstantPoolInfoTag::Class:               return "Class";
+                case EConstantPoolInfoTag::String:              return "String";
+                case EConstantPoolInfoTag::FieldRef:            return "FieldRef";
+                case EConstantPoolInfoTag::MethodRef:           return "MethodRef";
+                case EConstantPoolInfoTag::InterfaceMethodRef:  return "InterfaceMethodRef";
+                case EConstantPoolInfoTag::NameAndType:         return "NameAndType";
+                case EConstantPoolInfoTag::MethodHandle:        return "MethodHandle";
+                case EConstantPoolInfoTag::MethodType:          return "MethodType";
+                case EConstantPoolInfoTag::InvokeDynamic:       return "InvokeDynamic";
+
+                default: return "Unknown Tag";
+            }
+        }
 
         template <typename T>
         static std::shared_ptr<T> CastConstantInfo(const std::shared_ptr<CConstantInfo>& ConstantInfo)

@@ -9,6 +9,7 @@
 
 #include "Attributes/CodeAttributeInfo.h"
 #include "Attributes/LineNumberTableAttributeInfo.h"
+#include "JavaWorld/ObjectBase.h"
 
 
 using Util::CByteOrders;
@@ -52,16 +53,16 @@ void TraverseDirectory(const std::string& Root, std::function<void(const std::st
 #include "Opcodes.h"
 #include "Bits.h"
 
-#include "FileSystem.h"
+#include "Util/FileSystem.h"
 
 using Bytecode::COpcodes;
 using Bytecode::COpcode;
 
-#include "Service/Public/ThreadStack.h"
-#include "Service/Public/LocalVariables.h"
+#include "Execution/ThreadStack.h"
+#include "Execution/LocalVariables.h"
 
 
-void Sum(Service::CThreadStack* ThreadStack)
+void Sum(CThreadStack* ThreadStack)
 {
 //    const int Op1 = ThreadStack->Pop8<int>();
 //    const int Op2 = ThreadStack->Pop8<int>();
@@ -87,11 +88,11 @@ private:
     const s4 InvocationLineNumber;
 };
 
-typedef void (*CExcessiveInvokableMethod)(Service::CThreadStack*);
+typedef void (*CExcessiveInvokableMethod)(CThreadStack*);
 
 FORCEINLINE void InvokeExcessiveMethod(
     const CExcessiveInvokableMethod& ExcessiveInvokableMethod,
-    Service::CThreadStack* ThreadStack,
+    CThreadStack* ThreadStack,
     const CExcessiveInvocationInfo& ExcessiveInvocationInfo
 )
 {
@@ -101,8 +102,8 @@ FORCEINLINE void InvokeExcessiveMethod(
 
 
 typedef void (*CBytecodeExecFunc)(
-        Service::CThreadStack& ThreadStack,
-        Service::CLocalVariables& LocalVariables,
+        CThreadStack& ThreadStack,
+        CLocalVariablesDynamic& LocalVariables,
         Compiler::CConstantPool& ConstantPool,
         const std::initializer_list<u1>& OtherBytes
 );
@@ -129,7 +130,7 @@ CBytecodeExecFunc BytecodeExecFuncs[Bytecode::NumOpcodes];
     ARRAY[(OPCODE).GetOperation()] = EXEC_FUNCTION;
 
 
-FORCEINLINE void Impl_LDC(Service::CThreadStack& ThreadStack, const Compiler::CConstantPool& ConstantPool, const usz IndexInConstantPool)
+FORCEINLINE void Impl_LDC(CThreadStack& ThreadStack, const Compiler::CConstantPool& ConstantPool, const usz IndexInConstantPool)
 {
     std::shared_ptr<Compiler::CConstantInfo> ConstantInfo = ConstantPool[IndexInConstantPool];
 
@@ -188,9 +189,10 @@ FORCEINLINE void Impl_LDC(Service::CThreadStack& ThreadStack, const Compiler::CC
     }
 }
 
-void Impl_ILOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariables& LocalVariables, const usz LocalVariableIndex)
+/*
+void Impl_ILOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariablesStatic& LocalVariables, const usz LocalVariableIndex)
 {
-    const Service::CLocalVariable& LocalVariable = LocalVariables[LocalVariableIndex];
+    const Service::CLocalVariableSlot& LocalVariable = LocalVariables[LocalVariableIndex];
 
     ASSERT(LocalVariable.IsInt());
 
@@ -198,9 +200,9 @@ void Impl_ILOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariabl
     ThreadStack.Push4(Int);
 }
 
-void Impl_LLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariables& LocalVariables, const usz LocalVariableIndex)
+void Impl_LLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariablesStatic& LocalVariables, const usz LocalVariableIndex)
 {
-    const Service::CLocalVariable& LocalVariable = LocalVariables[LocalVariableIndex];
+    const Service::CLocalVariableSlot& LocalVariable = LocalVariables[LocalVariableIndex];
 
     ASSERT(LocalVariable.IsLong());
 
@@ -208,9 +210,9 @@ void Impl_LLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariabl
     ThreadStack.Push8(Long);
 }
 
-void Impl_FLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariables& LocalVariables, const usz LocalVariableIndex)
+void Impl_FLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariablesStatic& LocalVariables, const usz LocalVariableIndex)
 {
-    const Service::CLocalVariable& LocalVariable = LocalVariables[LocalVariableIndex];
+    const Service::CLocalVariableSlot& LocalVariable = LocalVariables[LocalVariableIndex];
 
     ASSERT(LocalVariable.IsFloat());
 
@@ -218,9 +220,9 @@ void Impl_FLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariabl
     ThreadStack.Push4(Float);
 }
 
-void Impl_DLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariables& LocalVariables, const usz LocalVariableIndex)
+void Impl_DLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariablesStatic& LocalVariables, const usz LocalVariableIndex)
 {
-    const Service::CLocalVariable& LocalVariable = LocalVariables[LocalVariableIndex];
+    const Service::CLocalVariableSlot& LocalVariable = LocalVariables[LocalVariableIndex];
 
     ASSERT(LocalVariable.IsDouble());
 
@@ -228,9 +230,9 @@ void Impl_DLOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariabl
     ThreadStack.Push8(Double);
 }
 
-void Impl_ALOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariables& LocalVariables, const usz LocalVariableIndex)
+void Impl_ALOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariablesStatic& LocalVariables, const usz LocalVariableIndex)
 {
-    const Service::CLocalVariable& LocalVariable = LocalVariables[LocalVariableIndex];
+    const Service::CLocalVariableSlot& LocalVariable = LocalVariables[LocalVariableIndex];
 
     ASSERT(LocalVariable.IsReference());
 
@@ -245,7 +247,7 @@ DEFINE_BYTECODE_EXEC_FUNC(NOP, ThreadStack, LocalVariables, ConstantPool, OtherB
 }
 DEFINE_BYTECODE_EXEC_FUNC(ACONST_NULL, ThreadStack, LocalVariables, ConstantPool, OtherBytes)
 {
-    ThreadStack.Push8(nullptr);
+    ThreadStack.PushNullOOP();
 }
 DEFINE_BYTECODE_EXEC_FUNC(ICONST_M1, ThreadStack, LocalVariables, ConstantPool, OtherBytes)
 {
@@ -277,13 +279,13 @@ DEFINE_BYTECODE_EXEC_FUNC(ICONST_5, ThreadStack, LocalVariables, ConstantPool, O
 }
 DEFINE_BYTECODE_EXEC_FUNC(LCONST_0, ThreadStack, LocalVariables, ConstantPool, OtherBytes)
 {
-    ThreadStack.Push8((s8)0);
+    ThreadStack.Push8(static_cast<s8>(0));
 }
 
 // 10-19
 DEFINE_BYTECODE_EXEC_FUNC(LCONST_1, ThreadStack, LocalVariables, ConstantPool, OtherBytes)
 {
-    ThreadStack.Push8((s8)1);
+    ThreadStack.Push8(static_cast<s8>(1));
 }
 DEFINE_BYTECODE_EXEC_FUNC(FCONST_0, ThreadStack, LocalVariables, ConstantPool, OtherBytes)
 {
@@ -475,8 +477,6 @@ DEFINE_BYTECODE_EXEC_FUNC(IALOAD, ThreadStack, LocalVariables, ConstantPool, Oth
 
 
 
-
-
 void ExecuteBytecode(const COpcode& Opcode, BYTECODE_EXEC_FUNC_ARGS(ThreadStack, LocalVariables, ConstantPool, Args = {}))
 {
     const CBytecodeExecFunc& BytecodeExecFunc = BytecodeExecFuncs[Opcode.GetOperation()];
@@ -485,6 +485,7 @@ void ExecuteBytecode(const COpcode& Opcode, BYTECODE_EXEC_FUNC_ARGS(ThreadStack,
 
     BytecodeExecFunc(ThreadStack, LocalVariables, ConstantPool, Args);
 }
+
 
 void FillBytecodeExecFuncsTable()
 {
@@ -558,6 +559,7 @@ void FillBytecodeExecFuncsTable()
     ASSIGN_BYTECODE_EXEC_FUNC(BytecodeExecFuncs, COpcodes::IALOAD,      BYTECODE_EXEC_FUNC_NAME(IALOAD));
 #pragma endregion
 }
+*/
 
 #include <Windows.h>
 
@@ -589,17 +591,17 @@ extern "C" __declspec(dllexport) CClass* _$New_Class()
     return new CClass();
 }
 
-#include "StringUtils.h"
+#include "Util/MathUtils.h"
+#include "Util/StringUtils.h"
 #include <fstream>
 #include <variant>
 
 #include <cstddef>
 
-#include "MathUtils.h"
 
 
 #define STRUCT_FIELD_OFFSETOF(Struct, Field) ((usz)&(((Struct*)(nullptr))->Field))
-#define STRUCT_METHOD_ADDROF(Struct, Method) 0//(*reinterpret_cast<const void**>(&(Struct::Method)))
+#define STRUCT_METHOD_ADDROF(Struct, Method) 0//(*reinterpret_cast<const void*>(&(Struct::Method)))
 
 struct CFieldMeta
 {
@@ -613,7 +615,7 @@ struct CMethodMeta
     const void* MethodAddress;
 };
 
-struct alignas(sizeof(void*)) CGeneratedSample
+struct CGeneratedSample
 {
     char c;
     short s;
@@ -685,6 +687,8 @@ void test()
 #include "Compiler/Printer/CppPrinter.h"
 
 #include "ww898/utf_converters.hpp"
+#include "Execution/LocalVariables.h"
+#include "Execution/ThreadStack.h"
 
 FORCEINLINE void ConvertUtf8ToUtf16LEBytes(const Util::IStringUtf8& StringUtf8, std::vector<u1>& StringUtf16Bytes)
 {
@@ -710,43 +714,101 @@ FORCEINLINE void ConvertUtf8ToUtf16LEBytes(const Util::IStringUtf8& StringUtf8, 
     }
 }
 
+
+template <u2 NumLocals, typename T>
+FORCEINLINE void Generic_xload(CThreadStack& Stack, CLocalVariablesStatic<NumLocals>& Locals, const u2 Index)
+{
+    Stack.template Push<T>((Locals[Index].template Get<T>()));
+}
+
+template <u2 NumLocals, typename T>
+FORCEINLINE void Generic_xstore(CThreadStack& Stack, CLocalVariablesStatic<NumLocals>& Locals, const u2 Index)
+{
+    Locals[Index].template Set<T>(Stack.template Pop<T>());
+}
+
+
+
+template <u2 NumLocals>
+FORCEINLINE void aload
+(
+    CThreadStack& Stack,
+    CLocalVariablesStatic<NumLocals>& Locals,
+    const u2 Index
+)
+{
+    Stack.PushOOP(Locals.template Get<oop>(Index));
+}
+
+template <u2 NumLocals>
+FORCEINLINE void astore
+(
+    CThreadStack& Stack,
+    CLocalVariablesStatic<NumLocals>& Locals,
+    const u2 Index
+)
+{
+    Locals[Index] = Stack.Pop<oop>();
+};
+
+template <u2 NumLocals>
+FORCEINLINE void dload
+(
+    CThreadStack& Stack,
+    CLocalVariablesStatic<NumLocals>& Locals,
+    const u2 Index
+)
+{
+    Locals[Index] = Stack.Pop<oop>();
+};
+
+
+#include "JavaWorld/Oop.h"
+#include <mutex>
+
 int main()
 {
-//    $StringMeta stringMeta;
+    std::mutex m;
+    int s = sizeof(m);
 
-    Compiler::CCppPrinter P;
-    CClassReader ClassReader(R"(C:\Users\ASUS\Desktop\rt\java\lang\String.class)");
+
+    new JavaWorld::CObjectBase();
+
+
+    //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";
+
+    CClassReader ClassReader(R"(C:\Users\rcheh\Projects\Object.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;
 
     std::shared_ptr<const Compiler::CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
 
-    CConstantUtf8Info ConstantInfo(Util::CLiteralStringUtf8("AAA"));
 
+    CLocalVariablesStatic<8> LocalVariables{};
+    CThreadStack ThreadStack{ 256 };
+
+    LocalVariables.Set(2, 5);
+    aload(ThreadStack, LocalVariables, 2);
+
+    oop value = ThreadStack.Pop<oop>();
+
+    for (const Compiler::CMethodInfo& MethodInfo : ClassInfo.GetMethods())
     {
-        std::vector<std::shared_ptr<CConstantUtf8Info>> ConstantUtf8Infos = ConstantPool->GetEachOfType<CConstantUtf8Info>();
-
-
-        P.Append("const std::array<Util::CConstantUtf8Info, ").Append((usz)ConstantUtf8Infos.size()).Append("> ConstantUtf8Infos = ");
-        P.ScopeBegin();
-
-        std::vector<u1> Utf16LEBytes;
-        for (const std::shared_ptr<CConstantUtf8Info>& ConstantUtf8Info : ConstantUtf8Infos)
+        if (MethodInfo.IsNative())
         {
-            Utf16LEBytes.clear();
-            ConvertUtf8ToUtf16LEBytes(ConstantUtf8Info->GetStringUtf8(), Utf16LEBytes);
+            std::shared_ptr<Compiler::CCodeAttributeInfo> CodeAttribute =
+                MethodInfo.GetAttribute<Compiler::CCodeAttributeInfo>();
 
-            P
-                .Append("CConstantUtf8Info(Util::CLiteralStringUtf8(")
-                .AppendNTBS(Utf16LEBytes)
-                .Append(")),")
-                .NewLine();
+            const TSerializedArray<u4, u1>& Code = CodeAttribute->GetCode();
+
+            
         }
-        P.ScopeEnd().SemicolonNewLine();
+
+        //DebugBreakOrExit();
     }
 
-    std::cout << P;
+    ClassInfo.Debug_PrintClass();
 
 #if 0
     for (const auto& Method : ClassInfo.GetMethods())
@@ -804,7 +866,7 @@ int main()
 //
 //                                std::shared_ptr<CConstantClassInfo> ConstantClassInfo =
 //                                        ConstantPool->Get<CConstantClassInfo>(
-//                                                (usz) ConstantMethodRefInfo->GetClassIndex());
+//                                                (usz) ConstantMethodRefInfo->GetClassHandle());
 //                                ASSERT_NOT_NULLPTR(ConstantClassInfo);
 //
 //                                std::shared_ptr<CConstantNameAndTypeInfo> ConstantNameAndTypeInfo =

@@ -2,14 +2,14 @@
 // Created by ASUS on 29/12/2020.
 //
 
-#ifndef CPP20_TYPES_H
-#define CPP20_TYPES_H
-
+#pragma once
 
 #include <cstdint>
 #include <cstdio>
 #include <string>
 #include <fstream>
+
+#include "ExcessiveAssert.h"
 
 #define __STRINGIFY(x) #x
 #define LITERAL_TO_STRING(x) __STRINGIFY(x)
@@ -73,13 +73,3 @@ namespace Util
 {
     using WideString = std::wstring;
 }
-
-/**
- * Ordinary ObjectBase Pointer
- * Forced 64 bits for now
- */
-using oop = u8;
-
-#define STRIP_DEBUG_INFO 0
-
-#endif //CPP20_TYPES_H

@@ -26,10 +26,8 @@ namespace Util
     template<typename TNumItems, typename TItem>
     class TSerializedArray
     {
-        using VectorOfItems = std::vector<TItem>;
-
-        using TIterator = typename VectorOfItems::iterator;
-        using TConstIterator = typename VectorOfItems::const_iterator;
+        using TIterator = typename std::vector<TItem>::iterator;
+        using TConstIterator = typename std::vector<TItem>::const_iterator;
 
         static_assert(std::is_arithmetic_v<TNumItems>, "TNumItems must be arithmetic");
         static_assert(std::is_unsigned_v<TNumItems>, "TNumItems must be unsigned");
@@ -111,7 +109,7 @@ namespace Util
         }
 
 //    private:
-        VectorOfItems Items;
+        std::vector<TItem> Items;
     };
 
 

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 #include "ExcessiveAssert.h"
 
 // Include all constant info subclasses to avoid including them explicitly

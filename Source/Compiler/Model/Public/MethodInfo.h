@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 #include "SerializedArray.h"
 
 namespace Compiler
@@ -96,6 +96,13 @@ namespace Compiler
         std::vector<std::shared_ptr<T>> GetAttributes() const
         {
             return CAttributeInfo::GetAttributesOfType<T>(Attributes);
+        }
+
+        // Sugar
+
+        [[nodiscard]] FORCEINLINE bool IsNative() const
+        {
+            return Util::CMathUtils::EnumHasFlag(AccessFlags, EMethodAccessFlags::ACC_NATIVE);
         }
 
         [[nodiscard]]

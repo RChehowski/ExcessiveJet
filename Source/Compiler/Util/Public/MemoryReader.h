@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 #include "ExcessiveAssert.h"
 #include "ByteOrder.h"
-#include "MathUtils.h"
+#include "Util/MathUtils.h"
 #include "Allocation.h"
 
 #include <string>

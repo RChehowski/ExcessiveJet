@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 #include "ByteOrder.h"
 
 namespace Util

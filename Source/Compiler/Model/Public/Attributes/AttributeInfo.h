@@ -4,11 +4,9 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 #include "ClassVersion.h"
 #include "SerializedArray.h"
-
-#include "Interfaces/ToStringable.h"
 
 #include <vector>
 
@@ -122,8 +120,7 @@ namespace Compiler
         template <class T>
         static std::shared_ptr<T> GetAttributeOfType(const Util::TStandardSerializedArray<CSharedAttributeInfo>& InAttributes)
         {
-            static_assert(std::is_base_of_v<CAttributeInfo, T>,
-                    "T must be a subclass of CAttributeInfo");
+            static_assert(std::is_base_of_v<CAttributeInfo, T>, "T must be a subclass of CAttributeInfo");
 
             for (const CSharedAttributeInfo& SharedAttributeInfo : InAttributes)
             {
@@ -141,8 +138,7 @@ namespace Compiler
         template <class T>
         static std::vector<std::shared_ptr<T>> GetAttributesOfType(const Util::TStandardSerializedArray<CSharedAttributeInfo>& InAttributes)
         {
-            static_assert(std::is_base_of_v<CAttributeInfo, T>,
-                          "T must be a subclass of CAttributeInfo");
+            static_assert(std::is_base_of_v<CAttributeInfo, T>, "T must be a subclass of CAttributeInfo");
 
             std::vector<std::shared_ptr<T>> Result;
 

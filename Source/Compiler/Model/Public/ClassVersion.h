@@ -4,16 +4,15 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 
 #include <sstream>
-#include "Interfaces/ToStringable.h"
 
 namespace Compiler
 {
     class CClassReader;
 
-    class CClassVersion : public IToStringable
+    class CClassVersion
     {
     public:
         constexpr CClassVersion(u2 InMajorVersion, u2 InMinorVersion)
@@ -58,7 +57,7 @@ namespace Compiler
         }
 
         [[nodiscard]]
-        std::string ToString() const override
+        std::string ToString() const
         {
             std::ostringstream Oss;
             Oss << MajorVersion << "." << MinorVersion;

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Types.h"
+#include "Util/Types.h"
 #include "SerializedArray.h"
 #include "Attributes/AttributeInfo.h"
 
