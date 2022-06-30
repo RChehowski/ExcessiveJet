@@ -6,8 +6,8 @@
 
 #include "Util/Types.h"
 #include "JavaWorld/Oop.h"
-#include "Platform/Memory.h"
-#include "ExcessiveAssert.h"
+#include "Util/Platform/Memory.h"
+#include "Util/ExcessiveAssert.h"
 
 #define DEBUG_THREAD_STACK 1
 #if DEBUG_THREAD_STACK

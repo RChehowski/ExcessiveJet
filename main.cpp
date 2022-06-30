@@ -1,14 +1,15 @@
 
 #include <array>
 
-#include "ClassReader.h"
-#include "ClassInfo.h"
-#include "MethodInfo.h"
+#include "Model/ClassReader.h"
+#include "Model/ClassInfo.h"
+#include "Model/MethodInfo.h"
 
-#include "ExcessiveAssert.h"
+#include "Util/ExcessiveAssert.h"
+#include "Util/Bits.h"
 
-#include "Attributes/CodeAttributeInfo.h"
-#include "Attributes/LineNumberTableAttributeInfo.h"
+#include "Model/Attributes/CodeAttributeInfo.h"
+#include "Model/Attributes/LineNumberTableAttributeInfo.h"
 #include "JavaWorld/ObjectBase.h"
 
 
@@ -45,12 +46,12 @@ void TraverseDirectory(const std::string& Root, std::function<void(const std::st
 }
 
 #include <stack>
-#include <ConstantPool/ConstantIntegerInfo.h>
-#include <ConstantPool/ConstantFloatInfo.h>
-#include <ConstantPool/ConstantLongInfo.h>
-#include <ConstantPool/ConstantDoubleInfo.h>
+#include <Model/ConstantPool/ConstantIntegerInfo.h>
+#include <Model/ConstantPool/ConstantFloatInfo.h>
+#include <Model/ConstantPool/ConstantLongInfo.h>
+#include <Model/ConstantPool/ConstantDoubleInfo.h>
 
-#include "Opcodes.h"
+#include "Bytecode/Opcodes.h"
 #include "Bits.h"
 
 #include "Util/FileSystem.h"
@@ -684,7 +685,7 @@ void test()
 #include <algorithm>
 #include <random>
 
-#include "Compiler/Printer/CppPrinter.h"
+#include "Printer/CppPrinter.h"
 
 #include "ww898/utf_converters.hpp"
 #include "Execution/LocalVariables.h"

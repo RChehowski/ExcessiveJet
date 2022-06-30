@@ -5,8 +5,10 @@
 #pragma once
 
 #include "Util/Types.h"
-#include "ExcessiveAssert.h"
+#include "Util/ExcessiveAssert.h"
 #include "Util/MathUtils.h"
+
+#include <numeric>
 
 #define USE_COMPRESSED_OOPS ((1) && IS_BITNESS(64))
 
@@ -31,7 +33,7 @@ constexpr usz oopAlignment = static_cast<usz>(1) << oopAlignmentShift;
 
 struct CObjectHeapDimension
 {
-    static constexpr usz CompressedBitMask = static_cast<usz>(std::numeric_limits<u4>::max());
+    static constexpr usz CompressedBitMask = 0xFFFFFFFFULL;
     static constexpr usz UncompressedBitMask = CompressedBitMask << oopAlignmentShift;
 
     static constexpr usz Size = UncompressedBitMask + static_cast<usz>(1);

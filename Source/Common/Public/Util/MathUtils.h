@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Util/Types.h"
-#include "Platform/Memory.h"
+#include "Util/Platform/Memory.h"
 
 namespace Util
 {
