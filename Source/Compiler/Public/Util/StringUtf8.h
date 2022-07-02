@@ -102,8 +102,7 @@ namespace Util
 
         explicit operator std::string() const
         {
-            std::string AsString((char*)Bytes, NumBytes);
-            return std::move(AsString);
+            return std::string {(char*)Bytes, NumBytes };
         }
 
         IStringUtf8& operator=(IStringUtf8&& Other) noexcept

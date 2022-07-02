@@ -23,7 +23,7 @@ namespace Util
             fread(Allocation.Get<void*>(), FileSize, 1, File);
             fclose(File);
 
-            return std::move(Allocation);
+            return Allocation;
         }
         else
         {

@@ -62,7 +62,7 @@ namespace Compiler
             });
         }
 
-        return std::move(Map);
+        return Map;
     }
 
     const AttributeNamesMap G_AttributeNamesMap = GetAttributeNamesMap();

@@ -43,7 +43,7 @@ namespace Compiler
         std::shared_ptr<CElementValue> ElementValue = NewElementValue(Tag);
         ElementValue->DeserializeFrom(ClassReader);
 
-        return std::move(ElementValue);
+        return ElementValue;
     }
 
     void operator>> (CClassReader& ClassReader,

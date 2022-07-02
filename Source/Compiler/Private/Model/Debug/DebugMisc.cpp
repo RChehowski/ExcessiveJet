@@ -21,7 +21,7 @@ namespace Debug
             Oss << "[]";
         }
 
-        return std::move(Oss.str());
+        return Oss.str();
     }
 
     std::vector<std::string> SplitMethodArguments(std::string& TypeString)
@@ -40,25 +40,25 @@ namespace Debug
             {
                 const char FirstChar = TypeString[Index];
 
-                bool IsPrimitive;
-                switch (FirstChar)
+                bool bIsPrimitive = [FirstChar]
                 {
-                    case 'Z':
-                    case 'B':
-                    case 'C':
-                    case 'S':
-                    case 'I':
-                    case 'J':
-                    case 'F':
-                    case 'D':
-                        IsPrimitive = true;
-                        break;
+                    switch (FirstChar)
+                    {
+                        case 'Z':
+                        case 'B':
+                        case 'C':
+                        case 'S':
+                        case 'I':
+                        case 'J':
+                        case 'F':
+                        case 'D':
+                            return true;
+                        default:
+                            return false;
+                    }
+                }();
 
-                    default:
-                        IsPrimitive = false;
-                }
-
-                if (IsPrimitive)
+                if (bIsPrimitive)
                 {
                     Result.push_back(TypeString.substr(Begin, (Index - Begin) + 1));
 
@@ -105,7 +105,7 @@ namespace Debug
             }
         }
 
-        return std::move(Result);
+        return Result;
     }
 
     std::string DecodeType(const std::string& TypeString)
