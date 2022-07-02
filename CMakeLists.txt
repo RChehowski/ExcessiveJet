@@ -10,15 +10,10 @@ include_directories(Source/Compiler/Public)
 include_directories(third-party)
 
 set(UnityBuildFiles
-# Common
     Source/Common/Private/_Unity_Common_.cpp
-    Source/Compiler/Private/_Unity_Compiler_.cpp)
+    Source/Compiler/Private/_Unity_Compiler_.cpp
+)
 
 include_directories(Source)
-include_directories(Source/Compiler/Model/Public)
-include_directories(Source/Compiler/Util/Public)
 
-add_executable(${CMAKE_PROJECT_NAME}
-    main.cpp
-    "${UnityBuildFiles}"
-)
+add_executable(${CMAKE_PROJECT_NAME} main.cpp "${UnityBuildFiles}")

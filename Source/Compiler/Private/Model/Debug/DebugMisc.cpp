@@ -80,14 +80,17 @@ namespace Debug
                         {
                             Begin = Index;
                         }
-                        // Otherwise this is an an array of objects, we should not move `Begin`
+                        // Otherwise this is an array of objects, we should not move `Begin`
 
                         bObjectScanInProgress = true;
                     }
                     else
                     {
-                        ASSERT_MSG(false,
-                           "Unknown first char: %c. TypeString: %s, Index: %llu", FirstChar, TypeString.c_str(), Index);
+                        ASSERT_MSG(false, "Unknown first char: %c. TypeString: %s, Index: %llu",
+                           FirstChar,
+                           TypeString.c_str(),
+                           (unsigned long long)Index
+                       );
                     }
                 }
             }

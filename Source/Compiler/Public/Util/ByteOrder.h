@@ -51,23 +51,12 @@ namespace Util
 
         static constexpr const CByteOrder* GetNativeEndian()
         {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-            return GetLittleEndian();
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-            return GetBigEndian();
-#else
-            #error "Unknown endian!"
-#endif
-        }
-
-        static constexpr bool IsNativeEndian(const CByteOrder* const ByteOrder)
-        {
-            return GetNativeEndian() == ByteOrder;
+            return IsNativeLittleEndian() ? GetLittleEndian() : GetBigEndian();
         }
 
     private:
-        static constexpr const CByteOrder BigEndian = CByteOrder("Big Endian");
-        static constexpr const CByteOrder LittleEndian = CByteOrder("Little Endian");
+        static constexpr const CByteOrder BigEndian { "Big Endian" };
+        static constexpr const CByteOrder LittleEndian { "Little Endian" };
     };
 
     constexpr bool CByteOrder::IsNative() const

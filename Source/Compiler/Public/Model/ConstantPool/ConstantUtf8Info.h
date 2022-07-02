@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ConstantPool/ConstantInfo.h"
+#include "Model/ConstantPool/ConstantInfo.h"
 #include "Util/StringUtf8.h"
 
 namespace Compiler

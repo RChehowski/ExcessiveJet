@@ -68,10 +68,9 @@ namespace Util
 
         for (usz ItemByteIndex = (usz)0; ItemByteIndex < SizeOfItem; ++ItemByteIndex)
         {
-            const usz OutByteIndex = Util::CByteOrders::IsNativeEndian(ByteOrder)
-                                     ? ItemByteIndex
-                                     : (SizeOfItem - ItemByteIndex) - 1
-            ;
+            const usz OutByteIndex = ByteOrder->IsNative()
+                    ? ItemByteIndex
+                    : (SizeOfItem - ItemByteIndex) - 1;
 
             *OutByteArray[OutByteIndex] = ItemBytes[ItemByteIndex];
         }

@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Util/Types.h"
-#include "ConstantPool.h"
+#include "Model/ConstantPool.h"
 
 #include "Model/FieldInfo.h"
 #include "Model/MethodInfo.h"

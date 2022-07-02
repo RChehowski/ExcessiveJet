@@ -27,6 +27,9 @@
 #endif // IS_BITNESS
 
 
+using Util::CMathUtils;
+
+
 constexpr usz oopAlignmentShift = 3;
 constexpr usz oopAlignment = static_cast<usz>(1) << oopAlignmentShift;
 

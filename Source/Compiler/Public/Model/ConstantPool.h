@@ -8,7 +8,7 @@
 #include "Util/ExcessiveAssert.h"
 
 // Include all constant info subclasses to avoid including them explicitly
-#include "ConstantPool/ConstantInfos.h"
+#include "Model/ConstantPool/ConstantInfos.h"
 
 #include <vector>
 #include <functional>

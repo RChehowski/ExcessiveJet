@@ -47,7 +47,7 @@ using f8 = double;
 #define IS_BITNESS( X ) IS_BITNESS_PRIVATE_DEFINITION_##X()
 
 // Bitness checks borrowed from https://stackoverflow.com/a/12338526/201787
-#if _WIN64 || (__GNUC__ && __x86_64__)
+#if _WIN64 || (__GNUC__ && __x86_64__) || (defined(__APPLE__) && defined(__MACH__))
     #define IS_BITNESS_PRIVATE_DEFINITION_64() 1
     #define IS_BITNESS_PRIVATE_DEFINITION_32() 0
     static_assert(sizeof(void*) == 8, "Pointer size is unexpected for this bitness");
@@ -67,6 +67,32 @@ using f8 = double;
     using usz = u4;
     using ssz = s4;
 #endif
+
+// Determine endian
+#if defined(__BYTE_ORDER__)
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        #define EJ_LITTLE_ENDIAN (1)
+        #define EJ_BIG_ENDIAN (0)
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        #define EJ_LITTLE_ENDIAN (0)
+        #define EJ_BIG_ENDIAN (1)
+    #else
+        #error Unknown endian!
+    #endif
+#else
+    #error Can not determine endian
+#endif
+
+
+constexpr bool IsNativeLittleEndian()
+{
+    return EJ_LITTLE_ENDIAN;
+}
+
+constexpr bool IsNativeBigEndian()
+{
+    return EJ_BIG_ENDIAN;
+}
 
 
 namespace Util

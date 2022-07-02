@@ -52,7 +52,7 @@ void TraverseDirectory(const std::string& Root, std::function<void(const std::st
 #include <Model/ConstantPool/ConstantDoubleInfo.h>
 
 #include "Bytecode/Opcodes.h"
-#include "Bits.h"
+#include "Util/Bits.h"
 
 #include "Util/FileSystem.h"
 
@@ -137,6 +137,9 @@ FORCEINLINE void Impl_LDC(CThreadStack& ThreadStack, const Compiler::CConstantPo
 
     switch (ConstantInfo->GetConstantPoolInfoTag())
     {
+        default:
+            break;
+
         case Compiler::EConstantPoolInfoTag::Utf8:
             break;
         case Compiler::EConstantPoolInfoTag::Integer:
@@ -562,8 +565,6 @@ void FillBytecodeExecFuncsTable()
 }
 */
 
-#include <Windows.h>
-
 
 enum class EClassLoadStatus
 {
@@ -587,10 +588,6 @@ public:
     }
 };
 
-extern "C" __declspec(dllexport) CClass* _$New_Class()
-{
-    return new CClass();
-}
 
 #include "Util/MathUtils.h"
 #include "Util/StringUtils.h"
@@ -681,7 +678,7 @@ void test()
     puts("Hello");
 }
 
-#include "Bits.h"
+#include "Util/Bits.h"
 #include <algorithm>
 #include <random>
 
