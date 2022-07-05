@@ -14,21 +14,18 @@ namespace Util
 {
     namespace Private
     {
-        void LazyMallocInit()
+        struct CRpMallocThreadLocalInitializer
         {
-            static std::atomic_bool bInitialized = false;
-            bool bInitialized_Expected = false;
-            if (bInitialized.compare_exchange_strong(bInitialized_Expected, true))
-            {
-                rpmalloc_initialize();
-            }
-
-            static thread_local bool bThreadInitialized = false;
-            if (bThreadInitialized)
+            FORCEINLINE CRpMallocThreadLocalInitializer()
             {
                 rpmalloc_thread_initialize();
             }
-        }
+
+            FORCEINLINE ~CRpMallocThreadLocalInitializer()
+            {
+                rpmalloc_thread_finalize(1);
+            }
+        };
     }
 
     void CMemory::Memcpy(void* const Dst, const void* const Src, const usz NumBytes)
@@ -43,7 +40,7 @@ namespace Util
 
     void* CMemory::MallocImpl(usz Size, usz Alignment)
     {
-        Private::LazyMallocInit();
+        static thread_local Private::CRpMallocThreadLocalInitializer Initializer{};
 
         return rpaligned_alloc(Alignment, Size);
     }
@@ -57,7 +54,40 @@ namespace Util
     {
         memset(Ptr, 0, Size);
     }
+
+    std::optional<CMemoryStatistics> CMemory::GetStatistics()
+    {
+#if ENABLE_STATISTICS
+        rpmalloc_global_statistics_t RawStatistics;
+        rpmalloc_global_statistics(&RawStatistics);
+
+        CMemoryStatistics MemoryStatistics {};
+        MemoryStatistics.Mapped         = static_cast<usz>(RawStatistics.mapped);
+        MemoryStatistics.MappedPeak     = static_cast<usz>(RawStatistics.mapped_peak);
+        MemoryStatistics.Cached         = static_cast<usz>(RawStatistics.cached);
+        MemoryStatistics.HugeAlloc      = static_cast<usz>(RawStatistics.huge_alloc);
+        MemoryStatistics.HugeAllocPeak  = static_cast<usz>(RawStatistics.huge_alloc_peak);
+        MemoryStatistics.MappedTotal    = static_cast<usz>(RawStatistics.mapped_total);
+        MemoryStatistics.UnmappedTotal  = static_cast<usz>(RawStatistics.unmapped_total);
+
+        return { MemoryStatistics };
+#endif // ENABLE_STATISTICS
+
+        return {};
+    }
 }
+
+#pragma section(".CRT$XLAB", long, read)
+
+//extern void rpmalloc_set_main_thread(void);
+
+static void __stdcall thread_init(void *mod, unsigned long reason, void *reserved)
+{
+    rpmalloc_initialize();
+    //rpmalloc_set_main_thread();
+}
+
+__declspec(allocate(".CRT$XLAB")) void (__stdcall *_thread_init)(void *, unsigned long, void *) = thread_init;
 
 
 using Util::CMemory;
@@ -101,17 +131,17 @@ extern void* EXJ_CRTDECL operator new[](std::size_t size, const std::nothrow_t& 
 }
 
 #if (__cplusplus >= 201402L || _MSC_VER >= 1916)
-extern void EXJ_CRTDECL operator delete(void* p, std::size_t size) noexcept
-{
-    (void)sizeof(size);
-    CMemory::Free(p);
-}
+    extern void EXJ_CRTDECL operator delete(void* p, std::size_t size) noexcept
+    {
+        (void)sizeof(size);
+        CMemory::Free(p);
+    }
 
-extern void EXJ_CRTDECL operator delete[](void* p, std::size_t size) noexcept
-{
-    (void)sizeof(size);
-    CMemory::Free(p);
-}
+    extern void EXJ_CRTDECL operator delete[](void* p, std::size_t size) noexcept
+    {
+        (void)sizeof(size);
+        CMemory::Free(p);
+    }
 #endif
 
 

@@ -2,13 +2,35 @@
 // Created by ASUS on 30/12/2020.
 //
 
-#ifndef CPP20_CMEMORY_H
-#define CPP20_CMEMORY_H
+#pragma once
+
+#include <optional>
 
 #include "Util/Platform/Misc.h"
 
 namespace Util
 {
+    struct CMemoryStatistics
+    {
+        //! Current amount of virtual memory mapped, all of which might not have been committed
+        usz Mapped;
+        //! Peak amount of virtual memory mapped, all of which might not have been committed
+        usz MappedPeak;
+
+        //! Current amount of memory in global caches for small and medium sizes (<32KiB)
+        usz Cached;
+
+        //! Current amount of memory allocated in huge allocations, i.e larger than LARGE_SIZE_LIMIT which is 2MiB by default
+        usz HugeAlloc;
+        //! Peak amount of memory allocated in huge allocations, i.e larger than LARGE_SIZE_LIMIT which is 2MiB by default
+        usz HugeAllocPeak;
+
+        //! Total amount of memory mapped since initialization
+        usz MappedTotal;
+        //! Total amount of memory unmapped since initialization
+        usz UnmappedTotal;
+    };
+
     class CMemory
     {
         static void Memcpy(void* const Dst, const void* const Src, const usz NumBytes);
@@ -38,7 +60,6 @@ namespace Util
             MemZero((void*)&Item, sizeof(T));
         }
 
-
         template<typename TDst, typename TSrc>
         static void Memcpy(TDst* const Dst, const TSrc* const Src, const usz NumBytes)
         {
@@ -58,8 +79,7 @@ namespace Util
                 NumBytes
             );
         }
+
+        static std::optional<CMemoryStatistics> GetStatistics();
     };
 }
-
-
-#endif //CPP20_CMEMORY_H
