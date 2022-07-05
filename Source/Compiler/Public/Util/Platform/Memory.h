@@ -20,6 +20,8 @@ namespace Util
     public:
         static constexpr usz DefaultMallocAlignment = sizeof(void*);
 
+        static bool bInitialized;
+
         template<class T>
         FORCEINLINE static T* Malloc(usz Size, usz Alignment = CMemory::DefaultMallocAlignment)
         {

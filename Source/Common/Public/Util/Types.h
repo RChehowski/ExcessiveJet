@@ -69,29 +69,20 @@ using f8 = double;
 #endif
 
 // Determine endian
-#if defined(__BYTE_ORDER__)
-    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-        #define EJ_LITTLE_ENDIAN (1)
-        #define EJ_BIG_ENDIAN (0)
-    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-        #define EJ_LITTLE_ENDIAN (0)
-        #define EJ_BIG_ENDIAN (1)
-    #else
-        #error Unknown endian!
-    #endif
-#else
-    #error Can not determine endian
-#endif
-
+namespace PrivateEndian
+{
+    constexpr u4 _u4 = 0x01000002UL;
+    constexpr u1 _u1 = (const u1&)_u4;
+}
 
 constexpr bool IsNativeLittleEndian()
 {
-    return EJ_LITTLE_ENDIAN;
+    return (u4)PrivateEndian::_u1 == 0x02UL;
 }
 
 constexpr bool IsNativeBigEndian()
 {
-    return EJ_BIG_ENDIAN;
+    return (u4)PrivateEndian::_u1 == 0x01UL;
 }
 
 

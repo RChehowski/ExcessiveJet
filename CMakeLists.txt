@@ -8,8 +8,12 @@ include_directories(Source/Common/Public)
 include_directories(Source/Compiler/Public)
 
 include_directories(third-party)
+include_directories(third-party/rpmalloc)
 
 set(UnityBuildFiles
+    third-party/rpmalloc/malloc.c
+    third-party/rpmalloc/rpmalloc.c
+
     Source/Common/Private/_Unity_Common_.cpp
     Source/Compiler/Private/_Unity_Compiler_.cpp
 )
