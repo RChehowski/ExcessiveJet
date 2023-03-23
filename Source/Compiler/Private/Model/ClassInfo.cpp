@@ -17,31 +17,6 @@
 
 namespace Compiler
 {
-    void CClassInfo::Deserialize(CClassReader& Reader, EClassInfoDeserializingMode ClassInfoDeserializingMode)
-    {
-        ASSERT(Reader.IsAtBegin());
-
-        Reader >> Magic;
-        ASSERT(Magic == 0xCAFEBABE);
-
-        Reader >> ClassVersion;
-
-        Reader >> ConstantPool;
-        Reader.SetConstantPool(ConstantPool);
-
-        Reader >> AccessFlags;
-        Reader >> ThisClass;
-        Reader >> SuperClass;
-
-        Reader >> Interfaces;
-        Reader >> Fields;
-        Reader >> Methods;
-
-        Reader >> Attributes;
-
-        ASSERT(Reader.IsAtEnd());
-    }
-
     const Util::IStringUtf8& CClassInfo::GetNameString() const
     {
         std::shared_ptr<CConstantClassInfo> ThisClassInfo =
@@ -144,11 +119,11 @@ namespace Compiler
             Oss << " extends " << SuperClassNameInfo->GetStringUtf8();
         }
 
-        if (!Interfaces.IsEmpty())
+        if (!Interfaces.empty())
         {
             Oss << " implements ";
 
-            usz InterfacesLeft = Interfaces.Size();
+            usz InterfacesLeft = Interfaces.size();
             for (u2 InterfaceClassIndex : Interfaces)
             {
                 std::shared_ptr<CConstantClassInfo> InterfaceClassInfo =
@@ -180,7 +155,7 @@ namespace Compiler
     {
         std::ostringstream Oss;
 
-        Oss << "========== FIELDS  (" << Fields.Size() << ") ==========" << std::endl;
+        Oss << "========== FIELDS  (" << Fields.size() << ") ==========" << std::endl;
 
         for (const CFieldInfo& FieldInfo : Fields)
         {
@@ -194,7 +169,7 @@ namespace Compiler
     {
         std::ostringstream Oss;
 
-        Oss << "========== METHODS (" << Methods.Size() << ") ==========" << std::endl;
+        Oss << "========== METHODS (" << Methods.size() << ") ==========" << std::endl;
 
         for (const CMethodInfo& MethodInfo : Methods)
         {
@@ -202,5 +177,35 @@ namespace Compiler
         }
 
         std::cout << Oss.str();
+    }
+
+    void operator>>(CClassReader &Reader, CClassInfo &Instance)
+    {
+        ASSERT(Reader.IsAtBegin());
+
+        Reader >> Instance.Magic;
+        ASSERT(Instance.Magic == 0xCAFEBABE);
+
+        Reader >> Instance.ClassVersion;
+
+        Reader >> Instance.ConstantPool;
+
+        // The reader will need to access the constant pool to deserialize attributes
+        Reader.SetConstantPool(Instance.ConstantPool);
+
+        Reader >> Instance.AccessFlags;
+        Reader >> Instance.ThisClass;
+        Reader >> Instance.SuperClass;
+
+        Reader >> Instance.Interfaces;
+        Reader >> Instance.Fields;
+        Reader >> Instance.Methods;
+
+        Reader >> Instance.Attributes;
+
+        // Constant pool is not needed anymore
+        Reader.SetConstantPool(nullptr);
+
+        ASSERT(Reader.IsAtEnd());
     }
 }

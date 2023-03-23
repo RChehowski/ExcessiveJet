@@ -83,7 +83,8 @@ namespace Compiler
 
     CSharedAttributeInfo NewAttributeInfo(const Util::IStringUtf8& AttributeNameString)
     {
-        static const CAttributeInfoSpawners G_AttributeInfoSpawners {
+        static const CAttributeInfoSpawners G_AttributeInfoSpawners
+        {
             ADD_ATTRIBUTE_INFO_SPAWNER(Code),
             ADD_ATTRIBUTE_INFO_SPAWNER(Synthetic),
             ADD_ATTRIBUTE_INFO_SPAWNER(Signature),
@@ -113,7 +114,8 @@ namespace Compiler
     {
         Util::TStandardSerializedArray<CSharedAttributeInfo>::NumItemsType NumItems = 0;
         Reader >> NumItems;
-        Instance.Clear(NumItems);
+        Instance.clear();
+        Instance.reserve(NumItems);
 
         for (usz Index = 0; Index < (usz)NumItems; ++Index)
         {
@@ -132,7 +134,7 @@ namespace Compiler
                 AttributeInfo->DeserializeFrom(Reader);
             }
 
-            Instance.Items.push_back(std::move(AttributeInfo));
+            Instance.push_back(std::move(AttributeInfo));
         }
 
         return Reader;

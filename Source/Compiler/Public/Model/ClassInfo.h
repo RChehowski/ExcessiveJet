@@ -59,14 +59,7 @@ namespace Compiler
     class CClassInfo
     {
     public:
-        void Deserialize(CClassReader& Reader,
-                         EClassInfoDeserializingMode ClassInfoDeserializingMode = EClassInfoDeserializingMode::All
-        );
-
-        FORCEINLINE friend void operator>>(CClassReader& Reader, CClassInfo& Instance)
-        {
-            Instance.Deserialize(Reader, EClassInfoDeserializingMode::All);
-        }
+        friend void operator>>(CClassReader& Reader, CClassInfo& Instance);
 
         [[nodiscard]]
         FORCEINLINE std::shared_ptr<const CConstantPool> GetConstantPool() const

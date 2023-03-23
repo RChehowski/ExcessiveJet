@@ -43,9 +43,6 @@ namespace Compiler
         Invalid_NotATag = 255
     };
 
-    // For debugging purposes, to fill holes in the jump table
-    constexpr u1 UnusedConstantPoolInfoTags[] = { 2, 13, 14, 17 };
-
 
     class CConstantInfo
     {
@@ -95,7 +92,7 @@ namespace Compiler
             }
         }
 
-        static std::shared_ptr<CConstantInfo> NewConstantInfo(const EConstantPoolInfoTag ConstantPoolInfoTag);
+        static std::shared_ptr<CConstantInfo> NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
 
         static constexpr const char* ConstantPoolInfoTagToString(const EConstantPoolInfoTag ConstantPoolInfoTag)
         {

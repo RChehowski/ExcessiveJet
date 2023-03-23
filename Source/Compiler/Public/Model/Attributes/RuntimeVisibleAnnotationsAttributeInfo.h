@@ -32,23 +32,9 @@ namespace Compiler
     };
 
     class CElementValue;
-    class CElementValuePair;
 
     void operator>> (CClassReader& ClassReader,
                      Util::TStandardSerializedArray<std::shared_ptr<CElementValue>> ElementValues);
-
-    class CAnnotation
-    {
-    public:
-        CAnnotation() = default;
-        ~CAnnotation() = default;
-
-        friend void operator>> (CClassReader& ClassReader, CAnnotation& Instance);
-
-    private:
-        u2 TypeIndex = (u2)0;
-        Util::TStandardSerializedArray<CElementValuePair> ElementValuePairs;
-    };
 
     class CElementValuePair
     {
@@ -61,6 +47,19 @@ namespace Compiler
     private:
         u2 ElementNameIndex = (u2)0;
         std::shared_ptr<CElementValue> Value;
+    };
+
+    class CAnnotation
+    {
+    public:
+        CAnnotation() = default;
+        ~CAnnotation() = default;
+
+        friend void operator>> (CClassReader& ClassReader, CAnnotation& Instance);
+
+    private:
+        u2 TypeIndex = (u2)0;
+        Util::TStandardSerializedArray<CElementValuePair> ElementValuePairs;
     };
 
 

@@ -10,7 +10,7 @@
 
 namespace Compiler
 {
-    using CConstantInfoSpawnFunction = std::function<std::shared_ptr<CConstantInfo>()>;
+    typedef std::shared_ptr<CConstantInfo> (*CConstantInfoSpawnFunction)();
 
     using CConstantInfoSpawnFunctionTable = std::array<CConstantInfoSpawnFunction, (usz)EConstantPoolInfoTag::Num>;
 
@@ -87,9 +87,18 @@ namespace Compiler
         }
 
 
-        const CConstantInfoSpawnFunctionTable GetConstantInfoSpawnFunctions()
+        std::shared_ptr<CConstantInfo> New_UNUSED_TAG()
         {
-            CConstantInfoSpawnFunctionTable Table {};
+            ASSERT_MSG(false, "Unsupported tag");
+
+            // Never supposed to be returned
+            return std::shared_ptr<CConstantInfo>{ nullptr };
+        }
+
+
+        constexpr CConstantInfoSpawnFunctionTable GetConstantInfoSpawnFunctions()
+        {
+            CConstantInfoSpawnFunctionTable Table { nullptr };
 
             // Note that there will be "holes" in this array (by default assigned to nullptr) because these tags are not consecutive
             // but the losses are minor and array a lot faster than map.
@@ -108,32 +117,19 @@ namespace Compiler
             Table[(usz)EConstantPoolInfoTag::MethodType]            = New_ConstantMethodTypeInfo;
             Table[(usz)EConstantPoolInfoTag::InvokeDynamic]         = New_ConstantInvokeDynamicInfo;
 
-            // Fill the holes (unused tags)
-            for (const u1 UnusedConstantPoolInfoTag : UnusedConstantPoolInfoTags)
-            {
-                Table[(usz)UnusedConstantPoolInfoTag] = [UnusedConstantPoolInfoTag]()
-                {
-                    ASSERT_MSG(false, "Unsupported tag: %d", (int)UnusedConstantPoolInfoTag);
-
-                    // Never supposed to be returned
-                    return std::shared_ptr<CConstantInfo>{ nullptr };
-                };
-            }
-
             return Table;
         }
     }
 
-    static const CConstantInfoSpawnFunctionTable ConstantInfoSpawnFunctions =
-            Private::GetConstantInfoSpawnFunctions();
+    static constexpr CConstantInfoSpawnFunctionTable ConstantInfoSpawnFunctions = Private::GetConstantInfoSpawnFunctions();
 
     std::shared_ptr<CConstantInfo> CConstantInfo::NewConstantInfo(const EConstantPoolInfoTag ConstantPoolInfoTag)
     {
         const usz ConstantPoolInfoTagAsSize = (usz)ConstantPoolInfoTag;
         ASSERT((ConstantPoolInfoTagAsSize >= (usz)0) && (ConstantPoolInfoTagAsSize < (usz)ConstantInfoSpawnFunctions.size()));
 
-        const CConstantInfoSpawnFunction& ConstantInfoSpawnFunction = ConstantInfoSpawnFunctions[ConstantPoolInfoTagAsSize];
-        ASSERT(ConstantInfoSpawnFunction != nullptr);
+        const CConstantInfoSpawnFunction ConstantInfoSpawnFunction = ConstantInfoSpawnFunctions[ConstantPoolInfoTagAsSize];
+        ASSERT_MSG(ConstantInfoSpawnFunction != nullptr, "Invalid tag: %d", static_cast<int>(ConstantPoolInfoTagAsSize));
 
         // Invoke the spawner function that will create an instance for us.
         return ConstantInfoSpawnFunction();
@@ -141,6 +137,7 @@ namespace Compiler
 
     void operator>>(CClassReader &Reader, CConstantInfo &Instance)
     {
+        // Note that DeserializeFrom() is a virtual call
         Instance.DeserializeFrom(Reader);
     }
 }

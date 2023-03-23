@@ -56,7 +56,7 @@ namespace Compiler
         {
             std::shared_ptr<CElementValue> ElementValue = ReadElementValue(ClassReader);
 
-            ElementValues.Items.push_back(std::move(ElementValue));
+            ElementValues.push_back(std::move(ElementValue));
         }
     }
 
