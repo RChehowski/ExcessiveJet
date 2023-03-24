@@ -15,6 +15,23 @@ namespace DebugBytecodePrinter
     {
         std::ostream& stream;
         std::shared_ptr<Compiler::CConstantPool> ConstantPool;
+
+        const TSerializedArray<u4, u1>& Code;
+        mutable u4 Index = 0;
+
+//        explicit CDebugPrinterContext(const TSerializedArray<u4, u1>& InCode) : Code(InCode)
+//        {
+//        }
+
+        [[nodiscard]] FORCEINLINE u1 NextByte() const
+        {
+            return Code[Index++];
+        }
+
+        [[nodiscard]] FORCEINLINE bool IsAtEnd() const
+        {
+            return Code.size() == Index;
+        }
     };
 
 #define DECLARE_OPCODE_PRINTER(_Opcode) void Print_##_Opcode(const CDebugPrinterContext& Context);
@@ -263,8 +280,13 @@ namespace DebugBytecodePrinter
     DECLARE_OPCODE_PRINTER(GOTO_W)
     DECLARE_OPCODE_PRINTER(JSR_W)
 
-#undef DECLARE_OPCODE_PRINTER;
+#undef DECLARE_OPCODE_PRINTER
 };
 
 
 #endif //EXCESSIVE_DEBUGBYTECODEPRINTER_H
+
+namespace DebugBytecodePrinter
+{
+    void PrintBytecode(CDebugPrinterContext& DebugPrinterContext);
+}
