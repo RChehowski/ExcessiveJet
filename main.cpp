@@ -56,7 +56,6 @@ void TraverseDirectory(const std::string& Root, std::function<void(const std::st
 
 #include "Util/FileSystem.h"
 
-using Bytecode::COpcodes;
 using Bytecode::COpcode;
 
 #include "Execution/ThreadStack.h"
@@ -108,7 +107,6 @@ typedef void (*CBytecodeExecFunc)(
         Compiler::CConstantPool& ConstantPool,
         const std::initializer_list<u1>& OtherBytes
 );
-CBytecodeExecFunc BytecodeExecFuncs[Bytecode::NumOpcodes];
 
 
 #define BYTECODE_EXEC_FUNC_ARGS(THREAD_STACK_VAR_NAME, LOCAL_VARIABLES_VAR_NAME, CONSTANT_POOL_VAR_NAME, OTHER_BYTES_VAR_NAME)\
@@ -766,16 +764,12 @@ FORCEINLINE void dload
 
 int main()
 {
-    std::mutex m;
-    int s = sizeof(m);
-
-
-    new JavaWorld::CObjectBase();
+    auto arr = Bytecode::COpcode::DEBUG_GetOpcodes();
 
 
     //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";
 
-    CClassReader ClassReader(R"(C:\Users\rcheh\Projects\Object.class)");
+    CClassReader ClassReader(R"(C:\Users\raman.chakhouski\Projects\JavaDemo\out\production\JavaDemo\Main.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;

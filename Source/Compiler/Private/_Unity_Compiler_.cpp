@@ -37,6 +37,7 @@
 
 
 #include "Compiler/Private/Model/Debug/DebugMisc.cpp"
+#include "Compiler/Private/Model/Debug/DebugBytecodePrinter.cpp"
 
 #include "Compiler/Private/Model/AttributeType.cpp"
 #include "Compiler/Private/Model/ConstantPool.cpp"

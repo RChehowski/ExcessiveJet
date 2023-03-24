@@ -26,14 +26,8 @@ namespace Compiler
 
         FORCEINLINE friend void operator>>(CClassReader& Reader, CClassVersion& Instance)
         {
-            Reader >> Instance.MinorVersion;
             Reader >> Instance.MajorVersion;
-        }
-
-        [[nodiscard]]
-        FORCEINLINE u2 GetMinorVersion() const
-        {
-            return MinorVersion;
+            Reader >> Instance.MinorVersion;
         }
 
         [[nodiscard]]
@@ -42,13 +36,19 @@ namespace Compiler
             return MajorVersion;
         }
 
+        [[nodiscard]]
+        FORCEINLINE u2 GetMinorVersion() const
+        {
+            return MinorVersion;
+        }
+
         FORCEINLINE bool operator< (const CClassVersion& ClassVersion) const
         {
             if (MajorVersion < ClassVersion.MajorVersion)
             {
                 return true;
             }
-            else if (MajorVersion == ClassVersion.MajorVersion)
+            if (MajorVersion == ClassVersion.MajorVersion)
             {
                 return MinorVersion < ClassVersion.MinorVersion;
             }
@@ -66,7 +66,7 @@ namespace Compiler
         }
 
     private:
-        u2 MinorVersion = (u2)0;
         u2 MajorVersion = (u2)0;
+        u2 MinorVersion = (u2)0;
     };
 }
