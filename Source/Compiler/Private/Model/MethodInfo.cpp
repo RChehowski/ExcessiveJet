@@ -2,6 +2,7 @@
 // Created by ASUS on 01/02/2021.
 //
 
+#include <iomanip>
 #include "Model/MethodInfo.h"
 #include "Model/ClassInfo.h"
 
@@ -51,6 +52,14 @@ namespace Compiler
             << "("
                 << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
             << ")";
+
+        if (std::shared_ptr<CCodeAttributeInfo> CodeAttributeInfo = GetAttribute<CCodeAttributeInfo>())
+        {
+            Oss << std::endl;
+
+            DebugBytecodePrinter::CDebugPrinterContext Context(Oss, ConstantPool, CodeAttributeInfo->GetCode());
+            DebugBytecodePrinter::PrintBytecode(Context);
+        }
 
         return Oss.str();
     }

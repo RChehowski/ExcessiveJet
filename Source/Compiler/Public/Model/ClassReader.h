@@ -41,7 +41,6 @@ namespace Compiler
 
         FORCEINLINE void SetConstantPool(const std::shared_ptr<CConstantPool>& InConstantPool)
         {
-            ASSERT(ConstantPool == nullptr);
             ConstantPool = InConstantPool;
         }
 

@@ -16,7 +16,7 @@ namespace Debug
     {
         std::ostringstream Oss;
 
-        for (int Index = 0; Index < ArrayDimensions; ++Index)
+        for (usz Index = 0; Index < ArrayDimensions; ++Index)
         {
             Oss << "[]";
         }

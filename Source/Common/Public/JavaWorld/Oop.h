@@ -10,9 +10,9 @@
 
 #include <numeric>
 
-#define USE_COMPRESSED_OOPS ((1) && IS_BITNESS(64))
+#define USE_COMPRESSED_OOPS ((1) && EXJ_IS_BITNESS(64))
 
-#if IS_BITNESS(64)
+#if EXJ_IS_BITNESS(64)
     #define USE_64_OOPS (!USE_COMPRESSED_OOPS)
 #else
     #define USE_64_OOPS (0)
@@ -24,7 +24,7 @@
 #else
     /** Ordinary Object Pointer. 32 bit in this configuration */
     using oopValue = u4;
-#endif // IS_BITNESS
+#endif // EXJ_IS_BITNESS
 
 
 using Util::CMathUtils;
@@ -48,7 +48,8 @@ struct CObjectHeapDimension
 
 class oop
 {
-    static_assert(sizeof(uintptr_t) == 8);
+    //static_assert(sizeof(uintptr_t) == 8);
+    static_assert(sizeof(uintptr_t) == 4);
 
 #if USE_COMPRESSED_OOPS
     template<typename T>

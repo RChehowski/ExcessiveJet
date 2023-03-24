@@ -14,18 +14,29 @@ namespace DebugBytecodePrinter
     struct CDebugPrinterContext
     {
         std::ostream& stream;
-        std::shared_ptr<Compiler::CConstantPool> ConstantPool;
+        std::shared_ptr<const Compiler::CConstantPool> ConstantPool;
 
         const TSerializedArray<u4, u1>& Code;
         mutable u4 Index = 0;
 
-//        explicit CDebugPrinterContext(const TSerializedArray<u4, u1>& InCode) : Code(InCode)
-//        {
-//        }
+        CDebugPrinterContext(std::ostream &stream, std::shared_ptr<const Compiler::CConstantPool> constantPool, const TSerializedArray<u4, u1>& code)
+            : stream(stream)
+            , ConstantPool(std::move(constantPool))
+            , Code(code)
+        {
+        }
 
         [[nodiscard]] FORCEINLINE u1 NextByte() const
         {
             return Code[Index++];
+        }
+
+        FORCEINLINE u2 NextUShort() const
+        {
+            const u1 B1 = NextByte();
+            const u1 B2 = NextByte();
+
+            return (static_cast<u2>(B1) << 8) | (static_cast<u2>(B2));
         }
 
         [[nodiscard]] FORCEINLINE bool IsAtEnd() const

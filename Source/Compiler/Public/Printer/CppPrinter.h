@@ -42,9 +42,9 @@ namespace Compiler
 
             FORCEINLINE ~CLine() = default;
 
-            FORCEINLINE void Append(const std::string& InItem)
+            FORCEINLINE void Append(std::string InItem)
             {
-                Items.push_back(InItem);
+                Items.push_back(std::move(InItem));
             }
 
             FORCEINLINE void AppendNTBS(const std::vector<u1>& InItem)
@@ -55,7 +55,8 @@ namespace Compiler
                 Result.push_back('\"');
                 for (const u1 &Item : InItem)
                 {
-                    static const char HexNumberChars[] = {
+                    constexpr char HexNumberChars[]
+                    {
                         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
                     };
 
@@ -69,19 +70,33 @@ namespace Compiler
                 Items.push_back(std::move(Result));
             }
 
-            FORCEINLINE void IncTabs() { NumTabs = (u1)std::min<s4>(((s4)NumTabs) + 1, (s4)std::numeric_limits<u1>::max()); }
-            FORCEINLINE void DecTabs() { NumTabs = (u1)std::max<s4>(((s4)NumTabs) - 1, (s4)0); }
+            FORCEINLINE void IncTabs()
+            {
+                NumTabs = (u1)std::min<s4>(((s4)NumTabs) + 1, (s4)std::numeric_limits<u1>::max());
+            }
+
+            FORCEINLINE void DecTabs()
+            {
+                NumTabs = (u1)std::max<s4>(((s4)NumTabs) - 1, (s4)0);
+            }
 
             [[nodiscard]]
-            FORCEINLINE u1 GetNumTabs() const { return NumTabs; }
+            FORCEINLINE s4 GetNumTabs() const
+            {
+                return (s4)NumTabs;
+            }
 
             friend std::ostream& operator<<(std::ostream& Os, const CLine& Line)
             {
-                for (s4 Index = (s4)0; Index < (s4)Line.NumTabs; ++Index)
+                for (s4 Index = (s4) 0; Index < (s4) Line.NumTabs; ++Index)
+                {
                     Os << "    ";
+                }
 
-                for (const std::string& Item : Line.Items)
+                for (const std::string &Item : Line.Items)
+                {
                     Os << Item;
+                }
 
                 return Os;
             }
@@ -99,6 +114,7 @@ namespace Compiler
             Num
         };
 
+
         static constexpr const char* GetFileExtension(const EOutputChannelType& OutputType)
         {
             switch (OutputType)
@@ -112,25 +128,52 @@ namespace Compiler
             }
         }
 
+        enum class EAccessModifier
+        {
+            Private,
+            Protected,
+            Public
+        };
+
         class COutputChannel
         {
             FORCEINLINE CLine& GetCurrentLine()
             {
                 if (UNLIKELY(Lines.empty()))
                 {
-                    Lines.emplace_back(CLine((u1) 0)).Append(HeaderString);
+                    Lines.emplace_back(CLine{(u1) 0}).Append(HeaderString);
+
+                    NewLine();
                     NewLine();
                 }
 
                 return Lines.back();
             }
         public:
-            FORCEINLINE void NewLine() { Lines.emplace_back(GetCurrentLine().GetNumTabs()); }
-            FORCEINLINE void Append(const std::string& InItem) { GetCurrentLine().Append(InItem); }
-            FORCEINLINE void AppendNTBS(const std::vector<u1>& InItem) { GetCurrentLine().AppendNTBS(InItem); }
+            FORCEINLINE void NewLine()
+            {
+                Lines.emplace_back(GetCurrentLine().GetNumTabs());
+            }
 
-            FORCEINLINE void IncTabs() { GetCurrentLine().IncTabs(); }
-            FORCEINLINE void DecTabs() { GetCurrentLine().DecTabs(); }
+            FORCEINLINE void Append(const std::string& InItem)
+            {
+                GetCurrentLine().Append(InItem);
+            }
+
+            FORCEINLINE void AppendNTBS(const std::vector<u1>& InItem)
+            {
+                GetCurrentLine().AppendNTBS(InItem);
+            }
+
+            FORCEINLINE void IncTabs()
+            {
+                GetCurrentLine().IncTabs();
+            }
+
+            FORCEINLINE void DecTabs()
+            {
+                GetCurrentLine().DecTabs();
+            }
 
             FORCEINLINE friend std::ostream& operator<<(std::ostream& Os, const COutputChannel& OutputChannel)
             {
@@ -143,7 +186,7 @@ namespace Compiler
                 }
                 else
                 {
-                    Os << "// File is empty";
+                    Os << "<<< File is empty >>>";
                 }
 
                 return Os;
@@ -153,7 +196,10 @@ namespace Compiler
             std::vector<CLine> Lines = {};
         };
 
-        FORCEINLINE COutputChannel& GetCurrentOutputChannel() { return OutputChannels[(usz)OutputChannelType]; }
+        FORCEINLINE COutputChannel& GetCurrentOutputChannel()
+        {
+            return OutputChannels[(usz)OutputChannelType];
+        }
 
     public:
         CCppPrinter& NewLine(usz NumNewLines = 1)
@@ -204,9 +250,20 @@ namespace Compiler
         }
 
         // SUGAR
-        FORCEINLINE CCppPrinter& ScopeBegin()   { return NewLine().Append("{").NewLine().IncTabs(); }
-        FORCEINLINE CCppPrinter& ScopeEnd()     { return NewLine().DecTabs().Append("}"); }
-        FORCEINLINE CCppPrinter& Space()        { return Append(" "); }
+        FORCEINLINE CCppPrinter& ScopeBegin()
+        {
+            return NewLine().Append("{").NewLine().IncTabs();
+        }
+
+        FORCEINLINE CCppPrinter& ScopeEnd()
+        {
+            return NewLine().DecTabs().Append("}");
+        }
+
+        FORCEINLINE CCppPrinter& Space()
+        {
+            return Append(" ");
+        }
 
         FORCEINLINE CCppPrinter& Include(const std::string& String, bool bTriangle = false)
         {
@@ -217,22 +274,33 @@ namespace Compiler
                 .NewLine();
         }
 
-        FORCEINLINE CCppPrinter& ClassBegin(const std::string& ClassName)
-        {
-            return Append("class").Space().Append(ClassName).ScopeBegin();
-        }
-
-        FORCEINLINE CCppPrinter& ClassEnd(const std::string& ClassName)
-        {
-            return ScopeEnd().Append(";").NewLine();
-        }
-
         FORCEINLINE CCppPrinter& Semicolon() { return Append(";"); }
-        FORCEINLINE CCppPrinter& SemicolonNewLine() { return Semicolon().NewLine(); }
+
+        FORCEINLINE CCppPrinter& Modifier(const EAccessModifier AccessModifier)
+        {
+            switch (AccessModifier)
+            {
+                case EAccessModifier::Private:
+                    return Append("private:").NewLine();
+                case EAccessModifier::Protected:
+                    return Append("protected:").NewLine();
+                case EAccessModifier::Public:
+                    return Append("public:").NewLine();
+            }
+        }
 
         // Switch between header/cpp
-        FORCEINLINE CCppPrinter& SwitchToHeader()   { OutputChannelType = EOutputChannelType::Header;   return *this; }
-        FORCEINLINE CCppPrinter& SwitchToCpp()      { OutputChannelType = EOutputChannelType::Cpp;      return *this; }
+        FORCEINLINE CCppPrinter& SwitchToHeader()
+        {
+            OutputChannelType = EOutputChannelType::Header;
+            return *this;
+        }
+
+        FORCEINLINE CCppPrinter& SwitchToCpp()
+        {
+            OutputChannelType = EOutputChannelType::Cpp;
+            return *this;
+        }
 
         // DEBUG
         FORCEINLINE friend void operator<<(std::ostream& Os, const CCppPrinter& CppPrinter)

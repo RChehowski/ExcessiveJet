@@ -101,12 +101,6 @@ FORCEINLINE void InvokeExcessiveMethod(
 
 
 
-typedef void (*CBytecodeExecFunc)(
-        CThreadStack& ThreadStack,
-        CLocalVariablesDynamic& LocalVariables,
-        Compiler::CConstantPool& ConstantPool,
-        const std::initializer_list<u1>& OtherBytes
-);
 
 
 #define BYTECODE_EXEC_FUNC_ARGS(THREAD_STACK_VAR_NAME, LOCAL_VARIABLES_VAR_NAME, CONSTANT_POOL_VAR_NAME, OTHER_BYTES_VAR_NAME)\
@@ -764,12 +758,16 @@ FORCEINLINE void dload
 
 int main()
 {
-    auto arr = Bytecode::COpcode::DEBUG_GetOpcodes();
+    std::mutex m;
+    int s = sizeof(m);
+
+
+    new JavaWorld::CObjectBase();
 
 
     //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";
 
-    CClassReader ClassReader(R"(C:\Users\raman.chakhouski\Projects\JavaDemo\out\production\JavaDemo\Main.class)");
+    CClassReader ClassReader(R"(C:\Users\rcheh\Downloads\rt\java\lang\Class.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;

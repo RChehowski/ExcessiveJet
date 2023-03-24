@@ -31,7 +31,14 @@ namespace Compiler
         template<class T>
         FORCEINLINE std::shared_ptr<T> Get(usz IndexInConstantPool) const
         {
-            return CConstantInfo::CastConstantInfo<T>((*this)[IndexInConstantPool]);
+            if constexpr (std::is_same_v<T, CConstantInfo>)
+            {
+                return (*this)[IndexInConstantPool];
+            }
+            else
+            {
+                return CConstantInfo::CastConstantInfo<T>((*this)[IndexInConstantPool]);
+            }
         }
 
         template<

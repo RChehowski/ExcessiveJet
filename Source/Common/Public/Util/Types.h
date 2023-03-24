@@ -44,7 +44,7 @@ using f8 = double;
 
 // Macro for checking bitness (safer macros borrowed from
 // https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/)
-#define IS_BITNESS( X ) IS_BITNESS_PRIVATE_DEFINITION_##X()
+#define EXJ_IS_BITNESS( X ) IS_BITNESS_PRIVATE_DEFINITION_##X()
 
 // Bitness checks borrowed from https://stackoverflow.com/a/12338526/201787
 #if _WIN64 || (__GNUC__ && __x86_64__) || (defined(__APPLE__) && defined(__MACH__))
@@ -60,7 +60,7 @@ using f8 = double;
 #endif
 
 
-#if IS_BITNESS(64)
+#if EXJ_IS_BITNESS(64)
     using usz = u8;
     using ssz = s8;
 #else

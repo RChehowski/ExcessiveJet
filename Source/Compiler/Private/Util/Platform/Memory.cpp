@@ -78,15 +78,10 @@ namespace Util
 }
 
 #pragma section(".CRT$XLAB", long, read)
-
-//extern void rpmalloc_set_main_thread(void);
-
 static void __stdcall thread_init(void *mod, unsigned long reason, void *reserved)
 {
     rpmalloc_initialize();
-    //rpmalloc_set_main_thread();
 }
-
 __declspec(allocate(".CRT$XLAB")) void (__stdcall *_thread_init)(void *, unsigned long, void *) = thread_init;
 
 

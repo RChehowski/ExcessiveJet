@@ -4,6 +4,55 @@
 
 #include "DebugBytecodePrinter.h"
 
+namespace Util
+{
+    using Compiler::CConstantInfo;
+
+    void PrintInvokeInfo(const char* InvokeName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const u2 MethodRefInfo)
+    {
+        u2 ClassIndex;
+        u2 NameAndTypeIndex;
+
+        std::shared_ptr<CConstantInfo> ConstantMethodRefInfo = Context.ConstantPool->Get<CConstantInfo>(MethodRefInfo);
+
+        if (ConstantMethodRefInfo->IsA<Compiler::CConstantInterfaceMethodRefInfo>())
+        {
+            std::shared_ptr<Compiler::CConstantInterfaceMethodRefInfo> ConstantInterfaceMethodRefInfo =
+                    CConstantInfo::CastConstantInfo<Compiler::CConstantInterfaceMethodRefInfo>(ConstantMethodRefInfo);
+
+            ClassIndex = ConstantInterfaceMethodRefInfo->GetClassIndex();
+            NameAndTypeIndex = ConstantInterfaceMethodRefInfo->GetNameAndTypeIndex();
+        }
+        else
+        {
+            std::shared_ptr<Compiler::CConstantMethodRefInfo> ConstantClassMethodRefInfo =
+                    CConstantInfo::CastConstantInfo<Compiler::CConstantMethodRefInfo>(ConstantMethodRefInfo);
+
+            ClassIndex = ConstantClassMethodRefInfo->GetClassIndex();
+            NameAndTypeIndex = ConstantClassMethodRefInfo->GetNameAndTypeIndex();
+        }
+
+
+        std::shared_ptr<Compiler::CConstantClassInfo> ClassInfo =
+                Context.ConstantPool->Get<Compiler::CConstantClassInfo>(ClassIndex);
+
+        std::shared_ptr<Compiler::CConstantUtf8Info> ClassName =
+                Context.ConstantPool->Get<Compiler::CConstantUtf8Info>(ClassInfo->GetNameIndex());
+
+
+        std::shared_ptr<Compiler::CConstantNameAndTypeInfo> NameAndType =
+                Context.ConstantPool->Get<Compiler::CConstantNameAndTypeInfo>(NameAndTypeIndex);
+
+        std::shared_ptr<Compiler::CConstantUtf8Info> MethodName =
+                Context.ConstantPool->Get<Compiler::CConstantUtf8Info>(NameAndType->GetNameIndex());
+
+        std::shared_ptr<Compiler::CConstantUtf8Info> MethodSignature =
+                Context.ConstantPool->Get<Compiler::CConstantUtf8Info>(NameAndType->GetDescriptorIndex());
+
+        Context.stream << InvokeName << ' ' << ClassName->GetStringUtf8() << '.' << MethodName->GetStringUtf8() << ' ' << MethodSignature->GetStringUtf8() << std::endl;
+    }
+}
+
 #define DEFINE_OPCODE_PRINTER(_Opcode) void DebugBytecodePrinter::Print_##_Opcode(const DebugBytecodePrinter::CDebugPrinterContext& Context)
 
 // 0 - 9
@@ -14,6 +63,10 @@ DEFINE_OPCODE_PRINTER(NOP)
 DEFINE_OPCODE_PRINTER(ACONST_NULL)
 {
     Context.stream << "ACONST_NULL" << std::endl;
+}
+DEFINE_OPCODE_PRINTER(ICONST_M1)
+{
+    Context.stream << "ICONST_M1" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(ICONST_0)
 {
@@ -88,7 +141,7 @@ DEFINE_OPCODE_PRINTER(LDC)
     // TODO: CP
 
     const u1 Arg = Context.NextByte();
-    Context.stream << "LDC " << Arg << std::endl;
+    Context.stream << "LDC " << (int)Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(LDC_W)
 {
@@ -117,27 +170,27 @@ DEFINE_OPCODE_PRINTER(LDC2_W)
 DEFINE_OPCODE_PRINTER(ILOAD)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "ILOAD Locals[" << Arg << "]" << std::endl;
+    Context.stream << "ILOAD Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(LLOAD)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "LLOAD Locals[" << Arg << "]" << std::endl;
+    Context.stream << "LLOAD Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(FLOAD)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "FLOAD Locals[" << Arg << "]" << std::endl;
+    Context.stream << "FLOAD Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(DLOAD)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "DLOAD Locals[" << Arg << "]" << std::endl;
+    Context.stream << "DLOAD Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(ALOAD)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "ALOAD Locals[" << Arg << "]" << std::endl;
+    Context.stream << "ALOAD Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(ILOAD_0)
 {
@@ -260,27 +313,27 @@ DEFINE_OPCODE_PRINTER(SALOAD)
 DEFINE_OPCODE_PRINTER(ISTORE)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "ISTORE Locals[" << Arg << "]" << std::endl;
+    Context.stream << "ISTORE Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(LSTORE)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "LSTORE Locals[" << Arg << "]" << std::endl;
+    Context.stream << "LSTORE Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(FSTORE)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "FSTORE Locals[" << Arg << "]" << std::endl;
+    Context.stream << "FSTORE Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(DSTORE)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "DSTORE Locals[" << Arg << "]" << std::endl;
+    Context.stream << "DSTORE Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(ASTORE)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "ASTORE Locals[" << Arg << "]" << std::endl;
+    Context.stream << "ASTORE Locals[" << (int)Arg << "]" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(ISTORE_0)
 {
@@ -917,92 +970,154 @@ DEFINE_OPCODE_PRINTER(INVOKEVIRTUAL)
 }
 DEFINE_OPCODE_PRINTER(INVOKESPECIAL)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
-
-    Context.stream << "INVOKESPECIAL " << Arg << std::endl;
+    Util::PrintInvokeInfo("INVOKESPECIAL", Context, Context.NextUShort());
 }
 DEFINE_OPCODE_PRINTER(INVOKESTATIC)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
-
-    Context.stream << "INVOKESTATIC " << Arg << std::endl;
+    Util::PrintInvokeInfo("INVOKESTATIC", Context, Context.NextUShort());
 }
 DEFINE_OPCODE_PRINTER(INVOKEINTERFACE)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-    const u1 B3 = Context.NextByte();
-    const u1 B4 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
-
-    Context.stream << "INVOKEINTERFACE " << Arg << std::endl;
+    Util::PrintInvokeInfo("INVOKEINTERFACE", Context, Context.NextUShort());
 }
 DEFINE_OPCODE_PRINTER(INVOKEDYNAMIC)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-    const u1 B3 = Context.NextByte();
-    const u1 B4 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
-
-    Context.stream << "INVOKEDYNAMIC " << Arg << std::endl;
+    Util::PrintInvokeInfo("INVOKEDYNAMIC", Context, Context.NextUShort());
 }
 DEFINE_OPCODE_PRINTER(NEW)
 {
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+
+    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+
+    Context.stream << "NEW " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(NEWARRAY)
 {
+    const u1 Arg = Context.NextByte();
+
+    Context.stream << "NEWARRAY " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(ANEWARRAY)
 {
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+
+    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+
+    Context.stream << "ANEWARRAY " << Arg << std::endl;
 }
 
 // 190 - 199
 DEFINE_OPCODE_PRINTER(ARRAYLENGTH)
 {
+    Context.stream << "ARRAYLENGTH " << std::endl;
 }
 DEFINE_OPCODE_PRINTER(ATHROW)
 {
+    Context.stream << "ATHROW " << std::endl;
 }
 DEFINE_OPCODE_PRINTER(CHECKCAST)
 {
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+
+    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+
+    Context.stream << "CHECKCAST " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(INSTANCEOF)
 {
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+
+    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+
+    Context.stream << "INSTANCEOF " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(MONITORENTER)
 {
+    Context.stream << "MONITORENTER" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(MONITOREXIT)
 {
+    Context.stream << "MONITOREXIT" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(WIDE)
 {
+    const u1 B1 = Context.NextByte();
+
+    // TODO: Refactor
+    if (B1 == 0x84) // iinc
+    {
+        const u1 B1 = Context.NextByte();
+        const u1 B2 = Context.NextByte();
+        const u1 B3 = Context.NextByte();
+        const u1 B4 = Context.NextByte();
+
+        const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    }
+    else
+    {
+        const u1 B1 = Context.NextByte();
+        const u1 B2 = Context.NextByte();
+    }
+
+    Context.stream << "WIDE" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(MULTIANEWARRAY)
 {
+    // TODO: Refactor
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+    const u1 B3 = Context.NextByte();
+
+    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+
+    Context.stream << "MULTIANEWARRAY " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFNULL)
 {
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+
+    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+
+    Context.stream << "IFNULL " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFNONNULL)
 {
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+
+    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+
+    Context.stream << "IFNONNULL " << Arg << std::endl;
 }
 
 // 200 - 201
 DEFINE_OPCODE_PRINTER(GOTO_W)
 {
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+    const u1 B3 = Context.NextByte();
+    const u1 B4 = Context.NextByte();
+
+    const u2 Arg = ((u4)B1 << 24) | ((u4)B2 << 16) | ((u4)B3 << 8) | (u4)B4;
+
+    Context.stream << "GOTO_W " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(JSR_W)
 {
+    const u1 B1 = Context.NextByte();
+    const u1 B2 = Context.NextByte();
+    const u1 B3 = Context.NextByte();
+    const u1 B4 = Context.NextByte();
+
+    const u2 Arg = ((u4)B1 << 24) | ((u4)B2 << 16) | ((u4)B3 << 8) | (u4)B4;
+
+    Context.stream << "JSR_W " << Arg << std::endl;
 }
 
 #undef DEFINE_OPCODE_PRINTER
