@@ -10,10 +10,14 @@
 #include <cstdlib>
 #include <cstring>
 
+
+#define WITH_RPMALLOC 0
+
 namespace Util
 {
     namespace Private
     {
+#if WITH_RPMALLOC
         struct CRpMallocThreadLocalInitializer
         {
             FORCEINLINE CRpMallocThreadLocalInitializer()
@@ -25,7 +29,8 @@ namespace Util
             {
                 rpmalloc_thread_finalize(1);
             }
-        };
+        }
+#endif // WITH_RPMALLOC
     }
 
     void CMemory::Memcpy(void* const Dst, const void* const Src, const usz NumBytes)
@@ -40,14 +45,24 @@ namespace Util
 
     void* CMemory::MallocImpl(usz Size, usz Alignment)
     {
+#if WITH_RPMALLOC
         static thread_local Private::CRpMallocThreadLocalInitializer Initializer{};
 
         return rpaligned_alloc(Alignment, Size);
+#else
+        void* addr;
+        posix_memalign(&addr, Alignment, Size);
+        return addr;
+#endif // WITH_RPMALLOC
     }
 
     void CMemory::Free(const void *const Ptr)
     {
+#if WITH_RPMALLOC
         rpfree(const_cast<void*>(Ptr));
+#else
+        free(const_cast<void*>(Ptr));
+#endif // WITH_RPMALLOC
     }
 
     void CMemory::MemZero(void* Ptr, usz Size)
@@ -77,13 +92,14 @@ namespace Util
     }
 }
 
+#if 0
 #pragma section(".CRT$XLAB", long, read)
 static void __stdcall thread_init(void *mod, unsigned long reason, void *reserved)
 {
     rpmalloc_initialize();
 }
 __declspec(allocate(".CRT$XLAB")) void (__stdcall *_thread_init)(void *, unsigned long, void *) = thread_init;
-
+#endif
 
 using Util::CMemory;
 
