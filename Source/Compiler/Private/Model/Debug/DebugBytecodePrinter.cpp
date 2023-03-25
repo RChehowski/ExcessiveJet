@@ -7,9 +7,11 @@
 using Bytecode::COpcode;
 using Bytecode::COpcodes;
 
+using Compiler::CConstantInfo;
+
 namespace Util
 {
-    using Compiler::CConstantInfo;
+
 
     void PrintInvokeInfo(const char* InvokeName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const u2 MethodRefInfo)
     {
@@ -144,16 +146,15 @@ DEFINE_OPCODE_PRINTER(LDC)
     // TODO: CP
 
     const u1 Arg = Context.NextByte();
+
+	const CConstantInfo* Const = Context.ConstantPool->Get<CConstantInfo>(Arg);
+
     Context.stream << "LDC " << (int)Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(LDC_W)
 {
     // TODO: CP
-
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "LDC_W " << Arg << std::endl;
 }
@@ -162,11 +163,7 @@ DEFINE_OPCODE_PRINTER(LDC_W)
 DEFINE_OPCODE_PRINTER(LDC2_W)
 {
     // TODO: CP
-
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "LDC2_W " << Arg << std::endl;
 }
@@ -648,10 +645,7 @@ DEFINE_OPCODE_PRINTER(LXOR)
 }
 DEFINE_OPCODE_PRINTER(IINC)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IINC " << Arg << std::endl;
 }
@@ -741,64 +735,43 @@ DEFINE_OPCODE_PRINTER(DCMPG)
 }
 DEFINE_OPCODE_PRINTER(IFEQ)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IFEQ " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFNE)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IFNE " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFLT)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IFLT " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFGE)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IFGE " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFGT)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IFGT " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFLE)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IFLE " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IF_ICMPEQ)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IF_ICMPEQ " << Arg << std::endl;
 }
@@ -806,82 +779,55 @@ DEFINE_OPCODE_PRINTER(IF_ICMPEQ)
 // 160 - 169
 DEFINE_OPCODE_PRINTER(IF_ICMPNE)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IF_ICMPNE " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IF_ICMPLT)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IF_ICMPLT " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IF_ICMPGE)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IF_ICMPGE " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IF_ICMPGT)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "IF_ICMPGT " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IF_ICMPLE)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "IF_ICMPLE " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IF_ACMPEQ)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "IF_ACMPEQ " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IF_ACMPNE)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "IF_ACMPNE " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(GOTO)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "GOTO " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(JSR)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "JSR " << Arg << std::endl;
 }
@@ -982,19 +928,13 @@ DEFINE_OPCODE_PRINTER(RETURN)
 }
 DEFINE_OPCODE_PRINTER(GETSTATIC)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "GETSTATIC " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(PUTSTATIC)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "PUTSTATIC " << Arg << std::endl;
 }
@@ -1002,28 +942,19 @@ DEFINE_OPCODE_PRINTER(PUTSTATIC)
 // 180 - 189
 DEFINE_OPCODE_PRINTER(GETFIELD)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "GETFIELD " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(PUTFIELD)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "PUTFIELD " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(INVOKEVIRTUAL)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "INVOKEVIRTUAL " << Arg << std::endl;
 }
@@ -1045,10 +976,7 @@ DEFINE_OPCODE_PRINTER(INVOKEDYNAMIC)
 }
 DEFINE_OPCODE_PRINTER(NEW)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "NEW " << Arg << std::endl;
 }
@@ -1060,10 +988,7 @@ DEFINE_OPCODE_PRINTER(NEWARRAY)
 }
 DEFINE_OPCODE_PRINTER(ANEWARRAY)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "ANEWARRAY " << Arg << std::endl;
 }
@@ -1079,19 +1004,13 @@ DEFINE_OPCODE_PRINTER(ATHROW)
 }
 DEFINE_OPCODE_PRINTER(CHECKCAST)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "CHECKCAST " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(INSTANCEOF)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "INSTANCEOF " << Arg << std::endl;
 }
@@ -1112,40 +1031,30 @@ DEFINE_OPCODE_PRINTER(WIDE)
     if (OpcodeToWide == COpcodes::IINC)
     {
         const u4 Arg = Context.NextU4();
+	    Context.stream << "WIDE (32) " << Arg <<  std::endl;
     }
     else
     {
         const u2 Arg = Context.NextU2();
+	    Context.stream << "WIDE (16) " << Arg << std::endl;
     }
-
-    Context.stream << "WIDE" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(MULTIANEWARRAY)
 {
-    // TODO: Refactor
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
+	const u2 Arg = Context.NextU2();
     const u1 B3 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
 
     Context.stream << "MULTIANEWARRAY " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFNULL)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "IFNULL " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IFNONNULL)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+	const u2 Arg = Context.NextU2();
 
     Context.stream << "IFNONNULL " << Arg << std::endl;
 }
@@ -1153,23 +1062,13 @@ DEFINE_OPCODE_PRINTER(IFNONNULL)
 // 200 - 201
 DEFINE_OPCODE_PRINTER(GOTO_W)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-    const u1 B3 = Context.NextByte();
-    const u1 B4 = Context.NextByte();
-
-    const u2 Arg = ((u4)B1 << 24) | ((u4)B2 << 16) | ((u4)B3 << 8) | (u4)B4;
+	const u4 Arg = Context.NextU4();
 
     Context.stream << "GOTO_W " << Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(JSR_W)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-    const u1 B3 = Context.NextByte();
-    const u1 B4 = Context.NextByte();
-
-    const u2 Arg = ((u4)B1 << 24) | ((u4)B2 << 16) | ((u4)B3 << 8) | (u4)B4;
+	const u4 Arg = Context.NextU4();
 
     Context.stream << "JSR_W " << Arg << std::endl;
 }

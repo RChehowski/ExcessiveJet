@@ -122,11 +122,10 @@ namespace Compiler
             CAttributeInfoHeader AttributeInfoHeader;
             Reader >> AttributeInfoHeader;
 
-            std::shared_ptr<CConstantUtf8Info> AttributeName =
-                Reader.GetConstantPool()->Get<CConstantUtf8Info>(AttributeInfoHeader.GetAttributeNameIndex());
-            ASSERT(AttributeName != nullptr);
+            const CConstantUtf8Info& AttributeName =
+                Reader.GetConstantPool()->GetChecked<CConstantUtf8Info>(AttributeInfoHeader.GetAttributeNameIndex());
 
-            CSharedAttributeInfo AttributeInfo = NewAttributeInfo(AttributeName->GetStringUtf8());
+            CSharedAttributeInfo AttributeInfo = NewAttributeInfo(AttributeName.GetStringUtf8());
             ASSERT(AttributeInfo != nullptr);
 
             {
