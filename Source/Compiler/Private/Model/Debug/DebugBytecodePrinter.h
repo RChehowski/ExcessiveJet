@@ -17,7 +17,7 @@ namespace DebugBytecodePrinter
         std::shared_ptr<const Compiler::CConstantPool> ConstantPool;
 
         const TSerializedArray<u4, u1>& Code;
-        mutable u4 Index = 0;
+        mutable usz Index = 0;
 
         CDebugPrinterContext(std::ostream &stream, std::shared_ptr<const Compiler::CConstantPool> constantPool, const TSerializedArray<u4, u1>& code)
             : stream(stream)
@@ -31,12 +31,33 @@ namespace DebugBytecodePrinter
             return Code[Index++];
         }
 
-        FORCEINLINE u2 NextUShort() const
+        FORCEINLINE u2 NextU2() const
         {
             const u1 B1 = NextByte();
             const u1 B2 = NextByte();
 
             return (static_cast<u2>(B1) << 8) | (static_cast<u2>(B2));
+        }
+
+	    FORCEINLINE u4 NextU4() const
+	    {
+		    const u1 B1 = NextByte();
+		    const u1 B2 = NextByte();
+		    const u1 B3 = NextByte();
+		    const u1 B4 = NextByte();
+
+		    return (static_cast<u4>(B1) << 24) | (static_cast<u4>(B2) << 16) | (static_cast<u4>(B3) << 8) | (static_cast<u4>(B4));
+	    }
+
+	    FORCEINLINE s4 NextS4() const
+	    {
+        	u4 U4 = NextU4();
+        	return *reinterpret_cast<s4*>(&U4);
+	    }
+
+        FORCEINLINE usz Tell() const
+        {
+        	return Index;
         }
 
         [[nodiscard]] FORCEINLINE bool IsAtEnd() const

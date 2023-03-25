@@ -19,8 +19,8 @@ namespace Util
 
     CMemoryReader::CMemoryReader(const std::string& InFileName) : FileName(InFileName)
     {
-        usz OutFileSize = 0;
-        Allocation = CFileUtils::ReadFile(FileName, OutFileSize);
+        bool bFileOpened;
+        Allocation = CFileUtils::ReadFile(FileName, bFileOpened);
     }
 
     CMemoryReader::CMemoryReader(CAllocation&& InAllocation) : Allocation(std::move(InAllocation))

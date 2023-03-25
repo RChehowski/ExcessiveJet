@@ -15,19 +15,17 @@
 #include "Model/ConstantPool/ConstantClassInfo.h"
 #include "Model/Debug/DebugMisc.h"
 
+using Util::IStringUtf8;
+
 namespace Compiler
 {
-    const Util::IStringUtf8& CClassInfo::GetNameString() const
+    const IStringUtf8& CClassInfo::GetNameString() const
     {
-        std::shared_ptr<CConstantClassInfo> ThisClassInfo =
-                ConstantPool->Get<CConstantClassInfo>(ThisClass);
-        ASSERT(ThisClassInfo != nullptr);
+        const CConstantClassInfo& ThisClassInfo = ConstantPool->GetChecked<CConstantClassInfo>(ThisClass);
+        const CConstantUtf8Info& ThisClassNameInfo = ConstantPool->GetChecked<CConstantUtf8Info>(
+		        ThisClassInfo.GetNameIndex());
 
-        std::shared_ptr<CConstantUtf8Info> ThisClassNameInfo =
-                ConstantPool->Get<CConstantUtf8Info>(ThisClassInfo->GetNameIndex());
-        ASSERT(ThisClassNameInfo != nullptr);
-
-        return ThisClassNameInfo->GetStringUtf8();
+        return ThisClassNameInfo.GetStringUtf8();
     }
 
     void CClassInfo::Debug_PrintClass() const
@@ -43,11 +41,10 @@ namespace Compiler
 
             if (SourceFileAttributeInfo != nullptr)
             {
-                std::shared_ptr<CConstantUtf8Info> SourceFileInfo =
-                    ConstantPool->Get<CConstantUtf8Info>(SourceFileAttributeInfo->GetSourcefileIndex());
-                ASSERT(SourceFileInfo != nullptr);
+                const CConstantUtf8Info& SourceFileInfo = ConstantPool->GetChecked<CConstantUtf8Info>(
+		                SourceFileAttributeInfo->GetSourcefileIndex());
 
-                Oss << "Original file: \"" << SourceFileInfo->GetStringUtf8() << "\"" << std::endl;
+                Oss << "Original file: \"" << SourceFileInfo.GetStringUtf8() << "\"" << std::endl;
             }
         }
 
@@ -58,11 +55,10 @@ namespace Compiler
 
             if (SignatureAttributeInfo != nullptr)
             {
-                std::shared_ptr<CConstantUtf8Info> SignatureInfo =
-                    ConstantPool->Get<CConstantUtf8Info>(SignatureAttributeInfo->GetSignatureIndex());
-                ASSERT(SignatureInfo != nullptr);
+                const CConstantUtf8Info& SignatureInfo =
+		                ConstantPool->GetChecked<CConstantUtf8Info>(SignatureAttributeInfo->GetSignatureIndex());
 
-                Oss << "Signature: \"" << SignatureInfo->GetStringUtf8() << "\"" << std::endl;
+                Oss << "Signature: \"" << SignatureInfo.GetStringUtf8() << "\"" << std::endl;
             }
         }
 
@@ -82,13 +78,9 @@ namespace Compiler
         if (AccessFlags & EClassAccessFlags::ACC_ENUM)        Oss << "<enum> ";
 
         {
-            std::shared_ptr<CConstantClassInfo> ThisClassInfo =
-                    ConstantPool->Get<CConstantClassInfo>(ThisClass);
-            ASSERT(ThisClassInfo != nullptr);
-
-            std::shared_ptr<CConstantUtf8Info> ThisClassNameInfo =
-                    ConstantPool->Get<CConstantUtf8Info>(ThisClassInfo->GetNameIndex());
-            ASSERT(ThisClassNameInfo != nullptr);
+            const CConstantClassInfo& ThisClassInfo = ConstantPool->GetChecked<CConstantClassInfo>(ThisClass);
+            const CConstantUtf8Info& ThisClassNameInfo = ConstantPool->GetChecked<CConstantUtf8Info>(
+		            ThisClassInfo.GetNameIndex());
 
             const char* ClassKind;
             if (AccessFlags & EClassAccessFlags::ACC_INTERFACE)
@@ -103,20 +95,16 @@ namespace Compiler
                 ClassKind = "class";
             }
 
-            Oss << ClassKind << " " << ThisClassNameInfo->GetStringUtf8();
+            Oss << ClassKind << " " << ThisClassNameInfo.GetStringUtf8();
         }
         if (SuperClass != 0)
         {
             // The only class that does not have a superclass is java.lang.ObjectBase
-            std::shared_ptr<CConstantClassInfo> SuperClassInfo =
-                    ConstantPool->Get<CConstantClassInfo>(SuperClass);
-            ASSERT(SuperClassInfo != nullptr);
+            const CConstantClassInfo& SuperClassInfo = ConstantPool->GetChecked<CConstantClassInfo>(SuperClass);
+            const CConstantUtf8Info& SuperClassNameInfo = ConstantPool->GetChecked<CConstantUtf8Info>(
+		            SuperClassInfo.GetNameIndex());
 
-            std::shared_ptr<CConstantUtf8Info> SuperClassNameInfo =
-                    ConstantPool->Get<CConstantUtf8Info>(SuperClassInfo->GetNameIndex());
-            ASSERT(SuperClassNameInfo != nullptr);
-
-            Oss << " extends " << SuperClassNameInfo->GetStringUtf8();
+            Oss << " extends " << SuperClassNameInfo.GetStringUtf8();
         }
 
         if (!Interfaces.empty())
@@ -126,14 +114,12 @@ namespace Compiler
             usz InterfacesLeft = Interfaces.size();
             for (u2 InterfaceClassIndex : Interfaces)
             {
-                std::shared_ptr<CConstantClassInfo> InterfaceClassInfo =
-                        ConstantPool->Get<CConstantClassInfo>(InterfaceClassIndex);
+                const CConstantClassInfo& InterfaceClassInfo = ConstantPool->GetChecked<CConstantClassInfo>(
+		                InterfaceClassIndex);
+                const CConstantUtf8Info& InterfaceClassNameInfo = ConstantPool->GetChecked<CConstantUtf8Info>(
+		                InterfaceClassInfo.GetNameIndex());
 
-                std::shared_ptr<CConstantUtf8Info> InterfaceClassNameInfo =
-                        ConstantPool->Get<CConstantUtf8Info>(InterfaceClassInfo->GetNameIndex());
-                ASSERT(InterfaceClassNameInfo != nullptr);
-
-                Oss << InterfaceClassNameInfo->GetStringUtf8();
+                Oss << InterfaceClassNameInfo.GetStringUtf8();
 
                 if (--InterfacesLeft > 0)
                 {

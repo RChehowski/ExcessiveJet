@@ -34,11 +34,8 @@ namespace Compiler
 
         std::ostringstream Oss;
 
-        const std::shared_ptr<CConstantUtf8Info> NameString =
-                ConstantPool->Get<CConstantUtf8Info>(NameIndex);
-
-        const std::shared_ptr<CConstantUtf8Info> DescriptorString =
-                ConstantPool->Get<CConstantUtf8Info>(DescriptorIndex);
+        const CConstantUtf8Info& NameString = ConstantPool->GetChecked<CConstantUtf8Info>(NameIndex);
+        const CConstantUtf8Info& DescriptorString = ConstantPool->GetChecked<CConstantUtf8Info>(DescriptorIndex);
 
         if      (AccessFlags & EFieldAccessFlags::ACC_PUBLIC)     Oss << "public ";
         else if (AccessFlags & EFieldAccessFlags::ACC_PRIVATE)    Oss << "private ";
@@ -52,9 +49,9 @@ namespace Compiler
         if (AccessFlags & EFieldAccessFlags::ACC_SYNTHETIC)  Oss << "<synthetic> ";
         if (AccessFlags & EFieldAccessFlags::ACC_ENUM)       Oss << "<enum> ";
 
-        std::string DecodedDescriptorType = Debug::DecodeType((std::string)DescriptorString->GetStringUtf8());
+        std::string DecodedDescriptorType = Debug::DecodeType((std::string)DescriptorString.GetStringUtf8());
 
-        Oss << DecodedDescriptorType << " " << NameString->GetStringUtf8();
+        Oss << DecodedDescriptorType << " " << NameString.GetStringUtf8();
 
         return Oss.str();
     }

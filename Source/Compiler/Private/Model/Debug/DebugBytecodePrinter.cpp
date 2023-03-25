@@ -4,6 +4,9 @@
 
 #include "DebugBytecodePrinter.h"
 
+using Bytecode::COpcode;
+using Bytecode::COpcodes;
+
 namespace Util
 {
     using Compiler::CConstantInfo;
@@ -13,43 +16,43 @@ namespace Util
         u2 ClassIndex;
         u2 NameAndTypeIndex;
 
-        std::shared_ptr<CConstantInfo> ConstantMethodRefInfo = Context.ConstantPool->Get<CConstantInfo>(MethodRefInfo);
+        const CConstantInfo& ConstantMethodRefInfo = Context.ConstantPool->GetChecked<CConstantInfo>(MethodRefInfo);
 
-        if (ConstantMethodRefInfo->IsA<Compiler::CConstantInterfaceMethodRefInfo>())
+        if (ConstantMethodRefInfo.IsA<Compiler::CConstantInterfaceMethodRefInfo>())
         {
-            std::shared_ptr<Compiler::CConstantInterfaceMethodRefInfo> ConstantInterfaceMethodRefInfo =
+            const Compiler::CConstantInterfaceMethodRefInfo& ConstantInterfaceMethodRefInfo =
                     CConstantInfo::CastConstantInfo<Compiler::CConstantInterfaceMethodRefInfo>(ConstantMethodRefInfo);
 
-            ClassIndex = ConstantInterfaceMethodRefInfo->GetClassIndex();
-            NameAndTypeIndex = ConstantInterfaceMethodRefInfo->GetNameAndTypeIndex();
+            ClassIndex = ConstantInterfaceMethodRefInfo.GetClassIndex();
+            NameAndTypeIndex = ConstantInterfaceMethodRefInfo.GetNameAndTypeIndex();
         }
         else
         {
-            std::shared_ptr<Compiler::CConstantMethodRefInfo> ConstantClassMethodRefInfo =
+            const Compiler::CConstantMethodRefInfo& ConstantClassMethodRefInfo =
                     CConstantInfo::CastConstantInfo<Compiler::CConstantMethodRefInfo>(ConstantMethodRefInfo);
 
-            ClassIndex = ConstantClassMethodRefInfo->GetClassIndex();
-            NameAndTypeIndex = ConstantClassMethodRefInfo->GetNameAndTypeIndex();
+            ClassIndex = ConstantClassMethodRefInfo.GetClassIndex();
+            NameAndTypeIndex = ConstantClassMethodRefInfo.GetNameAndTypeIndex();
         }
 
 
-        std::shared_ptr<Compiler::CConstantClassInfo> ClassInfo =
-                Context.ConstantPool->Get<Compiler::CConstantClassInfo>(ClassIndex);
+        const Compiler::CConstantClassInfo& ClassInfo =
+		        Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(ClassIndex);
 
-        std::shared_ptr<Compiler::CConstantUtf8Info> ClassName =
-                Context.ConstantPool->Get<Compiler::CConstantUtf8Info>(ClassInfo->GetNameIndex());
+	    const Compiler::CConstantUtf8Info& ClassName =
+			    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
 
 
-        std::shared_ptr<Compiler::CConstantNameAndTypeInfo> NameAndType =
-                Context.ConstantPool->Get<Compiler::CConstantNameAndTypeInfo>(NameAndTypeIndex);
+	    const Compiler::CConstantNameAndTypeInfo& NameAndType =
+			    Context.ConstantPool->GetChecked<Compiler::CConstantNameAndTypeInfo>(NameAndTypeIndex);
 
-        std::shared_ptr<Compiler::CConstantUtf8Info> MethodName =
-                Context.ConstantPool->Get<Compiler::CConstantUtf8Info>(NameAndType->GetNameIndex());
+	    const Compiler::CConstantUtf8Info& MethodName =
+			    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetNameIndex());
 
-        std::shared_ptr<Compiler::CConstantUtf8Info> MethodSignature =
-                Context.ConstantPool->Get<Compiler::CConstantUtf8Info>(NameAndType->GetDescriptorIndex());
+	    const Compiler::CConstantUtf8Info& MethodSignature =
+			    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetDescriptorIndex());
 
-        Context.stream << InvokeName << ' ' << ClassName->GetStringUtf8() << '.' << MethodName->GetStringUtf8() << ' ' << MethodSignature->GetStringUtf8() << std::endl;
+        Context.stream << InvokeName << ' ' << ClassName.GetStringUtf8() << '.' << MethodName.GetStringUtf8() << ' ' << MethodSignature.GetStringUtf8() << std::endl;
     }
 }
 
@@ -891,11 +894,67 @@ DEFINE_OPCODE_PRINTER(RET)
 // 170 - 179
 DEFINE_OPCODE_PRINTER(TABLESWITCH)
 {
-    // TODO: COMPLEX
+	const usz BeginPos = Context.Tell();
+	const usz BeginPosAligned = Util::CMathUtils::Align(BeginPos, 4);
+
+	usz NumPadBytes = BeginPosAligned - BeginPos;
+	ASSERT(NumPadBytes < 4);
+
+	while(NumPadBytes-- > 0)
+	{
+		const u1 UselessByte = Context.NextByte();
+	}
+
+	const u4 Default = Context.NextU4();
+	const u4 Low = Context.NextU4();
+	const u4 High = Context.NextU4();
+
+	ASSERT(High > Low);
+
+	const s4 NumJumpOffsets = (High - Low) + 1;
+
+	std::vector<s4> JumpOffsets{};
+	for (s4 Index = 0; Index < NumJumpOffsets; ++Index)
+	{
+		const s4 JumpOffset = Context.NextS4();
+		JumpOffsets.push_back(JumpOffset);
+	}
+
+	Context.stream << "TABLESWITCH" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(LOOKUPSWITCH)
 {
-    // TODO: COMPLEX
+	const usz BeginPos = Context.Tell();
+	const usz BeginPosAligned = Util::CMathUtils::Align(BeginPos, 4);
+
+	usz NumPadBytes = BeginPosAligned - BeginPos;
+	ASSERT(NumPadBytes < 4);
+
+	while(NumPadBytes-- > 0)
+	{
+		const u1 UselessByte = Context.NextByte();
+	}
+
+	const u4 Default = Context.NextU4();
+	const u4 NumPairs = Context.NextU4();
+
+	struct CLookupSwitchPair
+	{
+		s4 Match;
+		s4 Offset;
+	};
+
+	std::vector<CLookupSwitchPair> Pairs{};
+	Pairs.reserve(NumPairs);
+
+	for (u4 Index = 0; Index < NumPairs; ++Index)
+	{
+		const s4 Match = Context.NextS4();
+		const s4 Offset = Context.NextS4();
+		Pairs.push_back(CLookupSwitchPair{ Match, Offset });
+	}
+
+	Context.stream << "LOOKUPSWITCH" << std::endl;
 }
 DEFINE_OPCODE_PRINTER(IRETURN)
 {
@@ -970,19 +1029,19 @@ DEFINE_OPCODE_PRINTER(INVOKEVIRTUAL)
 }
 DEFINE_OPCODE_PRINTER(INVOKESPECIAL)
 {
-    Util::PrintInvokeInfo("INVOKESPECIAL", Context, Context.NextUShort());
+    Util::PrintInvokeInfo("INVOKESPECIAL", Context, Context.NextU2());
 }
 DEFINE_OPCODE_PRINTER(INVOKESTATIC)
 {
-    Util::PrintInvokeInfo("INVOKESTATIC", Context, Context.NextUShort());
+    Util::PrintInvokeInfo("INVOKESTATIC", Context, Context.NextU2());
 }
 DEFINE_OPCODE_PRINTER(INVOKEINTERFACE)
 {
-    Util::PrintInvokeInfo("INVOKEINTERFACE", Context, Context.NextUShort());
+    Util::PrintInvokeInfo("INVOKEINTERFACE", Context, Context.NextU2());
 }
 DEFINE_OPCODE_PRINTER(INVOKEDYNAMIC)
 {
-    Util::PrintInvokeInfo("INVOKEDYNAMIC", Context, Context.NextUShort());
+    Util::PrintInvokeInfo("INVOKEDYNAMIC", Context, Context.NextU2());
 }
 DEFINE_OPCODE_PRINTER(NEW)
 {
@@ -1048,20 +1107,15 @@ DEFINE_OPCODE_PRINTER(WIDE)
 {
     const u1 B1 = Context.NextByte();
 
-    // TODO: Refactor
-    if (B1 == 0x84) // iinc
-    {
-        const u1 B1 = Context.NextByte();
-        const u1 B2 = Context.NextByte();
-        const u1 B3 = Context.NextByte();
-        const u1 B4 = Context.NextByte();
+    const COpcode& OpcodeToWide = COpcode::GetOpcodeForByte(B1);
 
-        const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    if (OpcodeToWide == COpcodes::IINC)
+    {
+        const u4 Arg = Context.NextU4();
     }
     else
     {
-        const u1 B1 = Context.NextByte();
-        const u1 B2 = Context.NextByte();
+        const u2 Arg = Context.NextU2();
     }
 
     Context.stream << "WIDE" << std::endl;

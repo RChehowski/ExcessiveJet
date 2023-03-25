@@ -36,11 +36,12 @@ namespace Compiler
         InvokeDynamic = 18, // Java8+
 
         /**
-         * Number of tags, do not add new tags (except for Invalid_NotATag) after it.
+         * Number of tags, do not add new tags (except for Phantom) after it.
          */
         Num,
 
-        Invalid_NotATag = 255
+        // Used to pad Double and Long infos
+        Phantom
     };
 
 
@@ -92,7 +93,9 @@ namespace Compiler
             }
         }
 
-        static std::shared_ptr<CConstantInfo> NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
+        [[nodiscard]] bool IsPhantom() const;
+
+        static CConstantInfo* NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
 
         static constexpr const char* ConstantPoolInfoTagToString(const EConstantPoolInfoTag ConstantPoolInfoTag)
         {
@@ -118,19 +121,17 @@ namespace Compiler
         }
 
         template <typename T>
-        static std::shared_ptr<T> CastConstantInfo(const std::shared_ptr<CConstantInfo>& ConstantInfo)
+        static const T& CastConstantInfo(const CConstantInfo& ConstantInfo)
         {
             static_assert(std::is_base_of_v<CConstantInfo, T>, "T must be a subclass of CConstantInfo");
 
-            ASSERT(ConstantInfo != nullptr);
-
-            ASSERT_MSG(ConstantInfo->IsA<T>(),
+            ASSERT_MSG(ConstantInfo.IsA<T>(),
                 "Cannot cast \"%s\" to \"%s\". You can only cast from base CConstantInfo to it's subtype.",
-                ConstantPoolInfoTagToString(ConstantInfo->ConstantPoolInfoTag),
+                ConstantPoolInfoTagToString(ConstantInfo.ConstantPoolInfoTag),
                 ConstantPoolInfoTagToString(T::StaticTag)
             );
 
-            return std::static_pointer_cast<T>(ConstantInfo);
+            return static_cast<const T&>(ConstantInfo);
         }
 
         friend void operator>>(CClassReader& Reader, CConstantInfo& Instance);
@@ -138,4 +139,32 @@ namespace Compiler
     private:
         const EConstantPoolInfoTag ConstantPoolInfoTag;
     };
+
+	/**
+	 * Phantom constant info is used as the following dummy info for Long and Double constants.
+	 */
+	class CPhantomConstantInfo final : public CConstantInfo
+	{
+		CPhantomConstantInfo() : CConstantInfo(EConstantPoolInfoTag::Phantom)
+		{
+		}
+
+		~CPhantomConstantInfo() override = default;
+
+	public:
+		[[nodiscard]]
+		std::string ToString() const override
+		{
+			return "CPhantomConstantInfo";
+		}
+
+		void DeserializeFrom(CClassReader& Reader) override
+		{
+			ASSERT_MSG(false, "Phantom const infos should never be read");
+		}
+
+		static CConstantInfo* GetInstance();
+
+		static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Phantom;
+	};
 }

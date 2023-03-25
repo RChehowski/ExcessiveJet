@@ -10,91 +10,81 @@
 
 namespace Compiler
 {
-    typedef std::shared_ptr<CConstantInfo> (*CConstantInfoSpawnFunction)();
+    typedef CConstantInfo* (*CConstantInfoSpawnFunction)();
 
     using CConstantInfoSpawnFunctionTable = std::array<CConstantInfoSpawnFunction, (usz)EConstantPoolInfoTag::Num>;
 
     namespace Private
     {
-        std::shared_ptr<CConstantInfo> New_ConstantUtf8Info()
+        CConstantInfo* New_ConstantUtf8Info()
         {
-            return std::make_shared<CConstantUtf8Info>();
+            return new CConstantUtf8Info();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantIntegerInfo()
+	    CConstantInfo* New_ConstantIntegerInfo()
         {
-            return std::make_shared<CConstantIntegerInfo>();
+	        return new CConstantIntegerInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantFloatInfo()
+	    CConstantInfo* New_ConstantFloatInfo()
         {
-            return std::make_shared<CConstantFloatInfo>();
+	        return new CConstantFloatInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantLongInfo()
+	    CConstantInfo* New_ConstantLongInfo()
         {
-            return std::make_shared<CConstantLongInfo>();
+	        return new CConstantLongInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantDoubleInfo()
+	    CConstantInfo* New_ConstantDoubleInfo()
         {
-            return std::make_shared<CConstantDoubleInfo>();
+	        return new CConstantDoubleInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantClassInfo()
+	    CConstantInfo* New_ConstantClassInfo()
         {
-            return std::make_shared<CConstantClassInfo>();
+	        return new CConstantClassInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantStringInfo()
+	    CConstantInfo* New_ConstantStringInfo()
         {
-            return std::make_shared<CConstantStringInfo>();
+	        return new CConstantStringInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantFieldRefInfo()
+	    CConstantInfo* New_ConstantFieldRefInfo()
         {
-            return std::make_shared<CConstantFieldRefInfo>();
+	        return new CConstantFieldRefInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantMethodRefInfo()
+	    CConstantInfo* New_ConstantMethodRefInfo()
         {
-            return std::make_shared<CConstantMethodRefInfo>();
+	        return new CConstantMethodRefInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantInterfaceMethodRefInfo()
+	    CConstantInfo* New_ConstantInterfaceMethodRefInfo()
         {
-            return std::make_shared<CConstantInterfaceMethodRefInfo>();
+	        return new CConstantInterfaceMethodRefInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantNameAndTypeInfo()
+	    CConstantInfo* New_ConstantNameAndTypeInfo()
         {
-            return std::make_shared<CConstantNameAndTypeInfo>();
+	        return new CConstantNameAndTypeInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantMethodHandleInfo()
+	    CConstantInfo* New_ConstantMethodHandleInfo()
         {
-            return std::make_shared<CConstantMethodHandleInfo>();
+	        return new CConstantMethodHandleInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantMethodTypeInfo()
+	    CConstantInfo* New_ConstantMethodTypeInfo()
         {
-            return std::make_shared<CConstantMethodTypeInfo>();
+	        return new CConstantMethodTypeInfo();
         }
 
-        std::shared_ptr<CConstantInfo> New_ConstantInvokeDynamicInfo()
+	    CConstantInfo* New_ConstantInvokeDynamicInfo()
         {
-            return std::make_shared<CConstantInvokeDynamicInfo>();
+	        return new CConstantInvokeDynamicInfo();
         }
-
-
-        std::shared_ptr<CConstantInfo> New_UNUSED_TAG()
-        {
-            ASSERT_MSG(false, "Unsupported tag");
-
-            // Never supposed to be returned
-            return std::shared_ptr<CConstantInfo>{ nullptr };
-        }
-
 
         constexpr CConstantInfoSpawnFunctionTable GetConstantInfoSpawnFunctions()
         {
@@ -123,7 +113,7 @@ namespace Compiler
 
     static constexpr CConstantInfoSpawnFunctionTable ConstantInfoSpawnFunctions = Private::GetConstantInfoSpawnFunctions();
 
-    std::shared_ptr<CConstantInfo> CConstantInfo::NewConstantInfo(const EConstantPoolInfoTag ConstantPoolInfoTag)
+    CConstantInfo* CConstantInfo::NewConstantInfo(const EConstantPoolInfoTag ConstantPoolInfoTag)
     {
         const usz ConstantPoolInfoTagAsSize = (usz)ConstantPoolInfoTag;
         ASSERT((ConstantPoolInfoTagAsSize >= (usz)0) && (ConstantPoolInfoTagAsSize < (usz)ConstantInfoSpawnFunctions.size()));
@@ -140,4 +130,15 @@ namespace Compiler
         // Note that DeserializeFrom() is a virtual call
         Instance.DeserializeFrom(Reader);
     }
+
+	bool CConstantInfo::IsPhantom() const
+	{
+		return this == CPhantomConstantInfo::GetInstance();
+	}
+
+	CConstantInfo *CPhantomConstantInfo::GetInstance()
+	{
+		static CConstantInfo* PhantomConstantInfo = new CPhantomConstantInfo();
+		return PhantomConstantInfo;
+	}
 }

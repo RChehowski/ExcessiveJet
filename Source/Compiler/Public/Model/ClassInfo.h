@@ -15,6 +15,9 @@
 #include <vector>
 #include <limits>
 
+using Util::TStandardSerializedArray;
+using Util::IStringUtf8;
+
 namespace Compiler
 {
     class CClassReader;
@@ -80,25 +83,25 @@ namespace Compiler
         }
 
         [[nodiscard]]
-        FORCEINLINE const Util::TStandardSerializedArray<u2>& GetInterfaces() const
+        FORCEINLINE const TStandardSerializedArray<u2>& GetInterfaces() const
         {
             return Interfaces;
         }
 
         [[nodiscard]]
-        FORCEINLINE const Util::TStandardSerializedArray<Compiler::CFieldInfo>& GetFields() const
+        FORCEINLINE const TStandardSerializedArray<Compiler::CFieldInfo>& GetFields() const
         {
             return Fields;
         }
 
         [[nodiscard]]
-        FORCEINLINE const Util::TStandardSerializedArray<Compiler::CMethodInfo>& GetMethods() const
+        FORCEINLINE const TStandardSerializedArray<Compiler::CMethodInfo>& GetMethods() const
         {
             return Methods;
         }
 
         [[nodiscard]]
-        const Util::IStringUtf8& GetNameString() const;
+        const IStringUtf8& GetNameString() const;
 
         void Debug_PrintClass() const;
         void Debug_PrintFields() const;
@@ -114,10 +117,10 @@ namespace Compiler
         u2 ThisClass    = (u2)0;
         u2 SuperClass   = (u2)0;
 
-        Util::TStandardSerializedArray<u2> Interfaces;
-        Util::TStandardSerializedArray<CFieldInfo> Fields;
-        Util::TStandardSerializedArray<CMethodInfo> Methods;
+        TStandardSerializedArray<u2> Interfaces;
+        TStandardSerializedArray<CFieldInfo> Fields;
+        TStandardSerializedArray<CMethodInfo> Methods;
 
-        Util::TStandardSerializedArray<CSharedAttributeInfo> Attributes;
+        TStandardSerializedArray<CSharedAttributeInfo> Attributes;
     };
 }

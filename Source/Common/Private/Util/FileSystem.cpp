@@ -47,11 +47,11 @@ namespace Util
         [[nodiscard]]
         Util::CAllocation GetData() const override
         {
-            usz LocalSize = 0;
-            Util::CAllocation Allocation = CFileUtils::ReadFile(Name, LocalSize);
+            bool bFileOpened = 0;
+            Util::CAllocation Allocation = CFileUtils::ReadFile(Name, bFileOpened);
 
             if (!OptionalSize.has_value())
-                OptionalSize = LocalSize;
+                OptionalSize = Allocation.GetSize();
 
             return Allocation;
         }

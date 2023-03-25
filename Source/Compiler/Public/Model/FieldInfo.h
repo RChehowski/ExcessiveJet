@@ -103,6 +103,6 @@ namespace Compiler
         u2 NameIndex        = (u2)0;
         u2 DescriptorIndex  = (u2)0;
 
-        Util::TStandardSerializedArray<CSharedAttributeInfo> Attributes;
+        ::Util::TStandardSerializedArray<CSharedAttributeInfo> Attributes;
     };
 }

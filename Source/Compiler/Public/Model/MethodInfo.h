@@ -7,6 +7,9 @@
 #include "Util/Types.h"
 #include "Util/SerializedArray.h"
 
+using Util::CMathUtils;
+using Util::TStandardSerializedArray;
+
 namespace Compiler
 {
     class CClassInfo;
@@ -81,7 +84,7 @@ namespace Compiler
         }
 
         [[nodiscard]]
-        FORCEINLINE const Util::TStandardSerializedArray<CSharedAttributeInfo>& GetAttributes() const
+        FORCEINLINE const TStandardSerializedArray<CSharedAttributeInfo>& GetAttributes() const
         {
             return Attributes;
         }
@@ -102,7 +105,7 @@ namespace Compiler
 
         [[nodiscard]] FORCEINLINE bool IsNative() const
         {
-            return Util::CMathUtils::EnumHasFlag(AccessFlags, EMethodAccessFlags::ACC_NATIVE);
+            return CMathUtils::EnumHasFlag(AccessFlags, EMethodAccessFlags::ACC_NATIVE);
         }
 
         [[nodiscard]]
@@ -113,7 +116,7 @@ namespace Compiler
         u2 NameIndex        = (u2)0;
         u2 DescriptorIndex  = (u2)0;
 
-        Util::TStandardSerializedArray<CSharedAttributeInfo> Attributes;
+        TStandardSerializedArray<CSharedAttributeInfo> Attributes;
     };
 }
 

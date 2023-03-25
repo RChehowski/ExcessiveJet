@@ -84,8 +84,8 @@ namespace Util
             return reinterpret_cast<T*>(Data);
         }
 
-        template <class T>
-        FORCEINLINE const T* Get() const
+        template <typename T = void>
+        FORCEINLINE const T* sGet() const
         {
             return reinterpret_cast<const T*>(Data);
         }

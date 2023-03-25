@@ -675,9 +675,9 @@ namespace Bytecode
         std::vector<const COpcode *> Opcodes{};
         Opcodes.reserve(ARRAY_COUNT(GOpcodesArray));
 
-        for (const COpcode& OpcodeRef: GOpcodesArray)
+        for (const COpcode* OpcodeRef: GOpcodesArray)
         {
-            Opcodes.push_back(&OpcodeRef);
+            Opcodes.push_back(OpcodeRef);
         }
 
         return Opcodes;

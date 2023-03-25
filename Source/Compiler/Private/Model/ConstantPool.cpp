@@ -14,48 +14,40 @@
 namespace Compiler
 {
 #pragma region CPhantomConstantInfo
-    /**
-     * Phantom constant info is used as the following dummy info for Long and Double constants.
-     */
-    class CPhantomConstantInfo final : public CConstantInfo
-    {
-    public:
-        CPhantomConstantInfo() : CConstantInfo(EConstantPoolInfoTag::Invalid_NotATag)
-        {
-        }
-
-        ~CPhantomConstantInfo() override = default;
-
-        [[nodiscard]]
-        std::string ToString() const override
-        {
-            return "CPhantomConstantInfo";
-        }
-
-        void DeserializeFrom(CClassReader& Reader) override
-        {
-        }
-
-        static std::shared_ptr<CConstantInfo> GetPhantomConstantInfo()
-        {
-            static std::shared_ptr<CConstantInfo> PhantomConstantInfo = std::make_shared<CPhantomConstantInfo>();
-            return PhantomConstantInfo;
-        }
-    };
+	namespace Util
+	{
+		/** Checks if a constant info must be succeeded with a phantom constant info */
+		bool NeedsPhantomConstantInfo(const CConstantInfo& ConstantInfo)
+		{
+			return ConstantInfo.IsA<CConstantDoubleInfo>() || ConstantInfo.IsA<CConstantLongInfo>();
+		}
+	}
 #pragma endregion
 
+	CConstantInfo* CConstantPool::operator[] (const usz IndexInConstantPool) const
+	{
+		ASSERT_MSG((IndexInConstantPool >= 1) && (IndexInConstantPool <= ConstantInfos.size()),
+		           "Requested index: %llu", (unsigned long long)IndexInConstantPool
+		);
+
+		return ConstantInfos[IndexInConstantPool - 1];
+	}
+
+	CConstantPool::~CConstantPool()
+	{
+		for (CConstantInfo* ConstantInfo : ConstantInfos)
+		{
+			// Delete everything except phantom infos because they're a singleton
+			if (!ConstantInfo->IsPhantom())
+			{
+				delete ConstantInfo;
+			}
+		}
+	}
 
     const CAttributeType* CConstantPool::GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool) const
     {
-        return CAttributeTypes::GetAttributeNameByName(Get<CConstantUtf8Info>((usz)IndexInConstantPool)->GetStringUtf8());
-    }
-
-    std::shared_ptr<CConstantInfo> CConstantPool::operator[] (const usz IndexInConstantPool) const
-    {
-        ASSERT_MSG((IndexInConstantPool >= 1) && (IndexInConstantPool <= ConstantInfos.size()),
-                   "Requested index: %llu", (unsigned long long)IndexInConstantPool
-        );
-        return ConstantInfos[IndexInConstantPool - 1];
+        return CAttributeTypes::GetAttributeNameByName(GetChecked<CConstantUtf8Info>((usz) IndexInConstantPool).GetStringUtf8());
     }
 
     void operator>>(CClassReader& Reader, CConstantPool& Instance)
@@ -63,30 +55,32 @@ namespace Compiler
         u2 ConstantPoolCount = (u2)0;
         Reader >> ConstantPoolCount;
 
-        Instance.ConstantInfos.clear();
-        Instance.ConstantInfos.reserve((size_t)ConstantPoolCount);
+	    std::vector<CConstantInfo*>& ConstantInfos = Instance.ConstantInfos;
+
+        ConstantInfos.clear();
+        ConstantInfos.reserve((size_t)ConstantPoolCount);
 
         for (u2 ConstantPoolIndex = 1; ConstantPoolIndex < ConstantPoolCount; ++ConstantPoolIndex)
         {
-            u1 TagByte = (u1)0;
+            u1 TagByte { static_cast<u1>(0) };
             Reader >> TagByte;
 
-            std::shared_ptr<CConstantInfo> ConstantInfo = CConstantInfo::NewConstantInfo((EConstantPoolInfoTag)TagByte);
-            Reader >> ConstantInfo;
+	        const EConstantPoolInfoTag ConstantPoolInfoTag = static_cast<EConstantPoolInfoTag>(TagByte);
+            CConstantInfo* ConstantInfo = CConstantInfo::NewConstantInfo(ConstantPoolInfoTag);
+            Reader >> *ConstantInfo;
 
-            Instance.ConstantInfos.push_back(ConstantInfo);
+            ConstantInfos.push_back(ConstantInfo);
 
             /**
              * @spec:
              * Additionally, two types of constants (longs and doubles) take up two consecutive slots in the table,
              * although the second such slot is a phantom index that is never directly used.
              */
-            const bool bNeedsPhantomConstantInfo = ConstantInfo->IsA<CConstantDoubleInfo>() || ConstantInfo->IsA<CConstantLongInfo>();
-            if (bNeedsPhantomConstantInfo)
+            if (Util::NeedsPhantomConstantInfo(*ConstantInfo))
             {
-                ConstantPoolIndex++;
+                ++ConstantPoolIndex;
 
-                Instance.ConstantInfos.push_back(CPhantomConstantInfo::GetPhantomConstantInfo());
+                ConstantInfos.push_back(CPhantomConstantInfo::GetInstance());
             }
         }
     }

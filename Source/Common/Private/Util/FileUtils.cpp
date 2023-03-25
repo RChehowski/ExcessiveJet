@@ -6,21 +6,21 @@
 
 namespace Util
 {
-    CAllocation CFileUtils::ReadFile(const std::string& FileName, usz& OutFileSizePtr)
+    CAllocation CFileUtils::ReadFile(const std::string& FileName, bool& bFileOpened)
     {
         FILE* File = fopen(FileName.c_str(), "rb");
 
-        if (File != nullptr)
+        bFileOpened = (File != nullptr);
+
+        if (bFileOpened)
         {
             fseek(File, 0, SEEK_END);
             const usz FileSize = (usz)ftell(File);
             fseek(File, 0, SEEK_SET);
 
-            OutFileSizePtr = FileSize;
-
             CAllocation Allocation(FileSize);
 
-            fread(Allocation.Get<void*>(), FileSize, 1, File);
+            fread((void*)Allocation, FileSize, 1, File);
             fclose(File);
 
             return Allocation;

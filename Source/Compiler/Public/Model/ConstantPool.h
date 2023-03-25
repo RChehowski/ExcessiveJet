@@ -22,32 +22,53 @@ namespace Compiler
 
     class CConstantPool
     {
+    	//
+	    CConstantInfo* operator[] (usz IndexInConstantPool) const;
+
     public:
-        [[nodiscard]]
+	    virtual ~CConstantPool();
+
+	    [[nodiscard]]
         const CAttributeType* GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool) const;
 
-        std::shared_ptr<CConstantInfo> operator[] (usz IndexInConstantPool) const;
+	    template<typename T>
+	    FORCEINLINE const T* Get(usz IndexInConstantPool) const
+	    {
+		    CConstantInfo* const ConstantInfo = (*this)[IndexInConstantPool];
 
-        template<class T>
-        FORCEINLINE std::shared_ptr<T> Get(usz IndexInConstantPool) const
+		    // This method is allowed to return nullptr
+		    if (ConstantInfo == nullptr)
+		    {
+		    	return nullptr;
+		    }
+
+		    if constexpr (std::is_same_v<T, CConstantInfo>)
+		    {
+			    return ConstantInfo;
+		    }
+		    else
+		    {
+			    return &CConstantInfo::CastConstantInfo<T>(*ConstantInfo);
+		    }
+	    }
+
+        template<typename T>
+        FORCEINLINE const T& GetChecked(usz IndexInConstantPool) const
         {
-            if constexpr (std::is_same_v<T, CConstantInfo>)
-            {
-                return (*this)[IndexInConstantPool];
-            }
-            else
-            {
-                return CConstantInfo::CastConstantInfo<T>((*this)[IndexInConstantPool]);
-            }
+            const T* Value = Get<T>(IndexInConstantPool);
+			ASSERT(Value != nullptr);
+
+			return *Value;
         }
 
+#if UNLOCK_DEBUG_METHODS
         template<
             typename TConstantInfo,
             std::enable_if_t<std::is_base_of<CConstantInfo, TConstantInfo>::value, bool> = true
         >
-        FORCEINLINE void ForEachOfType(const std::function<void(const TConstantInfo&)>& Consumer) const
+        FORCEINLINE void DEBUG_ForEachOfType(std::function<void(const TConstantInfo&)>&& Consumer) const
         {
-            for (const std::shared_ptr<CConstantInfo>& ConstantInfo : ConstantInfos)
+            for (const CConstantInfo* ConstantInfo : ConstantInfos)
             {
                 if (ConstantInfo->IsA<TConstantInfo>())
                 {
@@ -63,10 +84,10 @@ namespace Compiler
             typename TConstantInfo,
             std::enable_if_t<std::is_base_of<CConstantInfo, TConstantInfo>::value, bool> = true
         >
-        FORCEINLINE std::vector<std::shared_ptr<TConstantInfo>> GetEachOfType() const
+        FORCEINLINE std::vector<std::shared_ptr<TConstantInfo>> DEBUG_GetEachOfType() const
         {
             std::vector<std::shared_ptr<TConstantInfo>> Result;
-            for (const std::shared_ptr<CConstantInfo>& ConstantInfo : ConstantInfos)
+            for (const CConstantInfo* ConstantInfo : ConstantInfos)
             {
                 if (ConstantInfo->IsA<TConstantInfo>())
                 {
@@ -79,10 +100,11 @@ namespace Compiler
 
             return Result;
         }
+#endif // UNLOCK_DEBUG_METHODS
 
         friend void operator>>(CClassReader& Reader, CConstantPool& Instance);
 
     private:
-        std::vector<std::shared_ptr<CConstantInfo>> ConstantInfos;
+        std::vector<CConstantInfo*> ConstantInfos;
     };
 }

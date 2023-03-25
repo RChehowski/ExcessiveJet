@@ -24,11 +24,8 @@ namespace Compiler
 
         std::ostringstream Oss;
 
-        const std::shared_ptr<CConstantUtf8Info> NameString =
-                ConstantPool->Get<CConstantUtf8Info>(NameIndex);
-
-        const std::shared_ptr<CConstantUtf8Info> DescriptorString =
-                ConstantPool->Get<CConstantUtf8Info>(DescriptorIndex);
+        const CConstantUtf8Info& NameString = ConstantPool->GetChecked<CConstantUtf8Info>(NameIndex);
+        const CConstantUtf8Info& DescriptorString = ConstantPool->GetChecked<CConstantUtf8Info>(DescriptorIndex);
 
         if      (AccessFlags & EMethodAccessFlags::ACC_PUBLIC)        Oss << "public ";
         else if (AccessFlags & EMethodAccessFlags::ACC_PRIVATE)       Oss << "private ";
@@ -45,10 +42,10 @@ namespace Compiler
         if (AccessFlags & EMethodAccessFlags::ACC_STRICT)        Oss << "strict(fp) ";
         if (AccessFlags & EMethodAccessFlags::ACC_SYNTHETIC)     Oss << "<synthetic> ";
 
-        std::string FunctionSignature = (std::string)DescriptorString->GetStringUtf8();
+        std::string FunctionSignature = (std::string)DescriptorString.GetStringUtf8();
 
         Oss << Debug::DecodeMethodReturnType(FunctionSignature)
-            << " " << NameString->GetStringUtf8()
+            << " " << NameString.GetStringUtf8()
             << "("
                 << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
             << ")";
