@@ -122,69 +122,6 @@ FORCEINLINE void InvokeExcessiveMethod(
 #define ASSIGN_BYTECODE_EXEC_FUNC(ARRAY, OPCODE, EXEC_FUNCTION)\
     ARRAY[(OPCODE).GetOperation()] = EXEC_FUNCTION;
 
-
-FORCEINLINE void Impl_LDC(CThreadStack& ThreadStack, const Compiler::CConstantPool& ConstantPool, const usz IndexInConstantPool)
-{
-    std::shared_ptr<Compiler::CConstantInfo> ConstantInfo = ConstantPool[IndexInConstantPool];
-
-    switch (ConstantInfo->GetConstantPoolInfoTag())
-    {
-        default:
-            break;
-
-        case Compiler::EConstantPoolInfoTag::Utf8:
-            break;
-        case Compiler::EConstantPoolInfoTag::Integer:
-        {
-            const std::shared_ptr<Compiler::CConstantIntegerInfo> ConstantIntegerInfo =
-                    Compiler::CConstantInfo::CastConstantInfo<Compiler::CConstantIntegerInfo>(ConstantInfo);
-
-            ThreadStack.Push4(ConstantIntegerInfo->GetBytes());
-            break;
-        }
-        case Compiler::EConstantPoolInfoTag::Float:
-        {
-            const std::shared_ptr<Compiler::CConstantFloatInfo> ConstantFloatInfo =
-                    Compiler::CConstantInfo::CastConstantInfo<Compiler::CConstantFloatInfo>(ConstantInfo);
-
-            ThreadStack.Push4(ConstantFloatInfo->GetBytes());
-            break;
-        }
-            // For ldc2w
-//        case Compiler::EConstantPoolInfoTag::Long:
-//        {
-//            const std::shared_ptr<Compiler::CConstantLongInfo> ConstantLongInfo =
-//                    Compiler::CConstantInfo::CastConstantInfo<Compiler::CConstantLongInfo>(ConstantInfo);
-//
-//            const u8 AsU8 = Util::CMathUtils::Convert2U32ToU64(ConstantLongInfo->GetHighBytes(), ConstantLongInfo->GetLowBytes());
-//
-//            ThreadStack.Push8(AsU8);
-//            break;
-//        }
-//        case Compiler::EConstantPoolInfoTag::Double:
-//        {
-//            const std::shared_ptr<Compiler::CConstantDoubleInfo> ConstantDoubleInfo =
-//                    Compiler::CConstantInfo::CastConstantInfo<Compiler::CConstantDoubleInfo>(ConstantInfo);
-//
-//            const u8 AsU8 = Util::CMathUtils::Convert2U32ToU64(ConstantDoubleInfo->GetHighBytes(), ConstantDoubleInfo->GetLowBytes());
-//
-//            ThreadStack.Push8(AsU8);
-//            break;
-//        }
-        case Compiler::EConstantPoolInfoTag::Class:
-        case Compiler::EConstantPoolInfoTag::String:
-        case Compiler::EConstantPoolInfoTag::FieldRef:
-        case Compiler::EConstantPoolInfoTag::MethodRef:
-        case Compiler::EConstantPoolInfoTag::InterfaceMethodRef:
-        case Compiler::EConstantPoolInfoTag::NameAndType:
-        case Compiler::EConstantPoolInfoTag::MethodHandle:
-        case Compiler::EConstantPoolInfoTag::MethodType:
-        case Compiler::EConstantPoolInfoTag::InvokeDynamic:
-        case Compiler::EConstantPoolInfoTag::Invalid_NotATag:
-            break;
-    }
-}
-
 /*
 void Impl_ILOAD(Service::CThreadStack& ThreadStack, const Service::CLocalVariablesStatic& LocalVariables, const usz LocalVariableIndex)
 {
@@ -767,7 +704,7 @@ int main()
 
     //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";
 
-    CClassReader ClassReader(R"(C:\Users\rcheh\Downloads\rt\java\lang\Class.class)");
+    CClassReader ClassReader(R"(C:\Users\raman.chakhouski\Downloads\Class.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;

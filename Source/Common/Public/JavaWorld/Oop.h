@@ -48,8 +48,8 @@ struct CObjectHeapDimension
 
 class oop
 {
-    //static_assert(sizeof(uintptr_t) == 8);
-    static_assert(sizeof(uintptr_t) == 4);
+    static_assert(sizeof(uintptr_t) == 8);
+    //static_assert(sizeof(uintptr_t) == 4);
 
 #if USE_COMPRESSED_OOPS
     template<typename T>

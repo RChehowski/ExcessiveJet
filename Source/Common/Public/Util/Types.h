@@ -25,7 +25,6 @@
 #define LIKELY(...) __VA_ARGS__
 #define UNLIKELY(...) __VA_ARGS__
 
-#define UNLOCK_DEBUG_METHODS (1)
 
 using u1 = uint8_t;
 using s1 = int8_t;

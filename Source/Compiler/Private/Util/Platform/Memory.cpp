@@ -9,9 +9,12 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <malloc.h>
+
+#define WIN32_LEAN_AND_MEAN 1
 
 
-#define WITH_RPMALLOC 0
+#define WITH_RPMALLOC (0)
 
 namespace Util
 {
@@ -29,7 +32,7 @@ namespace Util
             {
                 rpmalloc_thread_finalize(1);
             }
-        }
+        };
 #endif // WITH_RPMALLOC
     }
 
@@ -50,9 +53,15 @@ namespace Util
 
         return rpaligned_alloc(Alignment, Size);
 #else
+    #if PLATFORM_WINDOWS
+        return _aligned_malloc(static_cast<size_t>(Size), static_cast<size_t>(Alignment));
+    #elif PLATFORM_UNIX
         void* addr;
         posix_memalign(&addr, Alignment, Size);
         return addr;
+    #else
+        #error Unsupported platform
+    #endif
 #endif // WITH_RPMALLOC
     }
 
@@ -61,7 +70,12 @@ namespace Util
 #if WITH_RPMALLOC
         rpfree(const_cast<void*>(Ptr));
 #else
+    #if PLATFORM_WINDOWS
+        // Whatever was allocated with _aligned_malloc must be freed with _aligned_free
+        _aligned_free(const_cast<void*>(Ptr));
+    #else
         free(const_cast<void*>(Ptr));
+    #endif
 #endif // WITH_RPMALLOC
     }
 

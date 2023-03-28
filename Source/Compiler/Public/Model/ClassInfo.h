@@ -73,7 +73,8 @@ namespace Compiler
         template <class T>
         std::shared_ptr<T> GetAttributeOfType() const
         {
-            return CAttributeInfo::GetAttributeOfType<T>(Attributes);
+            //return CAttributeInfo::GetAttributeOfType<T>(Attributes);
+            return nullptr;
         }
 
         template <class T>

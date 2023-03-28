@@ -26,14 +26,14 @@ add_executable(${CMAKE_PROJECT_NAME} main.cpp "${UnityBuildFiles}")
 target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC ENABLE_STATISTICS=1)
 target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC UNLOCK_DEBUG_METHODS=1)
 
-set(PLATFORM_WINDOWS 0)
-set(PLATFORM_UNIX 0)
+target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC PLATFORM_WINDOWS=0)
+target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC PLATFORM_UNIX=0)
 
 if (WIN32 )
-    set(PLATFORM_WINDOWS 1)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC PLATFORM_WINDOWS=1)
 endif (WIN32)
 if (UNIX)
-    set(PLATFORM_UNIX 1)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC PLATFORM_UNIX=1)
 endif (UNIX)
 if (MSVC)
     # do something
