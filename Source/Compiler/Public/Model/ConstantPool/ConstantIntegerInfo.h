@@ -20,6 +20,11 @@ namespace Compiler
              return Bytes;
         }
 
+        FORCEINLINE s4 GetInteger() const
+        {
+            return *reinterpret_cast<const s4*>(&Bytes);
+        }
+
         void DeserializeFrom(CClassReader& Reader) override;
 
         friend void operator>>(CClassReader& Reader, CConstantIntegerInfo& Instance);

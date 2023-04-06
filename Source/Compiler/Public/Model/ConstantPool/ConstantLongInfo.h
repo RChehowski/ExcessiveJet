@@ -26,6 +26,13 @@ namespace Compiler
              return LowBytes;
         }
 
+        [[nodiscard]]
+        FORCEINLINE s8 GetLong() const
+        {
+            const u8 AsUnsigned = (static_cast<u8>(HighBytes) << 32) | LowBytes;
+            return *reinterpret_cast<const s8*>(&AsUnsigned);
+        }
+
         void DeserializeFrom(CClassReader& Reader) override;
 
         friend void operator>>(CClassReader& Reader, CConstantLongInfo& Instance);

@@ -20,6 +20,12 @@ namespace Compiler
              return Bytes;
         }
 
+        [[nodiscard]]
+        FORCEINLINE float GetFloat() const
+        {
+            return *reinterpret_cast<const float*>(&Bytes);
+        }
+
         void DeserializeFrom(CClassReader& Reader) override;
 
         friend void operator>>(CClassReader& Reader, CConstantFloatInfo& Instance);

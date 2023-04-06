@@ -8,6 +8,7 @@ using Bytecode::COpcode;
 using Bytecode::COpcodes;
 
 using Compiler::CConstantInfo;
+using Compiler::CConstantFieldRefInfo;
 
 namespace Util
 {
@@ -53,6 +54,87 @@ namespace Util
 			    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetDescriptorIndex());
 
         Context.stream << InvokeName << ' ' << ClassName.GetStringUtf8() << '.' << MethodName.GetStringUtf8() << ' ' << MethodSignature.GetStringUtf8() << std::endl;
+    }
+
+    void PrintFieldOperationInfo(const char* OperationName, const DebugBytecodePrinter::CDebugPrinterContext& Context)
+    {
+        const u2 FieldRefInfoIndex = Context.NextU2();
+
+        const CConstantFieldRefInfo& FieldRefInfo = Context.ConstantPool->GetChecked<CConstantFieldRefInfo>(FieldRefInfoIndex);
+
+        const Compiler::CConstantClassInfo& ClassInfo =
+                Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(FieldRefInfo.GetClassIndex());
+
+        const Compiler::CConstantUtf8Info& ClassName =
+                Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
+
+
+        const Compiler::CConstantNameAndTypeInfo& NameAndType =
+                Context.ConstantPool->GetChecked<Compiler::CConstantNameAndTypeInfo>(FieldRefInfo.GetNameAndTypeIndex());
+
+        const Compiler::CConstantUtf8Info& FieldName =
+                Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetNameIndex());
+
+        Context.stream << OperationName << ' ' << ClassName.GetStringUtf8() << "." << FieldName.GetStringUtf8() << std::endl;
+    }
+
+    void PrintLDC(const char* InvokeName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const usz ConstaintPoolIndex, bool bAllow8Byte = false)
+    {
+        Context.stream << InvokeName << ' ';
+
+        const CConstantInfo& Const = Context.ConstantPool->GetChecked<CConstantInfo>(ConstaintPoolIndex);
+        if (Const.IsA<Compiler::CConstantStringInfo>())
+        {
+            const u2 StringIndex = static_cast<const Compiler::CConstantStringInfo&>(Const).GetStringIndex();
+
+            const Compiler::CConstantUtf8Info& StringContent = Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(StringIndex);
+
+            Context.stream << "(string) \"" << StringContent.GetStringUtf8() << "\"";
+        }
+        else if (Const.IsA<Compiler::CConstantClassInfo>())
+        {
+            const u2 NameIndex = static_cast<const Compiler::CConstantClassInfo&>(Const).GetNameIndex();
+
+            const Compiler::CConstantUtf8Info& ClassName =
+                    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameIndex);
+
+            Context.stream << "(class) " << ClassName.GetStringUtf8();
+        }
+        else if (Const.IsA<Compiler::CConstantIntegerInfo>())
+        {
+            const s4 Integer = static_cast<const Compiler::CConstantIntegerInfo&>(Const).GetInteger();
+
+            Context.stream << "(integer) " << Integer;
+        }
+        else if (Const.IsA<Compiler::CConstantFloatInfo>())
+        {
+            const float Float = static_cast<const Compiler::CConstantFloatInfo&>(Const).GetFloat();
+
+            Context.stream << "(float) " << Float;
+        }
+        else if (Const.IsA<Compiler::CConstantLongInfo>())
+        {
+            ASSERT(bAllow8Byte);
+
+            const s8 Long = static_cast<const Compiler::CConstantLongInfo&>(Const).GetLong();
+
+            Context.stream << "(long) " << Long;
+        }
+        else if (Const.IsA<Compiler::CConstantDoubleInfo>())
+        {
+            ASSERT(bAllow8Byte);
+
+            const double Double = static_cast<const Compiler::CConstantDoubleInfo&>(Const).GetDouble();
+
+            Context.stream << "(double) " << Double;
+        }
+        else
+        {
+            ASSERT(false);
+            Context.stream << "<TODO: Unresolved CP>" << ConstaintPoolIndex;
+        }
+
+        Context.stream << std::endl;
     }
 }
 
@@ -128,39 +210,27 @@ DEFINE_OPCODE_PRINTER(DCONST_1)
 DEFINE_OPCODE_PRINTER(BIPUSH)
 {
     const u1 Arg = Context.NextByte();
-    Context.stream << "BIPUSH " << Arg << std::endl;
+    Context.stream << "BIPUSH " << (s4)Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(SIPUSH)
 {
     const u2 Arg = Context.NextU2();
 
-    Context.stream << "SIPUSH " << Arg << std::endl;
+    Context.stream << "SIPUSH " << (s4)Arg << std::endl;
 }
 DEFINE_OPCODE_PRINTER(LDC)
 {
-    // TODO: CP
-
-    const u1 Arg = Context.NextByte();
-
-	const CConstantInfo* Const = Context.ConstantPool->Get<CConstantInfo>(Arg);
-
-    Context.stream << "LDC " << (int)Arg << std::endl;
+    Util::PrintLDC("LDC", Context, (usz)Context.NextByte());
 }
 DEFINE_OPCODE_PRINTER(LDC_W)
 {
-    // TODO: CP
-    const u2 Arg = Context.NextU2();
-
-    Context.stream << "LDC_W " << Arg << std::endl;
+    Util::PrintLDC("LDC_W", Context, (usz)Context.NextU2());
 }
 
 // 20 - 29
 DEFINE_OPCODE_PRINTER(LDC2_W)
 {
-    // TODO: CP
-    const u2 Arg = Context.NextU2();
-
-    Context.stream << "LDC2_W " << Arg << std::endl;
+    Util::PrintLDC("LDC2_W", Context, (usz)Context.NextU2(), true);
 }
 DEFINE_OPCODE_PRINTER(ILOAD)
 {
@@ -923,35 +993,25 @@ DEFINE_OPCODE_PRINTER(RETURN)
 }
 DEFINE_OPCODE_PRINTER(GETSTATIC)
 {
-	const u2 Arg = Context.NextU2();
-
-    Context.stream << "GETSTATIC " << Arg << std::endl;
+    Util::PrintFieldOperationInfo("GETSTATIC", Context);
 }
 DEFINE_OPCODE_PRINTER(PUTSTATIC)
 {
-	const u2 Arg = Context.NextU2();
-
-    Context.stream << "PUTSTATIC " << Arg << std::endl;
+    Util::PrintFieldOperationInfo("PUTSTATIC", Context);
 }
 
 // 180 - 189
 DEFINE_OPCODE_PRINTER(GETFIELD)
 {
-	const u2 Arg = Context.NextU2();
-
-    Context.stream << "GETFIELD " << Arg << std::endl;
+    Util::PrintFieldOperationInfo("GETFIELD", Context);
 }
 DEFINE_OPCODE_PRINTER(PUTFIELD)
 {
-	const u2 Arg = Context.NextU2();
-
-    Context.stream << "PUTFIELD " << Arg << std::endl;
+    Util::PrintFieldOperationInfo("PUTFIELD", Context);
 }
 DEFINE_OPCODE_PRINTER(INVOKEVIRTUAL)
 {
-	const u2 Arg = Context.NextU2();
-
-    Context.stream << "INVOKEVIRTUAL " << Arg << std::endl;
+    Util::PrintInvokeInfo("INVOKEVIRTUAL", Context, Context.NextU2());
 }
 DEFINE_OPCODE_PRINTER(INVOKESPECIAL)
 {
@@ -973,19 +1033,60 @@ DEFINE_OPCODE_PRINTER(NEW)
 {
 	const u2 Arg = Context.NextU2();
 
-    Context.stream << "NEW " << Arg << std::endl;
+    const Compiler::CConstantClassInfo& ClassInfo =
+            Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
+
+    const Compiler::CConstantUtf8Info& ClassName =
+            Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
+
+    Context.stream << "NEW " << ClassName.GetStringUtf8() << std::endl;
 }
 DEFINE_OPCODE_PRINTER(NEWARRAY)
 {
     const u1 Arg = Context.NextByte();
 
-    Context.stream << "NEWARRAY " << Arg << std::endl;
+    enum class ENewArrayElementType
+    {
+        T_BOOLEAN   = 4,
+        T_CHAR      = 5,
+        T_FLOAT     = 6,
+        T_DOUBLE    = 7,
+        T_BYTE      = 8,
+        T_SHORT     = 9,
+        T_INT       = 10,
+        T_LONG      = 11,
+    };
+
+    const char* ArrayElementName = [Arg = (ENewArrayElementType)Arg]
+    {
+        switch(Arg)
+        {
+            case ENewArrayElementType::T_BOOLEAN:   return "T_BOOLEAN";
+            case ENewArrayElementType::T_CHAR:      return "T_CHAR";
+            case ENewArrayElementType::T_FLOAT:     return "T_FLOAT";
+            case ENewArrayElementType::T_DOUBLE:    return "T_DOUBLE";
+            case ENewArrayElementType::T_BYTE:      return "T_BYTE";
+            case ENewArrayElementType::T_SHORT:     return "T_SHORT";
+            case ENewArrayElementType::T_INT:       return "T_INT";
+            case ENewArrayElementType::T_LONG:      return "T_LONG";
+
+            default: return "<Unknown>";
+        }
+    }();
+
+    Context.stream << "NEWARRAY " << ArrayElementName << std::endl;
 }
 DEFINE_OPCODE_PRINTER(ANEWARRAY)
 {
-	const u2 Arg = Context.NextU2();
+    const u2 Arg = Context.NextU2();
 
-    Context.stream << "ANEWARRAY " << Arg << std::endl;
+    const Compiler::CConstantClassInfo& ClassInfo =
+            Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
+
+    const Compiler::CConstantUtf8Info& ClassName =
+            Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
+
+    Context.stream << "ANEWARRAY " << ClassName.GetStringUtf8() << std::endl;
 }
 
 // 190 - 199
@@ -1001,13 +1102,25 @@ DEFINE_OPCODE_PRINTER(CHECKCAST)
 {
 	const u2 Arg = Context.NextU2();
 
-    Context.stream << "CHECKCAST " << Arg << std::endl;
+    const Compiler::CConstantClassInfo& ClassInfo =
+            Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
+
+    const Compiler::CConstantUtf8Info& ClassName =
+            Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
+
+    Context.stream << "CHECKCAST " << ClassName.GetStringUtf8() << std::endl;
 }
 DEFINE_OPCODE_PRINTER(INSTANCEOF)
 {
 	const u2 Arg = Context.NextU2();
 
-    Context.stream << "INSTANCEOF " << Arg << std::endl;
+    const Compiler::CConstantClassInfo& ClassInfo =
+            Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
+
+    const Compiler::CConstantUtf8Info& ClassName =
+            Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
+
+    Context.stream << "INSTANCEOF " << ClassName.GetStringUtf8() << std::endl;
 }
 DEFINE_OPCODE_PRINTER(MONITORENTER)
 {

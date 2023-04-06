@@ -99,8 +99,8 @@ public:
     FORCEINLINE oop& operator=(const oop& Other) = default;
     FORCEINLINE oop& operator=(oop&& Other) = default;
 
-    FORCEINLINE bool operator==(const oop& Other) const { Value == Other.Value; }
-    FORCEINLINE bool operator!=(const oop& Other) const { Value != Other.Value; }
+    FORCEINLINE bool operator==(const oop& Other) const { return Value == Other.Value; }
+    FORCEINLINE bool operator!=(const oop& Other) const { return Value != Other.Value; }
 
     [[nodiscard]] FORCEINLINE bool IsNull() const
     {

@@ -26,6 +26,13 @@ namespace Compiler
              return LowBytes;
         }
 
+        [[nodiscard]]
+        FORCEINLINE double GetDouble() const
+        {
+            const u8 AsUnsigned = (static_cast<u8>(HighBytes) << 32) | LowBytes;
+            return *reinterpret_cast<const double*>(&AsUnsigned);
+        }
+
         void DeserializeFrom(CClassReader& Reader) override;
 
         friend void operator>>(CClassReader& Reader, CConstantDoubleInfo& Instance);

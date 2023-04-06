@@ -704,7 +704,7 @@ int main()
 
     //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";
 
-    CClassReader ClassReader(R"(C:\Users\raman.chakhouski\Downloads\Class.class)");
+    CClassReader ClassReader(R"(C:\Users\rcheh\Downloads\rt\javax\swing\JComponent.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;

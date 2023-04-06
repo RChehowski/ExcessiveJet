@@ -196,7 +196,7 @@ public:
 
     FORCEINLINE void PushNullOOP()
     {
-        PushOOP(oop::Null);
+        //PushOOP(oop::Null);
     }
 
 
