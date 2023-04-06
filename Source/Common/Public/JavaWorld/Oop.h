@@ -10,9 +10,9 @@
 
 #include <numeric>
 
-#define USE_COMPRESSED_OOPS ((1) && EXJ_IS_BITNESS(64))
+#define USE_COMPRESSED_OOPS ((1) && EXJ_64)
 
-#if EXJ_IS_BITNESS(64)
+#if EXJ_64
     #define USE_64_OOPS (!USE_COMPRESSED_OOPS)
 #else
     #define USE_64_OOPS (0)
@@ -48,9 +48,6 @@ struct CObjectHeapDimension
 
 class oop
 {
-    static_assert(sizeof(uintptr_t) == 8);
-    //static_assert(sizeof(uintptr_t) == 4);
-
 #if USE_COMPRESSED_OOPS
     template<typename T>
     FORCEINLINE static oopValue MemoryAddressToOop(T* const MemoryAddress)
@@ -65,8 +62,7 @@ class oop
         return static_cast<oopValue>(ShiftedMemoryAddress & CObjectHeapDimension::CompressedBitMask);
     }
 #else
-    template<typename T>
-    FORCEINLINE static oopValue MemoryAddressToOOP(T* const MemoryAddress)
+    FORCEINLINE static oopValue MemoryAddressToOop(const void* const MemoryAddress)
     {
         return reinterpret_cast<oopValue>(MemoryAddress);
     }
@@ -82,16 +78,13 @@ class oop
         return reinterpret_cast<T*>(ShiftedMemoryAddress + CObjectHeapDimension::Start);
     }
 #else
-    template<typename T>
-    FORCEINLINE static T* OopToMemoryAddress(const oopValue InOopValue)
+    FORCEINLINE static void* OopToMemoryAddress(const oopValue InOopValue)
     {
-        return reinterpret_cast<T*>(InOopValue);
+        return reinterpret_cast<void*>(InOopValue);
     }
 #endif // USE_COMPRESSED_OOPS
 
-    /**
-     * Only used for null
-     */
+    /** Private. Only used for null */
     FORCEINLINE constexpr explicit oop() : Value(static_cast<oopValue>(0)) {}
 
 public:
@@ -106,29 +99,28 @@ public:
     FORCEINLINE oop& operator=(const oop& Other) = default;
     FORCEINLINE oop& operator=(oop&& Other) = default;
 
+    FORCEINLINE bool operator==(const oop& Other) const { Value == Other.Value; }
+    FORCEINLINE bool operator!=(const oop& Other) const { Value != Other.Value; }
+
     [[nodiscard]] FORCEINLINE bool IsNull() const
     {
         return Value == static_cast<oopValue>(0);
     }
 
-    template<typename T>
-    FORCEINLINE void Set(T* const MemoryAddress)
+    FORCEINLINE void SetAddress(const void* const MemoryAddress)
     {
         Value = MemoryAddressToOop(MemoryAddress);
     }
 
-    template<typename T>
-    FORCEINLINE T* Get()
+    FORCEINLINE void* GetAddress() const
     {
-        return OopToMemoryAddress<T>(Value);
+        return OopToMemoryAddress(Value);
     }
 
     [[nodiscard]] FORCEINLINE oopValue GetValue() const
     {
         return Value;
     }
-
-    static const oop Null;
 
 private:
     oopValue Value;

@@ -3,5 +3,3 @@
 //
 
 #include "JavaWorld/Oop.h"
-
-constexpr const oop oop::Null { };

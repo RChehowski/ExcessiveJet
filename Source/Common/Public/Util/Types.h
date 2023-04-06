@@ -41,30 +41,14 @@ using s8 = int64_t;
 using f4 = float;
 using f8 = double;
 
-// Macro for checking bitness (safer macros borrowed from
-// https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/)
-#define EXJ_IS_BITNESS( X ) IS_BITNESS_PRIVATE_DEFINITION_##X()
-
-// Bitness checks borrowed from https://stackoverflow.com/a/12338526/201787
-#if _WIN64 || (__GNUC__ && __x86_64__) || (defined(__APPLE__) && defined(__MACH__))
-    #define IS_BITNESS_PRIVATE_DEFINITION_64() 1
-    #define IS_BITNESS_PRIVATE_DEFINITION_32() 0
-    static_assert(sizeof(void*) == 8, "Pointer size is unexpected for this bitness");
-#elif _WIN32 || __GNUC__
-    #define IS_BITNESS_PRIVATE_DEFINITION_64() 0
-    #define IS_BITNESS_PRIVATE_DEFINITION_32() 1
-    static_assert(sizeof(void*) == 4, "Pointer size is unexpected for this bitness");
-#else
-    #error "Unknown bitness!"
-#endif
-
-
-#if EXJ_IS_BITNESS(64)
+#if EXJ_64
     using usz = u8;
     using ssz = s8;
-#else
+#elif EXJ_32
     using usz = u4;
     using ssz = s4;
+#else
+    #error Unexpected bitness
 #endif
 
 // Determine endian
@@ -76,12 +60,12 @@ namespace PrivateEndian
 
 constexpr bool IsNativeLittleEndian()
 {
-    return (u4)PrivateEndian::_u1 == 0x02UL;
+    return (u4)PrivateEndian::_u1 == (u4)2;
 }
 
 constexpr bool IsNativeBigEndian()
 {
-    return (u4)PrivateEndian::_u1 == 0x01UL;
+    return (u4)PrivateEndian::_u1 == (u4)1;
 }
 
 

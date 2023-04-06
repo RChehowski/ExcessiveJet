@@ -10,6 +10,8 @@
 
 #include <vector>
 
+using Util::TStandardSerializedArray;
+
 namespace Compiler
 {
     class CClassReader;
@@ -118,7 +120,7 @@ namespace Compiler
         virtual CAttributeInfoType GetAttributeInfoType() const = 0;
 
         template <class T>
-        static std::shared_ptr<T> GetAttributeOfType(const Util::TStandardSerializedArray<CSharedAttributeInfo>& InAttributes)
+        static std::shared_ptr<T> GetAttributeOfType(const TStandardSerializedArray<CSharedAttributeInfo>& InAttributes)
         {
             static_assert(std::is_base_of_v<CAttributeInfo, T>, "T must be a subclass of CAttributeInfo");
 
@@ -136,7 +138,7 @@ namespace Compiler
         }
 
         template <class T>
-        static std::vector<std::shared_ptr<T>> GetAttributesOfType(const Util::TStandardSerializedArray<CSharedAttributeInfo>& InAttributes)
+        static std::vector<std::shared_ptr<T>> GetAttributesOfType(const TStandardSerializedArray<CSharedAttributeInfo>& InAttributes)
         {
             static_assert(std::is_base_of_v<CAttributeInfo, T>, "T must be a subclass of CAttributeInfo");
 

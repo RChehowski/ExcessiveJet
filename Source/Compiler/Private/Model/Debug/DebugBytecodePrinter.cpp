@@ -11,8 +11,6 @@ using Compiler::CConstantInfo;
 
 namespace Util
 {
-
-
     void PrintInvokeInfo(const char* InvokeName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const u2 MethodRefInfo)
     {
         u2 ClassIndex;
@@ -134,10 +132,7 @@ DEFINE_OPCODE_PRINTER(BIPUSH)
 }
 DEFINE_OPCODE_PRINTER(SIPUSH)
 {
-    const u1 B1 = Context.NextByte();
-    const u1 B2 = Context.NextByte();
-
-    const u2 Arg = ((u2)B1 << 8) | (u2)B2;
+    const u2 Arg = Context.NextU2();
 
     Context.stream << "SIPUSH " << Arg << std::endl;
 }
