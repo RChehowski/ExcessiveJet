@@ -70,12 +70,11 @@ class oop
 
 
 #if USE_COMPRESSED_OOPS
-    template<typename T>
-    FORCEINLINE static T* OopToMemoryAddress(const oopValue InOopValue)
+    FORCEINLINE static void* OopToMemoryAddress(const oopValue InOopValue)
     {
         const uintptr_t ShiftedMemoryAddress = static_cast<uintptr_t>(InOopValue) << oopAlignmentShift;
 
-        return reinterpret_cast<T*>(ShiftedMemoryAddress + CObjectHeapDimension::Start);
+        return reinterpret_cast<void*>(ShiftedMemoryAddress + CObjectHeapDimension::Start);
     }
 #else
     FORCEINLINE static void* OopToMemoryAddress(const oopValue InOopValue)

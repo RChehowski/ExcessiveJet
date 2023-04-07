@@ -9,9 +9,10 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <malloc.h>
 
-#define WIN32_LEAN_AND_MEAN 1
+#if PLATFORM_WINDOWS
+	#include <malloc.h>
+#endif
 
 
 #define WITH_RPMALLOC (0)
