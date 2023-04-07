@@ -1,12 +1,13 @@
 
 #include "Model/ConstantPool/ConstantNameAndTypeInfo.h"
 #include "Model/ClassReader.h"
+#include "Model/Debug/DebugMisc.h"
 
 #include <sstream>
 
 namespace Compiler
 {
-    std::string CConstantNameAndTypeInfo::ToString() const
+    std::string CConstantNameAndTypeInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantNameAndTypeInfo {" << std::endl;
@@ -25,6 +26,19 @@ namespace Compiler
     void operator>>(CClassReader& Reader, CConstantNameAndTypeInfo& Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    std::string CConstantNameAndTypeInfo::ToResolvedString(const CConstantPool &ConstantPool) const
+    {
+        const Compiler::CConstantUtf8Info& Name =
+                ConstantPool.GetChecked<Compiler::CConstantUtf8Info>(GetNameIndex());
+
+        const Compiler::CConstantUtf8Info& Descriptor =
+                ConstantPool.GetChecked<Compiler::CConstantUtf8Info>(GetDescriptorIndex());
+
+        const std::string DescriptorString = Debug::DecodeType(Descriptor.ToResolvedString(ConstantPool));
+
+        return DescriptorString + ' ' + Name.ToResolvedString(ConstantPool);
     }
 
 }

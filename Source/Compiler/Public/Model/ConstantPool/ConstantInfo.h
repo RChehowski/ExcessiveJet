@@ -54,12 +54,13 @@ namespace Compiler
          * @param InConstantPoolInfoTag Tag to identify CConstantInfo instances.
          */
         FORCEINLINE explicit CConstantInfo(const EConstantPoolInfoTag InConstantPoolInfoTag)
-            : ConstantPoolInfoTag(InConstantPoolInfoTag)
+                : ConstantPoolInfoTag(InConstantPoolInfoTag)
         {
         }
 
     public:
         CConstantInfo() = delete;
+
         virtual ~CConstantInfo() = default;
 
         [[nodiscard]]
@@ -69,9 +70,12 @@ namespace Compiler
         }
 
         [[nodiscard]]
-        virtual std::string ToString() const = 0;
+        virtual std::string ToLowLevelString() const = 0;
 
-        virtual void DeserializeFrom(CClassReader& Reader) = 0;
+        [[nodiscard]]
+        virtual std::string ToResolvedString(const CConstantPool& ConstantPool) const = 0;
+
+        virtual void DeserializeFrom(CClassReader &Reader) = 0;
 
         [[nodiscard]]
         FORCEINLINE bool IsA(EConstantPoolInfoTag InConstantPoolInfoTag) const
@@ -93,78 +97,111 @@ namespace Compiler
             }
         }
 
+        [[nodiscard]]
+        FORCEINLINE EConstantPoolInfoTag GetTag() const
+        {
+            return ConstantPoolInfoTag;
+        }
+
+        [[nodiscard]]
+        FORCEINLINE const char *GetTagString() const
+        {
+            return ConstantPoolInfoTagToString(GetTag());
+        }
+
         [[nodiscard]] bool IsPhantom() const;
 
-        static CConstantInfo* NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
+        static CConstantInfo *NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
 
-        static constexpr const char* ConstantPoolInfoTagToString(const EConstantPoolInfoTag ConstantPoolInfoTag)
+        static constexpr const char *ConstantPoolInfoTagToString(const EConstantPoolInfoTag ConstantPoolInfoTag)
         {
             switch (ConstantPoolInfoTag)
             {
-                case EConstantPoolInfoTag::Utf8:                return "Utf8";
-                case EConstantPoolInfoTag::Integer:             return "Integer";
-                case EConstantPoolInfoTag::Float:               return "Float";
-                case EConstantPoolInfoTag::Long:                return "Long";
-                case EConstantPoolInfoTag::Double:              return "Double";
-                case EConstantPoolInfoTag::Class:               return "Class";
-                case EConstantPoolInfoTag::String:              return "String";
-                case EConstantPoolInfoTag::FieldRef:            return "FieldRef";
-                case EConstantPoolInfoTag::MethodRef:           return "MethodRef";
-                case EConstantPoolInfoTag::InterfaceMethodRef:  return "InterfaceMethodRef";
-                case EConstantPoolInfoTag::NameAndType:         return "NameAndType";
-                case EConstantPoolInfoTag::MethodHandle:        return "MethodHandle";
-                case EConstantPoolInfoTag::MethodType:          return "MethodType";
-                case EConstantPoolInfoTag::InvokeDynamic:       return "InvokeDynamic";
+                case EConstantPoolInfoTag::Utf8:
+                    return "Utf8";
+                case EConstantPoolInfoTag::Integer:
+                    return "Integer";
+                case EConstantPoolInfoTag::Float:
+                    return "Float";
+                case EConstantPoolInfoTag::Long:
+                    return "Long";
+                case EConstantPoolInfoTag::Double:
+                    return "Double";
+                case EConstantPoolInfoTag::Class:
+                    return "Class";
+                case EConstantPoolInfoTag::String:
+                    return "String";
+                case EConstantPoolInfoTag::FieldRef:
+                    return "FieldRef";
+                case EConstantPoolInfoTag::MethodRef:
+                    return "MethodRef";
+                case EConstantPoolInfoTag::InterfaceMethodRef:
+                    return "InterfaceMethodRef";
+                case EConstantPoolInfoTag::NameAndType:
+                    return "NameAndType";
+                case EConstantPoolInfoTag::MethodHandle:
+                    return "MethodHandle";
+                case EConstantPoolInfoTag::MethodType:
+                    return "MethodType";
+                case EConstantPoolInfoTag::InvokeDynamic:
+                    return "InvokeDynamic";
 
-                default: return "Unknown Tag";
+                default:
+                    return "Unknown Tag";
             }
         }
 
-        template <typename T>
-        static const T& CastConstantInfo(const CConstantInfo& ConstantInfo)
+        template<typename T>
+        static const T &CastConstantInfo(const CConstantInfo &ConstantInfo)
         {
             static_assert(std::is_base_of_v<CConstantInfo, T>, "T must be a subclass of CConstantInfo");
 
             ASSERT_MSG(ConstantInfo.IsA<T>(),
-                "Cannot cast \"%s\" to \"%s\". You can only cast from base CConstantInfo to it's subtype.",
-                ConstantPoolInfoTagToString(ConstantInfo.ConstantPoolInfoTag),
-                ConstantPoolInfoTagToString(T::StaticTag)
+                       "Cannot cast \"%s\" to \"%s\". You can only cast from base CConstantInfo to it's subtype.",
+                       ConstantInfo.GetTagString(),
+                       ConstantPoolInfoTagToString(T::StaticTag)
             );
 
-            return static_cast<const T&>(ConstantInfo);
+            return static_cast<const T &>(ConstantInfo);
         }
 
-        friend void operator>>(CClassReader& Reader, CConstantInfo& Instance);
+        friend void operator>>(CClassReader &Reader, CConstantInfo &Instance);
 
     private:
         const EConstantPoolInfoTag ConstantPoolInfoTag;
     };
 
-	/**
-	 * Phantom constant info is used as the following dummy info for Long and Double constants.
-	 */
-	class CPhantomConstantInfo final : public CConstantInfo
-	{
-		CPhantomConstantInfo() : CConstantInfo(EConstantPoolInfoTag::Phantom)
-		{
-		}
+    /**
+     * Phantom constant info is used as the following dummy info for Long and Double constants.
+     */
+    class CPhantomConstantInfo final : public CConstantInfo
+    {
+        CPhantomConstantInfo() : CConstantInfo(EConstantPoolInfoTag::Phantom)
+        {
+        }
 
-		~CPhantomConstantInfo() override = default;
+        ~CPhantomConstantInfo() override = default;
 
-	public:
-		[[nodiscard]]
-		std::string ToString() const override
-		{
-			return "CPhantomConstantInfo";
-		}
+    public:
+        [[nodiscard]]
+        std::string ToLowLevelString() const override
+        {
+            return "CPhantomConstantInfo";
+        }
 
-		void DeserializeFrom(CClassReader& Reader) override
-		{
-			ASSERT_MSG(false, "Phantom const infos should never be read");
-		}
+        [[nodiscard]]
+        std::string ToResolvedString(const CConstantPool& ConstantPool) const override
+        {
+            return "";
+        }
 
-		static CConstantInfo* GetInstance();
+        void DeserializeFrom(CClassReader &Reader) override
+        {
+            ASSERT_MSG(false, "Phantom const infos should never be read");
+        }
 
-		static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Phantom;
-	};
+        static CConstantInfo *GetInstance();
+
+        static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Phantom;
+    };
 }

@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantInvokeDynamicInfo::ToString() const
+    std::string CConstantInvokeDynamicInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantInvokeDynamicInfo {" << std::endl;

@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantUtf8Info::ToString() const
+    std::string CConstantUtf8Info::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantUtf8Info {" << std::endl;
@@ -31,5 +31,10 @@ namespace Compiler
     void operator<<(std::ostream& Os, const CConstantUtf8Info& Instance)
     {
 
+    }
+
+    std::string CConstantUtf8Info::ToResolvedString(const CConstantPool &ConstantPool) const
+    {
+        return static_cast<std::string>(GetStringUtf8());
     }
 }

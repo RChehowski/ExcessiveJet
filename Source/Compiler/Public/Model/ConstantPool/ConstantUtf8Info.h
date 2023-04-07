@@ -17,10 +17,11 @@ namespace Compiler
             StringUtf8 = std::move(InStringUtf8);
         }
 
-
+        [[nodiscard]]
+        std::string ToLowLevelString() const override;
 
         [[nodiscard]]
-        std::string ToString() const override;
+        std::string ToResolvedString(const CConstantPool& ConstantPool) const override;
 
         [[nodiscard]]
         FORCEINLINE const Util::IStringUtf8& GetStringUtf8() const

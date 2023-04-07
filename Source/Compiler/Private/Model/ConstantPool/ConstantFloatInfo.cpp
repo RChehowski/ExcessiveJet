@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantFloatInfo::ToString() const
+    std::string CConstantFloatInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantFloatInfo {" << std::endl;
@@ -23,6 +23,11 @@ namespace Compiler
     void operator>>(CClassReader& Reader, CConstantFloatInfo& Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    std::string CConstantFloatInfo::ToResolvedString(const CConstantPool &ConstantPool) const
+    {
+        return std::to_string(GetFloat());
     }
 
 }

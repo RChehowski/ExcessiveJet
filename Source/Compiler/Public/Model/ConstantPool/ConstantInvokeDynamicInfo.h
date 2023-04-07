@@ -12,7 +12,14 @@ namespace Compiler
         CConstantInvokeDynamicInfo() : CConstantInfo(CConstantInvokeDynamicInfo::StaticTag) {}
 
         [[nodiscard]]
-        std::string ToString() const override;
+        std::string ToLowLevelString() const override;
+
+        [[nodiscard]]
+        std::string ToResolvedString(const CConstantPool& ConstantPool) const override
+        {
+            ASSERT_MSG(false, "Not implemented");
+            return "";
+        }
 
         [[nodiscard]]
         FORCEINLINE u2 GetBootstrapMethodAttrIndex() const

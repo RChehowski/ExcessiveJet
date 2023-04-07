@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantInterfaceMethodRefInfo::ToString() const
+    std::string CConstantInterfaceMethodRefInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantInterfaceMethodRefInfo {" << std::endl;
@@ -25,6 +25,11 @@ namespace Compiler
     void operator>>(CClassReader& Reader, CConstantInterfaceMethodRefInfo& Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    std::string CConstantInterfaceMethodRefInfo::ToResolvedString(const CConstantPool &ConstantPool) const
+    {
+        return CConstantMethodRefInfo::ToResolvedString(ConstantPool, GetClassIndex(), GetNameAndTypeIndex());
     }
 
 }

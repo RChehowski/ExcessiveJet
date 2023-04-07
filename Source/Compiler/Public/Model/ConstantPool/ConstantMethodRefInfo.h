@@ -12,7 +12,12 @@ namespace Compiler
         CConstantMethodRefInfo() : CConstantInfo(CConstantMethodRefInfo::StaticTag) {}
 
         [[nodiscard]]
-        std::string ToString() const override;
+        std::string ToLowLevelString() const override;
+
+        [[nodiscard]]
+        std::string ToResolvedString(const CConstantPool& ConstantPool) const override;
+
+        static std::string ToResolvedString(const CConstantPool& ConstantPool, u2 ClassIndex, u2 NameAndTypeIndex);
 
         [[nodiscard]]
         FORCEINLINE u2 GetClassIndex() const

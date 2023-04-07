@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantIntegerInfo::ToString() const
+    std::string CConstantIntegerInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantIntegerInfo {" << std::endl;
@@ -23,6 +23,11 @@ namespace Compiler
     void operator>>(CClassReader& Reader, CConstantIntegerInfo& Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    std::string CConstantIntegerInfo::ToResolvedString(const CConstantPool& ConstantPool) const
+    {
+        return std::to_string(GetInteger());
     }
 
 }

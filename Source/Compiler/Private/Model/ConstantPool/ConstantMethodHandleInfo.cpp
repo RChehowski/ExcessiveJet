@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantMethodHandleInfo::ToString() const
+    std::string CConstantMethodHandleInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantMethodHandleInfo {" << std::endl;

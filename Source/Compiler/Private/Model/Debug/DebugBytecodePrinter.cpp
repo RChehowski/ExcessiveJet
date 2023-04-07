@@ -14,46 +14,16 @@ namespace Util
 {
     void PrintInvokeInfo(const char* InvokeName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const u2 MethodRefInfo)
     {
-        u2 ClassIndex;
-        u2 NameAndTypeIndex;
-
         const CConstantInfo& ConstantMethodRefInfo = Context.ConstantPool->GetChecked<CConstantInfo>(MethodRefInfo);
 
-        if (ConstantMethodRefInfo.IsA<Compiler::CConstantInterfaceMethodRefInfo>())
-        {
-            const Compiler::CConstantInterfaceMethodRefInfo& ConstantInterfaceMethodRefInfo =
-                    CConstantInfo::CastConstantInfo<Compiler::CConstantInterfaceMethodRefInfo>(ConstantMethodRefInfo);
+        ASSERT_MSG
+        (
+            ConstantMethodRefInfo.IsA<Compiler::CConstantMethodRefInfo>() ||
+            ConstantMethodRefInfo.IsA<Compiler::CConstantInterfaceMethodRefInfo>(),
+            "Expected a method ref info (class or interface)"
+        );
 
-            ClassIndex = ConstantInterfaceMethodRefInfo.GetClassIndex();
-            NameAndTypeIndex = ConstantInterfaceMethodRefInfo.GetNameAndTypeIndex();
-        }
-        else
-        {
-            const Compiler::CConstantMethodRefInfo& ConstantClassMethodRefInfo =
-                    CConstantInfo::CastConstantInfo<Compiler::CConstantMethodRefInfo>(ConstantMethodRefInfo);
-
-            ClassIndex = ConstantClassMethodRefInfo.GetClassIndex();
-            NameAndTypeIndex = ConstantClassMethodRefInfo.GetNameAndTypeIndex();
-        }
-
-
-        const Compiler::CConstantClassInfo& ClassInfo =
-		        Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(ClassIndex);
-
-	    const Compiler::CConstantUtf8Info& ClassName =
-			    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
-
-
-	    const Compiler::CConstantNameAndTypeInfo& NameAndType =
-			    Context.ConstantPool->GetChecked<Compiler::CConstantNameAndTypeInfo>(NameAndTypeIndex);
-
-	    const Compiler::CConstantUtf8Info& MethodName =
-			    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetNameIndex());
-
-	    const Compiler::CConstantUtf8Info& MethodSignature =
-			    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetDescriptorIndex());
-
-        Context.stream << InvokeName << ' ' << ClassName.GetStringUtf8() << '.' << MethodName.GetStringUtf8() << ' ' << MethodSignature.GetStringUtf8() << std::endl;
+        Context.stream << InvokeName << ' ' <<  ConstantMethodRefInfo.ToResolvedString(*Context.ConstantPool) << std::endl;
     }
 
     void PrintFieldOperationInfo(const char* OperationName, const DebugBytecodePrinter::CDebugPrinterContext& Context)
@@ -62,79 +32,13 @@ namespace Util
 
         const CConstantFieldRefInfo& FieldRefInfo = Context.ConstantPool->GetChecked<CConstantFieldRefInfo>(FieldRefInfoIndex);
 
-        const Compiler::CConstantClassInfo& ClassInfo =
-                Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(FieldRefInfo.GetClassIndex());
-
-        const Compiler::CConstantUtf8Info& ClassName =
-                Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
-
-
-        const Compiler::CConstantNameAndTypeInfo& NameAndType =
-                Context.ConstantPool->GetChecked<Compiler::CConstantNameAndTypeInfo>(FieldRefInfo.GetNameAndTypeIndex());
-
-        const Compiler::CConstantUtf8Info& FieldName =
-                Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetNameIndex());
-
-        Context.stream << OperationName << ' ' << ClassName.GetStringUtf8() << "." << FieldName.GetStringUtf8() << std::endl;
+        Context.stream << OperationName << ' ' << FieldRefInfo.ToResolvedString(*Context.ConstantPool) << std::endl;
     }
 
     void PrintLDC(const char* InvokeName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const usz ConstaintPoolIndex, bool bAllow8Byte = false)
     {
-        Context.stream << InvokeName << ' ';
-
         const CConstantInfo& Const = Context.ConstantPool->GetChecked<CConstantInfo>(ConstaintPoolIndex);
-        if (Const.IsA<Compiler::CConstantStringInfo>())
-        {
-            const u2 StringIndex = static_cast<const Compiler::CConstantStringInfo&>(Const).GetStringIndex();
-
-            const Compiler::CConstantUtf8Info& StringContent = Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(StringIndex);
-
-            Context.stream << "(string) \"" << StringContent.GetStringUtf8() << "\"";
-        }
-        else if (Const.IsA<Compiler::CConstantClassInfo>())
-        {
-            const u2 NameIndex = static_cast<const Compiler::CConstantClassInfo&>(Const).GetNameIndex();
-
-            const Compiler::CConstantUtf8Info& ClassName =
-                    Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(NameIndex);
-
-            Context.stream << "(class) " << ClassName.GetStringUtf8();
-        }
-        else if (Const.IsA<Compiler::CConstantIntegerInfo>())
-        {
-            const s4 Integer = static_cast<const Compiler::CConstantIntegerInfo&>(Const).GetInteger();
-
-            Context.stream << "(integer) " << Integer;
-        }
-        else if (Const.IsA<Compiler::CConstantFloatInfo>())
-        {
-            const float Float = static_cast<const Compiler::CConstantFloatInfo&>(Const).GetFloat();
-
-            Context.stream << "(float) " << Float;
-        }
-        else if (Const.IsA<Compiler::CConstantLongInfo>())
-        {
-            ASSERT(bAllow8Byte);
-
-            const s8 Long = static_cast<const Compiler::CConstantLongInfo&>(Const).GetLong();
-
-            Context.stream << "(long) " << Long;
-        }
-        else if (Const.IsA<Compiler::CConstantDoubleInfo>())
-        {
-            ASSERT(bAllow8Byte);
-
-            const double Double = static_cast<const Compiler::CConstantDoubleInfo&>(Const).GetDouble();
-
-            Context.stream << "(double) " << Double;
-        }
-        else
-        {
-            ASSERT(false);
-            Context.stream << "<TODO: Unresolved CP>" << ConstaintPoolIndex;
-        }
-
-        Context.stream << std::endl;
+        Context.stream << InvokeName << " (" << Const.GetTagString() << ") " << Const.ToResolvedString(*Context.ConstantPool) << std::endl;
     }
 }
 

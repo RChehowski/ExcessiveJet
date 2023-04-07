@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantClassInfo::ToString() const
+    std::string CConstantClassInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantClassInfo {" << std::endl;
@@ -23,6 +23,14 @@ namespace Compiler
     void operator>>(CClassReader& Reader, CConstantClassInfo& Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    std::string CConstantClassInfo::ToResolvedString(const CConstantPool& ConstantPool) const
+    {
+        const Compiler::CConstantUtf8Info& ClassName =
+            ConstantPool.GetChecked<Compiler::CConstantUtf8Info>(GetNameIndex());
+
+        return ClassName.ToResolvedString(ConstantPool);
     }
 
 }

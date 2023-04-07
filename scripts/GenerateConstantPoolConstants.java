@@ -198,8 +198,8 @@ public class GenerateConstantPoolConstants
         s.add("namespace " + Const.GenNamespace);
         s.add("{");
 
-        // ToString()
-        s.add("    std::string " + GetHungarianClassName(Desc.GetFullName()) + "::ToString() const");
+        // ToResolvedString()
+        s.add("    std::string " + GetHungarianClassName(Desc.GetFullName()) + "::ToLowLevelString() const");
         s.add("    {");
         s.add("        std::ostringstream oss;");
         s.add("        oss << \"" + Desc.GetFullName() + " {\" << std::endl;");

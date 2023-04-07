@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantDoubleInfo::ToString() const
+    std::string CConstantDoubleInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantDoubleInfo {" << std::endl;
@@ -25,6 +25,11 @@ namespace Compiler
     void operator>>(CClassReader& Reader, CConstantDoubleInfo& Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    std::string CConstantDoubleInfo::ToResolvedString(const CConstantPool &ConstantPool) const
+    {
+        return std::to_string(GetDouble());
     }
 
 }

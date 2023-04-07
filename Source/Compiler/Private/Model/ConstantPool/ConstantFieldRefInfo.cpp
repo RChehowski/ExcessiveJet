@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantFieldRefInfo::ToString() const
+    std::string CConstantFieldRefInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantFieldRefInfo {" << std::endl;
@@ -25,6 +25,24 @@ namespace Compiler
     void operator>>(CClassReader& Reader, CConstantFieldRefInfo& Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    std::string CConstantFieldRefInfo::ToResolvedString(const CConstantPool& ConstantPool) const
+    {
+        const Compiler::CConstantClassInfo& ClassInfo =
+                ConstantPool.GetChecked<Compiler::CConstantClassInfo>(GetClassIndex());
+
+
+        const Compiler::CConstantNameAndTypeInfo& NameAndType =
+                ConstantPool.GetChecked<Compiler::CConstantNameAndTypeInfo>(GetNameAndTypeIndex());
+
+        const Compiler::CConstantUtf8Info& FieldName =
+                ConstantPool.GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetNameIndex());
+
+        std::ostringstream oss;
+        oss << NameAndType.ToResolvedString(ConstantPool) + " from " + ClassInfo.ToResolvedString(ConstantPool);
+
+        return oss.str();
     }
 
 }

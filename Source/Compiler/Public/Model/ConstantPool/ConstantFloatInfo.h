@@ -12,7 +12,10 @@ namespace Compiler
         CConstantFloatInfo() : CConstantInfo(CConstantFloatInfo::StaticTag) {}
 
         [[nodiscard]]
-        std::string ToString() const override;
+        std::string ToLowLevelString() const override;
+
+        [[nodiscard]]
+        std::string ToResolvedString(const CConstantPool& ConstantPool) const override;
 
         [[nodiscard]]
         FORCEINLINE u4 GetBytes() const

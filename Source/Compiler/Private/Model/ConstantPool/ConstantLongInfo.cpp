@@ -6,7 +6,7 @@
 
 namespace Compiler
 {
-    std::string CConstantLongInfo::ToString() const
+    std::string CConstantLongInfo::ToLowLevelString() const
     {
         std::ostringstream oss;
         oss << "ConstantLongInfo {" << std::endl;
@@ -25,6 +25,11 @@ namespace Compiler
     void operator>>(CClassReader& Reader, CConstantLongInfo& Instance)
     {
         Instance.DeserializeFrom(Reader);
+    }
+
+    std::string CConstantLongInfo::ToResolvedString(const CConstantPool &ConstantPool) const
+    {
+        return std::to_string(GetLong());
     }
 
 }
