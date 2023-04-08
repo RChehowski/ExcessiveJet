@@ -1,6 +1,7 @@
 
 #include "Model/ConstantPool/ConstantClassInfo.h"
 #include "Model/ClassReader.h"
+#include "Model/Debug/DebugMisc.h"
 
 #include <sstream>
 
@@ -30,7 +31,9 @@ namespace Compiler
         const Compiler::CConstantUtf8Info& ClassName =
             ConstantPool.GetChecked<Compiler::CConstantUtf8Info>(GetNameIndex());
 
-        return ClassName.ToResolvedString(ConstantPool);
+        const std::string RawName = ClassName.ToResolvedString(ConstantPool);
+
+	    return Debug::DecodeType(RawName);
     }
 
 }

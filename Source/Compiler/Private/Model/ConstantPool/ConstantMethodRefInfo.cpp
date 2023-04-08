@@ -38,9 +38,6 @@ namespace Compiler
         const Compiler::CConstantClassInfo& ClassInfo =
                 ConstantPool.GetChecked<Compiler::CConstantClassInfo>(ClassIndex);
 
-        const Compiler::CConstantUtf8Info& ClassName =
-                ConstantPool.GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
-
 
         const Compiler::CConstantNameAndTypeInfo& NameAndType =
                 ConstantPool.GetChecked<Compiler::CConstantNameAndTypeInfo>(NameAndTypeIndex);
@@ -58,7 +55,7 @@ namespace Compiler
         const std::string Signature = Debug::DecodeMethodArgumentTypesJoined(RawSignature);
 
         std::ostringstream oss;
-        oss << ReturnType << ' ' << MethodName.GetStringUtf8() << '(' << Signature << ") from " << ClassName.GetStringUtf8();
+        oss << ReturnType << ' ' << MethodName.GetStringUtf8() << '(' << Signature << ") from " << ClassInfo.ToResolvedString(ConstantPool);
 
         return oss.str();
     }

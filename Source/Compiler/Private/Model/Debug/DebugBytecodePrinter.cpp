@@ -12,7 +12,7 @@ using Compiler::CConstantFieldRefInfo;
 
 namespace Util
 {
-    void PrintInvokeInfo(const char* InvokeName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const u2 MethodRefInfo)
+    void PrintInvokeInfo(const char* OperationName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const u2 MethodRefInfo)
     {
         const CConstantInfo& ConstantMethodRefInfo = Context.ConstantPool->GetChecked<CConstantInfo>(MethodRefInfo);
 
@@ -23,10 +23,10 @@ namespace Util
             "Expected a method ref info (class or interface)"
         );
 
-        Context.stream << InvokeName << ' ' <<  ConstantMethodRefInfo.ToResolvedString(*Context.ConstantPool) << std::endl;
+        Context.stream << OperationName << ' ' <<  ConstantMethodRefInfo.ToResolvedString(*Context.ConstantPool) << std::endl;
     }
 
-    void PrintFieldOperationInfo(const char* OperationName, const DebugBytecodePrinter::CDebugPrinterContext& Context)
+    void PrintFieldRefInfo(const char* OperationName, const DebugBytecodePrinter::CDebugPrinterContext& Context)
     {
         const u2 FieldRefInfoIndex = Context.NextU2();
 
@@ -35,11 +35,21 @@ namespace Util
         Context.stream << OperationName << ' ' << FieldRefInfo.ToResolvedString(*Context.ConstantPool) << std::endl;
     }
 
-    void PrintLDC(const char* InvokeName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const usz ConstaintPoolIndex, bool bAllow8Byte = false)
+    void PrintLDC(const char* OperationName, const DebugBytecodePrinter::CDebugPrinterContext& Context, const usz ConstaintPoolIndex, bool bAllow8Byte = false)
     {
         const CConstantInfo& Const = Context.ConstantPool->GetChecked<CConstantInfo>(ConstaintPoolIndex);
-        Context.stream << InvokeName << " (" << Const.GetTagString() << ") " << Const.ToResolvedString(*Context.ConstantPool) << std::endl;
+        Context.stream << OperationName << " (" << Const.GetTagString() << ") " << Const.ToResolvedString(*Context.ConstantPool) << std::endl;
     }
+
+	void PrintClassRefInfo(const char* OperationName, const DebugBytecodePrinter::CDebugPrinterContext& Context)
+	{
+		const u2 Arg = Context.NextU2();
+
+		const Compiler::CConstantClassInfo& ClassInfo =
+				Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
+
+		Context.stream << OperationName << ' ' << ClassInfo.ToResolvedString(*Context.ConstantPool) << std::endl;
+	}
 }
 
 #define DEFINE_OPCODE_PRINTER(_Opcode) void DebugBytecodePrinter::Print_##_Opcode(const DebugBytecodePrinter::CDebugPrinterContext& Context)
@@ -616,7 +626,7 @@ DEFINE_OPCODE_PRINTER(IINC)
 {
     const u2 Arg = Context.NextU2();
 
-    Context.stream << "IINC " << Arg << std::endl;
+    Context.stream << "IINC Locals[" << Arg << ']' << std::endl;
 }
 DEFINE_OPCODE_PRINTER(I2L)
 {
@@ -897,21 +907,21 @@ DEFINE_OPCODE_PRINTER(RETURN)
 }
 DEFINE_OPCODE_PRINTER(GETSTATIC)
 {
-    Util::PrintFieldOperationInfo("GETSTATIC", Context);
+	Util::PrintFieldRefInfo("GETSTATIC", Context);
 }
 DEFINE_OPCODE_PRINTER(PUTSTATIC)
 {
-    Util::PrintFieldOperationInfo("PUTSTATIC", Context);
+	Util::PrintFieldRefInfo("PUTSTATIC", Context);
 }
 
 // 180 - 189
 DEFINE_OPCODE_PRINTER(GETFIELD)
 {
-    Util::PrintFieldOperationInfo("GETFIELD", Context);
+	Util::PrintFieldRefInfo("GETFIELD", Context);
 }
 DEFINE_OPCODE_PRINTER(PUTFIELD)
 {
-    Util::PrintFieldOperationInfo("PUTFIELD", Context);
+	Util::PrintFieldRefInfo("PUTFIELD", Context);
 }
 DEFINE_OPCODE_PRINTER(INVOKEVIRTUAL)
 {
@@ -927,23 +937,29 @@ DEFINE_OPCODE_PRINTER(INVOKESTATIC)
 }
 DEFINE_OPCODE_PRINTER(INVOKEINTERFACE)
 {
-    Util::PrintInvokeInfo("INVOKEINTERFACE", Context, Context.NextU2());
+	const u2 Arg = Context.NextU2();
+	const u1 Count = Context.NextByte();
+
+	const u1 Padding = Context.NextByte();
+	ASSERT(Padding == (u1)0);
+
+    Util::PrintInvokeInfo("INVOKEINTERFACE", Context, Arg);
 }
 DEFINE_OPCODE_PRINTER(INVOKEDYNAMIC)
 {
-    Util::PrintInvokeInfo("INVOKEDYNAMIC", Context, Context.NextU2());
+	const u2 Arg = Context.NextU2();
+
+	const u1 Padding0 = Context.NextByte();
+	ASSERT(Padding0 == (u1)0);
+
+	const u1 Padding1 = Context.NextByte();
+	ASSERT(Padding1 == (u1)0);
+
+    Util::PrintInvokeInfo("INVOKEDYNAMIC", Context, Arg);
 }
 DEFINE_OPCODE_PRINTER(NEW)
 {
-	const u2 Arg = Context.NextU2();
-
-    const Compiler::CConstantClassInfo& ClassInfo =
-            Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
-
-    const Compiler::CConstantUtf8Info& ClassName =
-            Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
-
-    Context.stream << "NEW " << ClassName.GetStringUtf8() << std::endl;
+	Util::PrintClassRefInfo("NEW", Context);
 }
 DEFINE_OPCODE_PRINTER(NEWARRAY)
 {
@@ -982,15 +998,7 @@ DEFINE_OPCODE_PRINTER(NEWARRAY)
 }
 DEFINE_OPCODE_PRINTER(ANEWARRAY)
 {
-    const u2 Arg = Context.NextU2();
-
-    const Compiler::CConstantClassInfo& ClassInfo =
-            Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
-
-    const Compiler::CConstantUtf8Info& ClassName =
-            Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
-
-    Context.stream << "ANEWARRAY " << ClassName.GetStringUtf8() << std::endl;
+	Util::PrintClassRefInfo("ANEWARRAY", Context);
 }
 
 // 190 - 199
@@ -1004,27 +1012,11 @@ DEFINE_OPCODE_PRINTER(ATHROW)
 }
 DEFINE_OPCODE_PRINTER(CHECKCAST)
 {
-	const u2 Arg = Context.NextU2();
-
-    const Compiler::CConstantClassInfo& ClassInfo =
-            Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
-
-    const Compiler::CConstantUtf8Info& ClassName =
-            Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
-
-    Context.stream << "CHECKCAST " << ClassName.GetStringUtf8() << std::endl;
+	Util::PrintClassRefInfo("CHECKCAST", Context);
 }
 DEFINE_OPCODE_PRINTER(INSTANCEOF)
 {
-	const u2 Arg = Context.NextU2();
-
-    const Compiler::CConstantClassInfo& ClassInfo =
-            Context.ConstantPool->GetChecked<Compiler::CConstantClassInfo>(Arg);
-
-    const Compiler::CConstantUtf8Info& ClassName =
-            Context.ConstantPool->GetChecked<Compiler::CConstantUtf8Info>(ClassInfo.GetNameIndex());
-
-    Context.stream << "INSTANCEOF " << ClassName.GetStringUtf8() << std::endl;
+	Util::PrintClassRefInfo("INSTANCEOF", Context);
 }
 DEFINE_OPCODE_PRINTER(MONITORENTER)
 {
@@ -1351,15 +1343,24 @@ namespace DebugBytecodePrinter
 {
     using Bytecode::COpcode;
 
-    void PrintBytecode(CDebugPrinterContext& DebugPrinterContext)
+    void PrintBytecode(CDebugPrinterContext& Context)
     {
-        while (!DebugPrinterContext.IsAtEnd())
+        while (!Context.IsAtEnd())
         {
-            const u1 RawByte = DebugPrinterContext.NextByte();
+	        if (std::optional<u2> OptionalLineNumber = Context.TryGetLineNumberByStartPc(Context.Tell()))
+	        {
+		        Context.stream << "LINE NUMBER: " << *OptionalLineNumber << std::endl;
+	        }
 
-            CPrintOpcodePtr PrintOpcodePtr = PrintOpcodeFunctions[static_cast<usz>(RawByte)];
+            const u1 RawByte = Context.NextByte();
 
-            PrintOpcodePtr(DebugPrinterContext);
+	        const usz IndexInArray = static_cast<usz>(RawByte);
+	        ASSERT((IndexInArray > 0) && (IndexInArray < ARRAY_COUNT(PrintOpcodeFunctions)));
+
+            const CPrintOpcodePtr PrintOpcodePtr = PrintOpcodeFunctions[IndexInArray];
+
+	        Context.stream << "  ";
+            PrintOpcodePtr(Context);
         }
     }
 }

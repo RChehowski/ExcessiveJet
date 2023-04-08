@@ -17,13 +17,32 @@ namespace DebugBytecodePrinter
         std::shared_ptr<const Compiler::CConstantPool> ConstantPool;
 
         const TSerializedArray<u4, u1>& Code;
-        mutable usz Index = 0;
+	    const std::vector<Compiler::CLineNumberTableAttributeInfoEntry>* LineNumberInfoEntries;
 
-        CDebugPrinterContext(std::ostream &stream, std::shared_ptr<const Compiler::CConstantPool> constantPool, const TSerializedArray<u4, u1>& code)
+        mutable usz Index = 0;
+        mutable usz LineNumberIndex = 0;
+
+        CDebugPrinterContext
+        (
+            std::ostream &stream,
+            std::shared_ptr<const Compiler::CConstantPool> constantPool,
+            const TSerializedArray<u4, u1>& code,
+            const std::vector<Compiler::CLineNumberTableAttributeInfoEntry>* InLineNumberInfoEntries
+        )
             : stream(stream)
             , ConstantPool(std::move(constantPool))
             , Code(code)
+            , LineNumberInfoEntries(InLineNumberInfoEntries)
         {
+        }
+
+        ~CDebugPrinterContext()
+        {
+        	ASSERT_MSG
+        	(
+                LineNumberIndex == (LineNumberInfoEntries ? LineNumberInfoEntries->size() : 0),
+                "Either the bytecode or this code (lol) is invalid"
+            );
         }
 
         [[nodiscard]] FORCEINLINE u1 NextByte() const
@@ -63,6 +82,21 @@ namespace DebugBytecodePrinter
         [[nodiscard]] FORCEINLINE bool IsAtEnd() const
         {
             return Code.size() == Index;
+        }
+
+        std::optional<u2> TryGetLineNumberByStartPc(const u2 StartPc) const
+        {
+        	if ((LineNumberInfoEntries != nullptr) && (LineNumberIndex < LineNumberInfoEntries->size()))
+        	{
+		        const Compiler::CLineNumberTableAttributeInfoEntry& Entry = LineNumberInfoEntries->at(LineNumberIndex);
+		        if (Entry.GetStartPc() == StartPc)
+		        {
+		        	++LineNumberIndex;
+		        	return Entry.GetLineNumber();
+		        }
+	        }
+
+	        return {};
         }
     };
 

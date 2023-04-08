@@ -40,7 +40,7 @@ namespace Compiler
                 ConstantPool.GetChecked<Compiler::CConstantUtf8Info>(NameAndType.GetNameIndex());
 
         std::ostringstream oss;
-        oss << NameAndType.ToResolvedString(ConstantPool) + " from " + ClassInfo.ToResolvedString(ConstantPool);
+        oss << NameAndType.ToResolvedString(ConstantPool) << " from " << ClassInfo.ToResolvedString(ConstantPool);
 
         return oss.str();
     }

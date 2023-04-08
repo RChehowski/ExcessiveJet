@@ -50,11 +50,19 @@ namespace Compiler
                 << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
             << ")";
 
+	    Oss << std::endl;
+
         if (std::shared_ptr<CCodeAttributeInfo> CodeAttributeInfo = GetAttribute<CCodeAttributeInfo>())
         {
-            Oss << std::endl;
+        	Oss << "<Max stack: " << CodeAttributeInfo->GetMaxStack() << ", Max locals: " << CodeAttributeInfo->GetMaxLocals() << '>' << std::endl;
 
-            DebugBytecodePrinter::CDebugPrinterContext Context(Oss, ConstantPool, CodeAttributeInfo->GetCode());
+	        const std::shared_ptr<CLineNumberTableAttributeInfo> LineNumberTable =
+	        		CodeAttributeInfo->GetAttribute<CLineNumberTableAttributeInfo>();
+
+	        const std::vector<CLineNumberTableAttributeInfoEntry>* LineNumberInfoEntries =
+			        LineNumberTable ? &LineNumberTable->GetLineNumberTable() : nullptr;
+
+            DebugBytecodePrinter::CDebugPrinterContext Context(Oss, ConstantPool, CodeAttributeInfo->GetCode(), LineNumberInfoEntries);
             DebugBytecodePrinter::PrintBytecode(Context);
         }
 

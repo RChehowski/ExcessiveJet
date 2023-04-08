@@ -154,10 +154,11 @@ namespace Debug
         }
         else
         {
-            ASSERT_MSG(false, "Unknown TypeString: \"%s\"", TypeString.c_str());
+            std::string ClassName = TypeString;
 
-            // No idea what was that
-            return TypeString;
+	        std::replace(ClassName.begin(), ClassName.end(), '/', '.');
+
+	        return ClassName + ArrayDimensionsToString(ArrayDimensions);
         }
     }
 
