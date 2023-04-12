@@ -51,10 +51,20 @@ namespace Compiler
             Reader >> *(SharedPtrItem.get());
         }
 
+        friend void operator>>(CClassReader &Reader, class CClassInfo &Instance);
+
+        [[nodiscard]]
+        FORCEINLINE bool IsValid() const
+        {
+            return bValid;
+        }
+
     private:
         /**
          * To read attributes, the class reader must hold a reference to the deserialized ConstantPool.
          */
         std::shared_ptr<CConstantPool> ConstantPool;
+
+        bool bValid = false;
     };
 }

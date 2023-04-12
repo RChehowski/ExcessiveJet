@@ -23,34 +23,7 @@ namespace Compiler
         std::shared_ptr<const CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
 
         std::ostringstream Oss;
-
-        const CConstantUtf8Info& NameString = ConstantPool->GetChecked<CConstantUtf8Info>(NameIndex);
-        const CConstantUtf8Info& DescriptorString = ConstantPool->GetChecked<CConstantUtf8Info>(DescriptorIndex);
-
-        if      (AccessFlags & EMethodAccessFlags::ACC_PUBLIC)        Oss << "public ";
-        else if (AccessFlags & EMethodAccessFlags::ACC_PRIVATE)       Oss << "private ";
-        else if (AccessFlags & EMethodAccessFlags::ACC_PROTECTED)     Oss << "protected ";
-        else Oss << "<package private> ";
-
-        if (AccessFlags & EMethodAccessFlags::ACC_STATIC)        Oss << "static ";
-        if (AccessFlags & EMethodAccessFlags::ACC_FINAL)         Oss << "final ";
-        if (AccessFlags & EMethodAccessFlags::ACC_SYNCHRONIZED)  Oss << "synchronized ";
-        if (AccessFlags & EMethodAccessFlags::ACC_BRIDGE)        Oss << "<bridge> ";
-        if (AccessFlags & EMethodAccessFlags::ACC_VARARGS)       Oss << "<varargs> ";
-        if (AccessFlags & EMethodAccessFlags::ACC_NATIVE)        Oss << "native ";
-        if (AccessFlags & EMethodAccessFlags::ACC_ABSTRACT)      Oss << "abstract ";
-        if (AccessFlags & EMethodAccessFlags::ACC_STRICT)        Oss << "strict(fp) ";
-        if (AccessFlags & EMethodAccessFlags::ACC_SYNTHETIC)     Oss << "<synthetic> ";
-
-        std::string FunctionSignature = (std::string)DescriptorString.GetStringUtf8();
-
-        Oss << Debug::DecodeMethodReturnType(FunctionSignature)
-            << " " << NameString.GetStringUtf8()
-            << "("
-                << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
-            << ")";
-
-	    Oss << std::endl;
+        Oss << GetNameWithSignature(*ConstantPool);
 
         if (std::shared_ptr<CCodeAttributeInfo> CodeAttributeInfo = GetAttribute<CCodeAttributeInfo>())
         {
@@ -68,5 +41,53 @@ namespace Compiler
 
         return Oss.str();
     }
+
+    std::string CMethodInfo::GetName(const CConstantPool &ConstantPool) const
+    {
+        const CConstantUtf8Info& NameString = ConstantPool.GetChecked<CConstantUtf8Info>(NameIndex);
+        return NameString.ToResolvedString(ConstantPool);
+    }
+
+    std::string CMethodInfo::GetNameWithSignature(const CConstantPool &ConstantPool, const CClassInfo* ClassInfoPtr) const
+    {
+        std::ostringstream Oss;
+
+        const CConstantUtf8Info& NameString = ConstantPool.GetChecked<CConstantUtf8Info>(NameIndex);
+        const CConstantUtf8Info& DescriptorString = ConstantPool.GetChecked<CConstantUtf8Info>(DescriptorIndex);
+
+        if      (AccessFlags & EMethodAccessFlags::ACC_PUBLIC)        Oss << "public ";
+        else if (AccessFlags & EMethodAccessFlags::ACC_PRIVATE)       Oss << "private ";
+        else if (AccessFlags & EMethodAccessFlags::ACC_PROTECTED)     Oss << "protected ";
+        else Oss << "<package private> ";
+
+        if (AccessFlags & EMethodAccessFlags::ACC_STATIC)        Oss << "static ";
+        if (AccessFlags & EMethodAccessFlags::ACC_FINAL)         Oss << "final ";
+        if (AccessFlags & EMethodAccessFlags::ACC_SYNCHRONIZED)  Oss << "synchronized ";
+        if (AccessFlags & EMethodAccessFlags::ACC_BRIDGE)        Oss << "<bridge> ";
+        if (AccessFlags & EMethodAccessFlags::ACC_VARARGS)       Oss << "<varargs> ";
+        if (AccessFlags & EMethodAccessFlags::ACC_NATIVE)        Oss << "native ";
+        if (AccessFlags & EMethodAccessFlags::ACC_ABSTRACT)      Oss << "abstract ";
+        if (AccessFlags & EMethodAccessFlags::ACC_STRICT)        Oss << "strict(fp) ";
+        if (AccessFlags & EMethodAccessFlags::ACC_SYNTHETIC)     Oss << "<synthetic> ";
+
+        std::string DeclaringClassName{};
+        if (ClassInfoPtr != nullptr)
+        {
+            DeclaringClassName = static_cast<std::string>(ClassInfoPtr->GetNameString()) + '.';
+        }
+
+        const std::string FunctionSignature = (std::string)DescriptorString.GetStringUtf8();
+
+        Oss << Debug::DecodeMethodReturnType(FunctionSignature)
+            << " "
+            << DeclaringClassName
+            << NameString.GetStringUtf8()
+            << "("
+            << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
+            << ")";
+
+        return Oss.str();
+    }
+
 #endif // UNLOCK_DEBUG_METHODS
 }

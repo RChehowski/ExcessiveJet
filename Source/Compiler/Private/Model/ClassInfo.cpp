@@ -167,10 +167,19 @@ namespace Compiler
 
     void operator>>(CClassReader &Reader, CClassInfo &Instance)
     {
+        Reader.bValid = false;
         ASSERT(Reader.IsAtBegin());
 
+        if (Reader.GetSizeInMemory() < sizeof(Instance.Magic))
+        {
+            return;
+        }
+
         Reader >> Instance.Magic;
-        ASSERT(Instance.Magic == 0xCAFEBABE);
+        if (Instance.Magic != 0xCAFEBABE)
+        {
+            return;
+        }
 
         Reader >> Instance.ClassVersion;
 
@@ -193,5 +202,6 @@ namespace Compiler
         Reader.SetConstantPool(nullptr);
 
         ASSERT(Reader.IsAtEnd());
+        Reader.bValid = true;
     }
 }

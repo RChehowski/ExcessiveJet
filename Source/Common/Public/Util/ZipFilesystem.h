@@ -9,10 +9,16 @@
 #include <functional>
 #include <optional>
 #include <filesystem>
+#include <utility>
 
 #include "Util/Types.h"
-#include "Allocation.h"
-#include "minizcpp/zip_file.hpp"
+#include "Util/Allocation.h"
+
+
+namespace miniz_cpp
+{
+    class zip_file;
+}
 
 namespace Filesystem
 {
@@ -36,9 +42,9 @@ namespace Filesystem
         miniz_cpp::zip_file& ZipFilePtr;
 
     private:
-        CZipFileHandle(const std::string& InArchivePath, const std::string& InFileName, std::size_t InFileSize, miniz_cpp::zip_file& InZipFilePtr)
+        CZipFileHandle(const std::string& InArchivePath, std::string InFileName, std::size_t InFileSize, miniz_cpp::zip_file& InZipFilePtr)
             : ArchivePath(InArchivePath)
-            , FileName(InFileName)
+            , FileName(std::move(InFileName))
             , FileSize(InFileSize)
             , ZipFilePtr(InZipFilePtr)
         {
@@ -61,30 +67,7 @@ namespace Filesystem
             return FileName;
         }
 
-        FORCEINLINE const Util::CAllocation& GetAllocation() const
-        {
-            if (!OptionalAllocation.has_value())
-            {
-                Util::CAllocation* Allocation = new Util::CAllocation(ZipFileHandle->FileSize);
-
-                miniz_cpp::zip_file& ZipFile = ZipFileHandle->GetZipFile();
-                std::ostream& Stream = ZipFile.open(ZipFileHandle->FileName);
-
-                u1* Data = Allocation->Get<u1>();
-
-                std::streambuf* StreamBuffer = Stream.rdbuf();
-                for (int i = 0; i < Allocation->GetSize(); i++)
-                {
-                    Data[i] = StreamBuffer->sbumpc();
-                }
-
-                Stream.flush();
-
-                return *Allocation;
-            }
-
-            return *OptionalAllocation;
-        }
+        Util::CAllocation GetAllocation() const;
 
     private:
         CZipFileEntry(const std::string& InFileName, CZipFileHandle* InZipFileHandle) : FileName(InFileName), ZipFileHandle(InZipFileHandle)
@@ -92,22 +75,12 @@ namespace Filesystem
         }
 
         std::string FileName;
-        mutable std::optional<Util::CAllocation> OptionalAllocation;
-
         CZipFileHandle* ZipFileHandle = { nullptr };
     };
 
     class CZipFileSystem
     {
     public:
-        FORCEINLINE static void Walk(const std::string& PathToArchive, std::function<void(const CZipFileEntry&)> Consumer)
-        {
-            miniz_cpp::zip_file ZipFile(PathToArchive);
-            for (const auto& ZipInfo : ZipFile.infolist())
-            {
-                CZipFileHandle* const ZipFileHandle = new CZipFileHandle(PathToArchive, ZipInfo.filename, ZipInfo.file_size, ZipFile);
-                Consumer(CZipFileEntry(ZipInfo.filename, ZipFileHandle));
-            }
-        }
+        static void Walk(const std::string& PathToArchive, std::function<void(const CZipFileEntry&)> Consumer);
     };
 }

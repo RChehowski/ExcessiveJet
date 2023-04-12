@@ -9,4 +9,5 @@
 #include "Common/Private/JavaWorld/Oop.cpp"
 
 #include "Common/Private/Util/FileSystem.cpp"
+#include "Common/Private/Util/ZipFileSystem.cpp"
 #include "Common/Private/Util/FileUtils.cpp"

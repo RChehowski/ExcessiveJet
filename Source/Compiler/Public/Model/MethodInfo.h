@@ -112,6 +112,10 @@ namespace Compiler
         [[nodiscard]]
         std::string Debug_ToString(const CClassInfo& ClassInfo) const;
 
+        std::string GetName(const CConstantPool& ConstantPool) const;
+
+        std::string GetNameWithSignature(const CConstantPool& ConstantPool, const CClassInfo* ClassInfoPtr = nullptr) const;
+
     private:
         EMethodAccessFlags::Type AccessFlags = (EMethodAccessFlags::Type)0;
         u2 NameIndex        = (u2)0;

@@ -96,7 +96,7 @@ namespace Compiler
         }
 
         [[nodiscard]]
-        FORCEINLINE const TStandardSerializedArray<Compiler::CMethodInfo>& GetMethods() const
+        FORCEINLINE const std::vector<Compiler::CMethodInfo>& GetMethods() const
         {
             return Methods;
         }

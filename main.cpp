@@ -641,84 +641,67 @@ FORCEINLINE void ConvertUtf8ToUtf16LEBytes(const Util::IStringUtf8& StringUtf8, 
     }
 }
 
-
-template <u2 NumLocals, typename T>
-FORCEINLINE void Generic_xload(CThreadStack& Stack, CLocalVariablesStatic<NumLocals>& Locals, const u2 Index)
-{
-    Stack.template Push<T>((Locals[Index].template Get<T>()));
-}
-
-template <u2 NumLocals, typename T>
-FORCEINLINE void Generic_xstore(CThreadStack& Stack, CLocalVariablesStatic<NumLocals>& Locals, const u2 Index)
-{
-    Locals[Index].template Set<T>(Stack.template Pop<T>());
-}
-
-
-
-template <u2 NumLocals>
-FORCEINLINE void aload
-(
-    CThreadStack& Stack,
-    CLocalVariablesStatic<NumLocals>& Locals,
-    const u2 Index
-)
-{
-    Stack.PushOOP(Locals.template Get<oop>(Index));
-}
-
-template <u2 NumLocals>
-FORCEINLINE void astore
-(
-    CThreadStack& Stack,
-    CLocalVariablesStatic<NumLocals>& Locals,
-    const u2 Index
-)
-{
-    Locals[Index] = Stack.Pop<oop>();
-};
-
-template <u2 NumLocals>
-FORCEINLINE void dload
-(
-    CThreadStack& Stack,
-    CLocalVariablesStatic<NumLocals>& Locals,
-    const u2 Index
-)
-{
-    Locals[Index] = Stack.Pop<oop>();
-};
-
-
 #include "JavaWorld/Oop.h"
+#include "Common/Public/Util/ZipFilesystem.h"
 #include <mutex>
+
+using Filesystem::CZipFileSystem;
+using Filesystem::CZipFileEntry;
+
+void Consume(const CZipFileEntry& Entry, std::vector<std::string>& NativeMethods)
+{
+    const std::string FileName = Entry.GetFileName();
+
+    // Starts with
+    //if (FileName.rfind("sun/net", 0) == 0)
+    {
+        CClassReader ClassReader(Entry.GetAllocation());
+
+        if (ClassReader.IsValid())
+        {
+            CClassInfo ClassInfo;
+            ClassReader >> ClassInfo;
+            ASSERT(ClassInfo.GetConstantPool() != nullptr);
+
+            for (const Compiler::CMethodInfo &MethodInfo : ClassInfo.GetMethods())
+            {
+                if (MethodInfo.IsNative())
+                {
+                    std::shared_ptr<const Compiler::CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
+                    std::string MethodName = MethodInfo.GetNameWithSignature(*ConstantPool, &ClassInfo);
+
+                    NativeMethods.push_back(std::move(MethodName));
+                }
+            }
+        }
+    }
+}
 
 int main()
 {
     std::mutex m;
     int s = sizeof(m);
 
+    std::aligned_storage<16, 4> Storage{};
 
-    new JavaWorld::CObjectBase();
+
+
+    std::vector<std::string> NativeMethods{};
+
+    CZipFileSystem::Walk(R"(C:\Users\rcheh\Downloads\rt.zip)", [&NativeMethods](const CZipFileEntry& Entry)
+    {
+        Consume(Entry, NativeMethods);
+    });
 
 
     //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";
 
-    CClassReader ClassReader(R"(/Users/netherwire/Downloads/rt/java/lang/Class.class)");
+    CClassReader ClassReader(R"(C:\Users\rcheh\Downloads\rt\java\nio\Bits.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;
 
     std::shared_ptr<const Compiler::CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
-
-
-    CLocalVariablesStatic<8> LocalVariables{};
-    CThreadStack ThreadStack{ 256 };
-
-    LocalVariables.Set(2, 5);
-    aload(ThreadStack, LocalVariables, 2);
-
-    oop value = ThreadStack.Pop<oop>();
 
     for (const Compiler::CMethodInfo& MethodInfo : ClassInfo.GetMethods())
     {
@@ -736,6 +719,8 @@ int main()
     }
 
     ClassInfo.Debug_PrintClass();
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
 #if 0
     for (const auto& Method : ClassInfo.GetMethods())
