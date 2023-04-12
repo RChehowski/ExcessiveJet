@@ -61,8 +61,6 @@ namespace Compiler
     public:
         CConstantInfo() = delete;
 
-        virtual ~CConstantInfo() = default;
-
         [[nodiscard]]
         FORCEINLINE EConstantPoolInfoTag GetConstantPoolInfoTag() const
         {
@@ -109,8 +107,6 @@ namespace Compiler
             return ConstantPoolInfoTagToString(GetTag());
         }
 
-        [[nodiscard]] bool IsPhantom() const;
-
         static CConstantInfo *NewConstantInfo(EConstantPoolInfoTag ConstantPoolInfoTag);
 
         static constexpr const char *ConstantPoolInfoTagToString(const EConstantPoolInfoTag ConstantPoolInfoTag)
@@ -156,13 +152,15 @@ namespace Compiler
         {
             static_assert(std::is_base_of_v<CConstantInfo, T>, "T must be a subclass of CConstantInfo");
 
-            ASSERT_MSG(ConstantInfo.IsA<T>(),
-                       "Cannot cast \"%s\" to \"%s\". You can only cast from base CConstantInfo to it's subtype.",
-                       ConstantInfo.GetTagString(),
-                       ConstantPoolInfoTagToString(T::StaticTag)
+            ASSERT_MSG
+            (
+                ConstantInfo.IsA<T>(),
+                "Cannot cast \"%s\" to \"%s\". You can only cast from base CConstantInfo to it's subtype.",
+                ConstantInfo.GetTagString(),
+                ConstantPoolInfoTagToString(T::StaticTag)
             );
 
-            return static_cast<const T &>(ConstantInfo);
+            return static_cast<const T&>(ConstantInfo);
         }
 
         friend void operator>>(CClassReader &Reader, CConstantInfo &Instance);
@@ -180,8 +178,6 @@ namespace Compiler
         {
         }
 
-        ~CPhantomConstantInfo() override = default;
-
     public:
         [[nodiscard]]
         std::string ToLowLevelString() const override
@@ -192,6 +188,7 @@ namespace Compiler
         [[nodiscard]]
         std::string ToResolvedString(const CConstantPool& ConstantPool) const override
         {
+            ASSERT_MSG(false, "Resolution of a phantom constant info indirectly indicates an error")
             return "";
         }
 
@@ -200,7 +197,7 @@ namespace Compiler
             ASSERT_MSG(false, "Phantom const infos should never be read");
         }
 
-        static CConstantInfo *GetInstance();
+        static CConstantInfo* GetInstance();
 
         static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Phantom;
     };

@@ -8,7 +8,13 @@ namespace Util
 {
     CAllocation CFileUtils::ReadFile(const std::string& FileName, bool& bFileOpened)
     {
-        FILE* File = fopen(FileName.c_str(), "rb");
+        FILE* File = nullptr;
+
+#if PLATFORM_WINDOWS
+        fopen_s(&File, FileName.c_str(), "rb");
+#else
+        File = fopen(FileName.c_str(), "rb");
+#endif
 
         bFileOpened = (File != nullptr);
 

@@ -677,13 +677,17 @@ void Consume(const CZipFileEntry& Entry, std::vector<std::string>& NativeMethods
     }
 }
 
+
 int main()
 {
     std::mutex m;
     int s = sizeof(m);
 
-    std::aligned_storage<16, 4> Storage{};
+    CLocalVariablesStorage<16> Storage{};
+    CLocalVariables LocalVariables { Storage };
 
+    LocalVariables.Set(2, 0.1);
+    LocalVariables.Set(1, oop{ (void*)64 });
 
 
     std::vector<std::string> NativeMethods{};

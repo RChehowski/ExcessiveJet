@@ -131,14 +131,9 @@ namespace Compiler
         Instance.DeserializeFrom(Reader);
     }
 
-	bool CConstantInfo::IsPhantom() const
-	{
-		return this == CPhantomConstantInfo::GetInstance();
-	}
-
 	CConstantInfo *CPhantomConstantInfo::GetInstance()
 	{
-		static CConstantInfo* PhantomConstantInfo = new CPhantomConstantInfo();
-		return PhantomConstantInfo;
+		static CPhantomConstantInfo PhantomConstantInfo{};
+		return &PhantomConstantInfo;
 	}
 }
