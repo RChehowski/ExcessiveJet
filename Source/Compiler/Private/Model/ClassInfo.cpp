@@ -82,20 +82,20 @@ namespace Compiler
             const CConstantUtf8Info& ThisClassNameInfo = ConstantPool->GetChecked<CConstantUtf8Info>(
 		            ThisClassInfo.GetNameIndex());
 
-            const char* ClassKind;
+            //const char* ClassKind;
             if (AccessFlags & EClassAccessFlags::ACC_INTERFACE)
             {
                 if (AccessFlags & EClassAccessFlags::ACC_ANNOTATION)
-                    ClassKind = "@interface";
+                    Oss << "@interface ";
                 else
-                    ClassKind = "interface";
+                    Oss << "interface ";
             }
             else
             {
-                ClassKind = "class";
+                Oss << "class ";
             }
 
-            Oss << ClassKind << " " << ThisClassNameInfo.GetStringUtf8();
+            Oss << Debug::DecodeType((std::string)ThisClassNameInfo.GetStringUtf8());
         }
         if (SuperClass != 0)
         {
@@ -104,7 +104,7 @@ namespace Compiler
             const CConstantUtf8Info& SuperClassNameInfo = ConstantPool->GetChecked<CConstantUtf8Info>(
 		            SuperClassInfo.GetNameIndex());
 
-            Oss << " extends " << SuperClassNameInfo.GetStringUtf8();
+            Oss << " extends " << Debug::DecodeType((std::string)SuperClassNameInfo.GetStringUtf8());
         }
 
         if (!Interfaces.empty())
@@ -119,7 +119,7 @@ namespace Compiler
                 const CConstantUtf8Info& InterfaceClassNameInfo = ConstantPool->GetChecked<CConstantUtf8Info>(
 		                InterfaceClassInfo.GetNameIndex());
 
-                Oss << InterfaceClassNameInfo.GetStringUtf8();
+                Oss << Debug::DecodeType((std::string)InterfaceClassNameInfo.GetStringUtf8());
 
                 if (--InterfacesLeft > 0)
                 {

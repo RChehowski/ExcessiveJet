@@ -690,12 +690,14 @@ int main()
     LocalVariables.Set(1, oop{ (void*)64 });
 
 
+    /*
     std::vector<std::string> NativeMethods{};
 
     CZipFileSystem::Walk(R"(C:\Users\rcheh\Downloads\rt.zip)", [&NativeMethods](const CZipFileEntry& Entry)
     {
         Consume(Entry, NativeMethods);
     });
+    */
 
 
     //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";

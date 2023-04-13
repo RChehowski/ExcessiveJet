@@ -26,8 +26,8 @@ namespace Compiler
 
         FORCEINLINE friend void operator>>(CClassReader& Reader, CClassVersion& Instance)
         {
-            Reader >> Instance.MajorVersion;
             Reader >> Instance.MinorVersion;
+            Reader >> Instance.MajorVersion;
         }
 
         [[nodiscard]]

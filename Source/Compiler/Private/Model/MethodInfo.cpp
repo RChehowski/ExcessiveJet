@@ -23,7 +23,7 @@ namespace Compiler
         std::shared_ptr<const CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
 
         std::ostringstream Oss;
-        Oss << GetNameWithSignature(*ConstantPool);
+        Oss << GetNameWithSignature(*ConstantPool) << std::endl;
 
         if (std::shared_ptr<CCodeAttributeInfo> CodeAttributeInfo = GetAttribute<CCodeAttributeInfo>())
         {
@@ -67,24 +67,22 @@ namespace Compiler
         if (AccessFlags & EMethodAccessFlags::ACC_VARARGS)       Oss << "<varargs> ";
         if (AccessFlags & EMethodAccessFlags::ACC_NATIVE)        Oss << "native ";
         if (AccessFlags & EMethodAccessFlags::ACC_ABSTRACT)      Oss << "abstract ";
-        if (AccessFlags & EMethodAccessFlags::ACC_STRICT)        Oss << "strict(fp) ";
+        if (AccessFlags & EMethodAccessFlags::ACC_STRICT)        Oss << "strictfp ";
         if (AccessFlags & EMethodAccessFlags::ACC_SYNTHETIC)     Oss << "<synthetic> ";
-
-        std::string DeclaringClassName{};
-        if (ClassInfoPtr != nullptr)
-        {
-            DeclaringClassName = static_cast<std::string>(ClassInfoPtr->GetNameString()) + '.';
-        }
 
         const std::string FunctionSignature = (std::string)DescriptorString.GetStringUtf8();
 
-        Oss << Debug::DecodeMethodReturnType(FunctionSignature)
-            << " "
-            << DeclaringClassName
-            << NameString.GetStringUtf8()
-            << "("
-            << Debug::DecodeMethodArgumentTypesJoined(FunctionSignature)
-            << ")";
+        const std::string MethodReturnType = Debug::DecodeMethodReturnType(FunctionSignature);
+        const std::string MethodArguments = Debug::DecodeMethodArgumentTypesJoined(FunctionSignature);
+
+        Oss << MethodReturnType << ' ';
+
+        if (ClassInfoPtr != nullptr)
+        {
+            Oss << ClassInfoPtr->GetNameString() << '.';
+        }
+
+        Oss << NameString.GetStringUtf8() << '(' << MethodArguments << ')';
 
         return Oss.str();
     }
