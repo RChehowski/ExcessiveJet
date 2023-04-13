@@ -62,44 +62,6 @@ using Bytecode::COpcode;
 #include "Execution/LocalVariables.h"
 
 
-void Sum(CThreadStack* ThreadStack)
-{
-//    const int Op1 = ThreadStack->Pop8<int>();
-//    const int Op2 = ThreadStack->Pop8<int>();
-//
-//    const int Res = Op1 + Op2;
-//
-//    ThreadStack->Push8(Res);
-}
-
-/**
- * To be stored in a static variable.
- */
-/* constexpr */ class CExcessiveInvocationInfo
-{
-public:
-    constexpr CExcessiveInvocationInfo(const char* const InInvocationMethodName, const s4 InInvocationLineNumber) :
-            InvocationMethodName(InInvocationMethodName), InvocationLineNumber(InInvocationLineNumber)
-    {
-    }
-
-private:
-    const char* const InvocationMethodName;
-    const s4 InvocationLineNumber;
-};
-
-typedef void (*CExcessiveInvokableMethod)(CThreadStack*);
-
-FORCEINLINE void InvokeExcessiveMethod(
-    const CExcessiveInvokableMethod& ExcessiveInvokableMethod,
-    CThreadStack* ThreadStack,
-    const CExcessiveInvocationInfo& ExcessiveInvocationInfo
-)
-{
-    ExcessiveInvokableMethod(ThreadStack);
-}
-
-
 
 
 
@@ -683,8 +645,13 @@ int main()
     std::mutex m;
     int s = sizeof(m);
 
-    CLocalVariablesStorage<16> Storage{};
-    CLocalVariables LocalVariables { Storage };
+    VM::CVariableSlotStorage<16> Storage{};
+    VM::CLocalVariables LocalVariables { Storage };
+
+    VM::CVariableSlotStorage<128 * 1024> StackStorage{};
+    VM::CThreadStack ThreadStack{ StackStorage };
+
+    ThreadStack.Push(0.1);
 
     LocalVariables.Set(2, 0.1);
     LocalVariables.Set(1, oop{ (void*)64 });
