@@ -16,7 +16,7 @@ namespace VM
 {
     class CLocalVariables
     {
-    #if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
         template <typename T>
         FORCEINLINE void SetDebugInfo(const u2 InIndex)
         {
@@ -49,15 +49,15 @@ namespace VM
                 ASSERT(DebugRamMemory[InIndex + 1] == VM::EVariableSlotType::Double_2);
             }
         }
-    #endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
     public:
         template<usz NumSlots>
         explicit CLocalVariables(CVariableSlotStorage<NumSlots>& LocalVariablesStorage)
             : RawMemory(LocalVariablesStorage.GetStorage())
-    #if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             , DebugRamMemory(LocalVariablesStorage.GetDebugStorage())
-    #endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             , NumElements(LocalVariablesStorage.GetNumSlots())
         {
         }
@@ -73,9 +73,9 @@ namespace VM
         template <typename T>
         FORCEINLINE void Set(const u2 InIndex, const T InValue)
         {
-    #if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             SetDebugInfo<T>(InIndex);
-    #endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             *reinterpret_cast<T*>(RawMemory + InIndex) = InValue;
         }
@@ -83,9 +83,9 @@ namespace VM
         template <typename T>
         FORCEINLINE T Get(const u2 InIndex) const
         {
-    #if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             CheckDebugInfo<T>(InIndex);
-    #endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             return *reinterpret_cast<const T*>(RawMemory + InIndex);
         }
@@ -99,8 +99,8 @@ namespace VM
         u4* const RawMemory;
         const u2 NumElements;
 
-    #if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
         VM::EVariableSlotType* const DebugRamMemory;
-    #endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
     };
 }

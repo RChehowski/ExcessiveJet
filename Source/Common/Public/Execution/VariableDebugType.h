@@ -86,8 +86,8 @@ namespace VM
             case EVariableSlotType::Float:     return "Float";
             case EVariableSlotType::Long:      return "Long";
             case EVariableSlotType::Double:    return "Double";
-            case EVariableSlotType::Long_2:    return "Long (second slot)";
-            case EVariableSlotType::Double_2:  return "Double (second slot)";
+            case EVariableSlotType::Long_2:    return "Long_2";
+            case EVariableSlotType::Double_2:  return "Double_2";
 
             default: return "<Unknown>";
         }

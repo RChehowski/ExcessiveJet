@@ -651,7 +651,11 @@ int main()
     VM::CVariableSlotStorage<128 * 1024> StackStorage{};
     VM::CThreadStack ThreadStack{ StackStorage };
 
-    ThreadStack.Push(0.1);
+    ThreadStack.Push(42.1);
+    const double V1 = ThreadStack.Pop<double>();
+
+    ThreadStack.Push(34.34);
+    const double V2 = ThreadStack.Pop<double>();
 
     LocalVariables.Set(2, 0.1);
     LocalVariables.Set(1, oop{ (void*)64 });

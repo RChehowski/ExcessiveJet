@@ -27,10 +27,11 @@ namespace VM
         template<usz NumSlots>
         explicit CThreadStack(CVariableSlotStorage<NumSlots>& LocalVariablesStorage)
             : Bottom(LocalVariablesStorage.GetStorage())
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             , Top(LocalVariablesStorage.GetStorage())
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             , Max(LocalVariablesStorage.GetStorage() + LocalVariablesStorage.GetStorageSize())
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+            , DebugRawMemory(LocalVariablesStorage.GetDebugStorage())
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
         {
         }
 
@@ -61,6 +62,27 @@ namespace VM
             Top += GetNumSlotsForType<T>();
             ASSERT(Top < Max);
 
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+            constexpr VM::EVariableSlotType SlotType = GetSlotType<T>();
+
+            *DebugRawMemory = SlotType;
+            DebugRawMemory = DebugRawMemory + 1;
+
+            if constexpr (VM::VariableNeedsTwoSlots<T>())
+            {
+                if constexpr (SlotType == VM::EVariableSlotType::Long)
+                {
+                    *DebugRawMemory = VM::EVariableSlotType::Long_2;
+                }
+                else if constexpr (SlotType == VM::EVariableSlotType::Double)
+                {
+                    *DebugRawMemory = VM::EVariableSlotType::Double_2;
+                }
+
+                DebugRawMemory = DebugRawMemory + 1;
+            }
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+
             *Data = Value;
         }
 
@@ -69,11 +91,34 @@ namespace VM
         {
             static_assert(VM::VariableCanBeStored<T>());
 
-            T* const Data = reinterpret_cast<T*>(Top);
-            const T Value = *Data;
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+            constexpr VM::EVariableSlotType SlotType = GetSlotType<T>();
+
+            if constexpr (VM::VariableNeedsTwoSlots<T>())
+            {
+                DebugRawMemory = DebugRawMemory - 1;
+                const VM::EVariableSlotType ActualType = *DebugRawMemory;
+
+                if constexpr (SlotType == VM::EVariableSlotType::Long)
+                {
+                    ASSERT_MSG(ActualType == VM::EVariableSlotType::Long_2, "Actual type: %s, expected Long_2", VM::ToString(SlotType));
+                }
+                else if constexpr (SlotType == VM::EVariableSlotType::Double)
+                {
+                    ASSERT_MSG(ActualType == VM::EVariableSlotType::Double_2, "Actual type: %s, expected Double_2", VM::ToString(SlotType));
+                }
+            }
+
+            DebugRawMemory = DebugRawMemory - 1;
+            const VM::EVariableSlotType ActualType = *DebugRawMemory;
+            ASSERT_MSG(ActualType == SlotType, "Actual type: %s, expected %s", VM::ToString(ActualType), VM::ToString(SlotType));
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             Top -= GetNumSlotsForType<T>();
             ASSERT(Top >= Bottom);
+
+            T* const Data = reinterpret_cast<T*>(Top);
+            const T Value = *Data;
 
             return Value;
         }
@@ -82,5 +127,9 @@ namespace VM
         u4* const Bottom;
         u4* Top;
         u4* const Max;
+
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+        VM::EVariableSlotType* DebugRawMemory;
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
     };
 }
