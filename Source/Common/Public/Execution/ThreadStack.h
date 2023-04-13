@@ -16,7 +16,7 @@ namespace VM
     struct CThreadStack
     {
         template<typename T>
-        static usz GetNumSlotsForType()
+        static constexpr usz GetNumSlotsForType()
         {
             constexpr usz NumSlots = sizeof(T) / VM::VariableSlotSize;
             static_assert((NumSlots == 1) || (VM::VariableNeedsTwoSlots<T>() && (NumSlots == 2)));
@@ -53,13 +53,15 @@ namespace VM
         }
 
         template <typename T>
-        FORCEINLINE void Push(T Value)
+        FORCEINLINE void Push(const T Value)
         {
             static_assert(VM::VariableCanBeStored<T>());
 
             T* const Data = reinterpret_cast<T*>(Top);
 
-            Top += GetNumSlotsForType<T>();
+            constexpr usz NumSlots = GetNumSlotsForType<T>();
+
+            Top += NumSlots;
             ASSERT(Top < Max);
 
 #if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
@@ -68,7 +70,7 @@ namespace VM
             *DebugRawMemory = SlotType;
             DebugRawMemory = DebugRawMemory + 1;
 
-            if constexpr (VM::VariableNeedsTwoSlots<T>())
+            if constexpr (NumSlots == 2)
             {
                 if constexpr (SlotType == VM::EVariableSlotType::Long)
                 {
@@ -91,10 +93,11 @@ namespace VM
         {
             static_assert(VM::VariableCanBeStored<T>());
 
+            constexpr usz NumSlots = GetNumSlotsForType<T>();
 #if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             constexpr VM::EVariableSlotType SlotType = GetSlotType<T>();
 
-            if constexpr (VM::VariableNeedsTwoSlots<T>())
+            if constexpr (NumSlots == 2)
             {
                 DebugRawMemory = DebugRawMemory - 1;
                 const VM::EVariableSlotType ActualType = *DebugRawMemory;
@@ -114,7 +117,7 @@ namespace VM
             ASSERT_MSG(ActualType == SlotType, "Actual type: %s, expected %s", VM::ToString(ActualType), VM::ToString(SlotType));
 #endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
-            Top -= GetNumSlotsForType<T>();
+            Top -= NumSlots;
             ASSERT(Top >= Bottom);
 
             T* const Data = reinterpret_cast<T*>(Top);

@@ -652,10 +652,14 @@ int main()
     VM::CThreadStack ThreadStack{ StackStorage };
 
     ThreadStack.Push(42.1);
+    ThreadStack.Push(404);
+
+    const s4 V2 = ThreadStack.Pop<s4>();
     const double V1 = ThreadStack.Pop<double>();
 
+
     ThreadStack.Push(34.34);
-    const double V2 = ThreadStack.Pop<double>();
+    const double V3 = ThreadStack.Pop<double>();
 
     LocalVariables.Set(2, 0.1);
     LocalVariables.Set(1, oop{ (void*)64 });
