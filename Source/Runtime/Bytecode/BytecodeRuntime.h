@@ -6,8 +6,5 @@
 
 namespace Runtime
 {
-    class CBytecodeRuntime0_20
-    {
 
-    };
 }

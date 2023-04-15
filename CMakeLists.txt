@@ -25,6 +25,7 @@ set(UnityBuildFiles
 add_executable(${CMAKE_PROJECT_NAME} main.cpp "${UnityBuildFiles}")
 target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC ENABLE_STATISTICS=1)
 target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC UNLOCK_DEBUG_METHODS=1)
+target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO=1)
 
 if (WIN32 )
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC PLATFORM_WINDOWS=1)

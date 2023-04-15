@@ -1,8 +1,6 @@
-#include "Util/Types.h"
-
 #pragma once
 
-#define EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO (1)
+#include "Util/Types.h"
 
 namespace VM
 {

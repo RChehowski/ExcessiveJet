@@ -11,7 +11,12 @@
 #include "Util/Types.h"
 #include "Util/ExcessiveAssert.h"
 
-typedef void (*COpcodeHandler)();
+namespace VM
+{
+    struct CExecutionContext;
+}
+
+typedef void (*COpcodeHandler)(VM::CExecutionContext&);
 
 namespace Bytecode
 {
@@ -57,10 +62,10 @@ namespace Bytecode
             return Label;
         }
 
-        void Execute(/* Execution context */) const
+        void Execute(VM::CExecutionContext& ExecutionContext) const
         {
             ASSERT_MSG(IsValid(), "Can not execute a null handler")
-            Handler(/* Execution context */);
+            Handler(ExecutionContext);
         }
 
         [[nodiscard]] bool IsValid() const
@@ -90,7 +95,7 @@ namespace Bytecode
     // Interpreter only
     namespace OpcodeHandlers
     {
-#define DECLARE_OPCODE_HANDLER(Opcode) void Handle_##Opcode();
+#define DECLARE_OPCODE_HANDLER(Opcode) void Handle_##Opcode(VM::CExecutionContext&);
 
 #pragma region Opcode handler declaration
         // 0 - 9

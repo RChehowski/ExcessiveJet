@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Util/Types.h"
-#include "Platform/Memory.h"
+#include "Compiler/Public/Util/Platform/Memory.h"
 
 namespace Util
 {
@@ -85,7 +85,7 @@ namespace Util
         }
 
         template <typename T = void>
-        FORCEINLINE const T* sGet() const
+        FORCEINLINE const T* Get() const
         {
             return reinterpret_cast<const T*>(Data);
         }

@@ -8,7 +8,7 @@
 #include "JavaWorld/Oop.h"
 #include "Util/Platform/Memory.h"
 #include "Util/ExcessiveAssert.h"
-#include "Execution/VariableDebugType.h"
+#include "Execution/VariableSlotType.h"
 #include "Execution/VariableSlotStorage.h"
 
 namespace VM
@@ -104,17 +104,17 @@ namespace VM
 
                 if constexpr (SlotType == VM::EVariableSlotType::Long)
                 {
-                    ASSERT_MSG(ActualType == VM::EVariableSlotType::Long_2, "Actual type: %s, expected Long_2", VM::ToString(SlotType));
+                    ASSERT_MSG((ActualType == VM::EVariableSlotType::Long_2), "Actual type: %s, expected Long_2", VM::ToString(SlotType));
                 }
                 else if constexpr (SlotType == VM::EVariableSlotType::Double)
                 {
-                    ASSERT_MSG(ActualType == VM::EVariableSlotType::Double_2, "Actual type: %s, expected Double_2", VM::ToString(SlotType));
+                    ASSERT_MSG((ActualType == VM::EVariableSlotType::Double_2), "Actual type: %s, expected Double_2", VM::ToString(SlotType));
                 }
             }
 
             DebugRawMemory = DebugRawMemory - 1;
             const VM::EVariableSlotType ActualType = *DebugRawMemory;
-            ASSERT_MSG(ActualType == SlotType, "Actual type: %s, expected %s", VM::ToString(ActualType), VM::ToString(SlotType));
+            ASSERT_MSG((ActualType == SlotType), "Actual type: %s, expected %s", VM::ToString(ActualType), VM::ToString(SlotType));
 #endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             Top -= NumSlots;

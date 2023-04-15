@@ -2,7 +2,7 @@
 // Created by rcheh on 7/1/2022.
 //
 
-#include "Compiler/Private/Bytecode/Opcodes.cpp"
+#include "Common/Private/Execution/Opcodes.cpp"
 
 #include "Compiler/Private/Model/Attributes/AttributeInfo.cpp"
 #include "Compiler/Private/Model/Attributes/CodeAttributeInfo.cpp"

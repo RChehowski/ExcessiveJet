@@ -6,7 +6,7 @@
 
 #include "Util/Types.h"
 #include "JavaWorld/Oop.h"
-#include "Execution/VariableDebugType.h"
+#include "Execution/VariableSlotType.h"
 #include "Execution/VariableSlotStorage.h"
 
 #include <vector>

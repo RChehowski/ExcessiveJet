@@ -51,7 +51,7 @@ void TraverseDirectory(const std::string& Root, std::function<void(const std::st
 #include <Model/ConstantPool/ConstantLongInfo.h>
 #include <Model/ConstantPool/ConstantDoubleInfo.h>
 
-#include "Bytecode/Opcodes.h"
+#include "Common/Public/Execution/Opcodes.h"
 #include "Util/Bits.h"
 
 #include "Util/FileSystem.h"
