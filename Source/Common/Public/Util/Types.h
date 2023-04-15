@@ -73,3 +73,7 @@ namespace Util
 {
     using WideString = std::wstring;
 }
+
+template<bool bFlag = false> void ConditionalStaticAssert() { static_assert(bFlag, "Conditional static_assert"); }
+
+#define EXJ_STATIC_ASSERT_CONDITIONAL() ConditionalStaticAssert<true>()

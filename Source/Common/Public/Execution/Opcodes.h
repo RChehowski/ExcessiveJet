@@ -10,11 +10,8 @@
 
 #include "Util/Types.h"
 #include "Util/ExcessiveAssert.h"
+#include "Execution/ExecutionContext.h"
 
-namespace VM
-{
-    struct CExecutionContext;
-}
 
 typedef void (*COpcodeHandler)(VM::CExecutionContext&);
 
@@ -62,10 +59,16 @@ namespace Bytecode
             return Label;
         }
 
-        void Execute(VM::CExecutionContext& ExecutionContext) const
+        FORCEINLINE void Execute(VM::CExecutionContext& ExecutionContext) const
         {
             ASSERT_MSG(IsValid(), "Can not execute a null handler")
             Handler(ExecutionContext);
+        }
+
+        FORCEINLINE bool ExecuteConditional(VM::CExecutionContext& ExecutionContext) const
+        {
+            Execute(ExecutionContext);
+            return *ExecutionContext.GetConstantParameters().Get<bool>();
         }
 
         [[nodiscard]] bool IsValid() const
@@ -862,5 +865,6 @@ namespace Bytecode
         return *GOpcodesArray[Byte];
     }
 }
+
 
 #endif //CPP20_OPCODES_H

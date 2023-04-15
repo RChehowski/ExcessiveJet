@@ -3,12 +3,31 @@
 //
 
 #include "Common/Public/Execution/Opcodes.h"
-#include "Execution/ExecutionContext.h"
+
 
 #include <algorithm>
 
 namespace Util
 {
+    enum class ECompareOperation : u8
+    {
+        // Equals (A==B)
+        EQ,
+        // Not equals (A!=B)
+        NE,
+
+        // Less than (A < B)
+        LT,
+        // Less or equals than (A <= B)
+        LE,
+
+        // Greater than (A > B)
+        GT,
+
+        // Greater or equals than (A >= B)
+        GE
+    };
+
     template<typename T>
     FORCEINLINE void GenericAdd(VM::CThreadStack& ThreadStack)
     {
@@ -207,6 +226,62 @@ namespace Util
             static_cast<s4>(std::numeric_limits<s2>::max())
         );
         ThreadStack.Push<s4>(Result);
+    }
+
+    template <typename T, ECompareOperation CompareOperation>
+    FORCEINLINE bool GenericCompareImpl(const T Value1, const T Value2)
+    {
+        // There is no constexpr switch yet, partial specialization is not allowed either
+        if constexpr (CompareOperation == ECompareOperation::EQ)
+        {
+            return Value1 == Value2;
+        }
+        else if constexpr (CompareOperation == ECompareOperation::NE)
+        {
+            return Value1 != Value2;
+        }
+        else if constexpr (CompareOperation == ECompareOperation::LT)
+        {
+            static_assert(!TIsOop<T>, "< is not supported for oops");
+            return Value1 < Value2;
+        }
+        else if constexpr (CompareOperation == ECompareOperation::LE)
+        {
+            static_assert(!TIsOop<T>, "<= is not supported for oops");
+            return Value1 <= Value2;
+        }
+        else if constexpr (CompareOperation == ECompareOperation::GT)
+        {
+            static_assert(!TIsOop<T>, "> is not supported for oops");
+            return Value1 > Value2;
+        }
+        else if constexpr (CompareOperation == ECompareOperation::GE)
+        {
+            static_assert(!TIsOop<T>, ">= is not supported for oops");
+            return Value1 >= Value2;
+        }
+        else
+        {
+            // can't use 'false' -- expression has to depend on a template parameter
+            static_assert(!sizeof(T*), "CompareOperation is not supported");
+            return false;
+        }
+    }
+
+    template <ECompareOperation CompareOperation>
+    FORCEINLINE bool GenericCompareIntZero(VM::CThreadStack& ThreadStack)
+    {
+        const s4 Value1 = ThreadStack.template Pop<s4>();
+        return GenericCompareImpl<s4, CompareOperation>(Value1, static_cast<s4>(0));
+    }
+
+    template <typename T, ECompareOperation CompareOperation>
+    FORCEINLINE bool GenericCompare2(VM::CThreadStack& ThreadStack)
+    {
+        const T Value1 = ThreadStack.template Pop<T>();
+        const T Value2 = ThreadStack.template Pop<T>();
+
+        return GenericCompareImpl<T, CompareOperation>(Value1, Value2);
     }
 }
 
@@ -576,9 +651,11 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(POP)
     {
+        Context.GetThreadStack().PopDiscard(1);
     }
     DEFINE_OPCODE_HANDLER(POP2)
     {
+        Context.GetThreadStack().PopDiscard(2);
     }
     DEFINE_OPCODE_HANDLER(DUP)
     {
@@ -751,6 +828,16 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(IINC)
     {
+        struct CStructure
+        {
+            const u1 Index;
+            const s1 Constant;
+        } const* Structure = Context.GetConstantParameters().Get<CStructure>();
+
+        const u2 Index = static_cast<u2>(Structure->Index);
+
+        const s4 Value = Context.GetLocalVariables().Get<s4>(Index);
+        Context.GetLocalVariables().Set(Index, Value + static_cast<s4>(Structure->Constant));
     }
     DEFINE_OPCODE_HANDLER(I2L)
     {
@@ -824,47 +911,75 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(IFEQ)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::EQ>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IFNE)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::NE>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IFLT)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::LT>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IFGE)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::GE>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IFGT)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::GT>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IFLE)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::LE>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPEQ)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::EQ>(Context.GetThreadStack());
     }
 
     // 160 - 169
     DEFINE_OPCODE_HANDLER(IF_ICMPNE)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::NE>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPLT)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::LT>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPGE)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::GE>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPGT)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::GT>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPLE)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::LE>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IF_ACMPEQ)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompare2<oop, Util::ECompareOperation::EQ>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(IF_ACMPNE)
     {
+        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
+        *ResultPtr = Util::GenericCompare2<oop, Util::ECompareOperation::NE>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(GOTO)
     {
@@ -967,9 +1082,13 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(IFNULL)
     {
+        const oop Value = Context.GetThreadStack().Pop<oop>();
+        *Context.GetConstantParameters().Get<bool>() = (Value == Null);
     }
     DEFINE_OPCODE_HANDLER(IFNONNULL)
     {
+        const oop Value = Context.GetThreadStack().Pop<oop>();
+        *Context.GetConstantParameters().Get<bool>() = (Value != Null);
     }
 
     // 200 - 201

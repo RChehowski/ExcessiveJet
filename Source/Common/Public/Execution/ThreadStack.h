@@ -126,6 +126,15 @@ namespace VM
             return Value;
         }
 
+        void PopDiscard(const int Times)
+        {
+            Top -= Times;
+
+#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+            DebugRawMemory -= Times;
+#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
+        }
+
     private:
         u4* const Bottom;
         u4* Top;

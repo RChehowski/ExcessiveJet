@@ -28,7 +28,7 @@ struct CObjectHeapDimension
 };
 
 
-class oop
+class alignas(4) oop
 {
     FORCEINLINE static u4 MemoryAddressToOop(const void* const MemoryAddress)
     {
@@ -91,4 +91,8 @@ private:
     u4 Value;
 };
 
+static_assert(sizeof(oop) == 4);
+
 static constexpr const oop Null{ nullptr };
+
+template<typename T> constexpr bool TIsOop = std::is_same_v<T, oop>;
