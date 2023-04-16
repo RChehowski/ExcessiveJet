@@ -231,6 +231,8 @@ namespace Util
     template <typename T, ECompareOperation CompareOperation>
     FORCEINLINE bool GenericCompareImpl(const T Value1, const T Value2)
     {
+        static_assert(std::is_same_v<T, s4> || std::is_same_v<T, oop>, "Only signed ints and oops can be compared using this method");
+
         // There is no constexpr switch yet, partial specialization is not allowed either
         if constexpr (CompareOperation == ECompareOperation::EQ)
         {
@@ -283,12 +285,32 @@ namespace Util
 
         return GenericCompareImpl<T, CompareOperation>(Value1, Value2);
     }
+
+    FORCEINLINE s4 LookupSwitch(s4 Key, CDisposableMemoryReader&& Reader)
+    {
+        // There's no padding here now
+        const u4 DefaultOffset = Reader.ReadNextCopy<u4>();
+        const u4 NumPairs = Reader.ReadNextCopy<u4>();
+
+        for (u4 Index = 0; Index < NumPairs; ++Index)
+        {
+            const s4 Match = Reader.ReadNextCopy<u4>();
+            const s4 Offset = Reader.ReadNextCopy<u4>();
+
+            if (Key == Match)
+            {
+                return Offset;
+            }
+        }
+
+        return DefaultOffset;
+    }
 }
 
 
 namespace Bytecode::OpcodeHandlers
 {
-#define DEFINE_OPCODE_HANDLER(Opcode) void Handle_##Opcode(VM::CExecutionContext& Context)
+#define DEFINE_OPCODE_HANDLER(Opcode) void Handle_##Opcode(VM::CExecutionContext& Context, const Util::CAllocationRef ConstantParameters)
 
 #pragma region Opcode handler definition
     // 0 - 9
@@ -360,12 +382,12 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(BIPUSH)
     {
-        const s1 Value = *Context.GetConstantParameters().template Get<s1>();
+        const s1 Value = ConstantParameters.template GetAsWhole<s1>();
         Context.GetThreadStack().template Push<s4>(static_cast<s4>(Value));
     }
     DEFINE_OPCODE_HANDLER(SIPUSH)
     {
-        const s2 Value = *Context.GetConstantParameters().template Get<s2>();
+        const s2 Value = ConstantParameters.template GetAsWhole<s2>();
         Context.GetThreadStack().template Push<s4>(static_cast<s4>(Value));
     }
     DEFINE_OPCODE_HANDLER(LDC)
@@ -381,27 +403,27 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(ILOAD)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericLoad<s4>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(LLOAD)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericLoad<s8>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(FLOAD)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericLoad<float>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(DLOAD)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericLoad<double>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(ALOAD)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericLoad<oop>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(ILOAD_0)
@@ -516,27 +538,27 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(ISTORE)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericStore<s4>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(LSTORE)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericStore<s8>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(FSTORE)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericStore<float>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(DSTORE)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericStore<double>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(ASTORE)
     {
-        const u1 Index = *Context.GetConstantParameters().Get<u1>();
+        const u1 Index = ConstantParameters.template GetAsWhole<u1>();
         Util::GenericStore<oop>(Context.GetThreadStack(), Context.GetLocalVariables(), Index);
     }
     DEFINE_OPCODE_HANDLER(ISTORE_0)
@@ -832,12 +854,13 @@ namespace Bytecode::OpcodeHandlers
         {
             const u1 Index;
             const s1 Constant;
-        } const* Structure = Context.GetConstantParameters().Get<CStructure>();
+        }
+        Structure = ConstantParameters.template GetAsWhole<CStructure>();
 
-        const u2 Index = static_cast<u2>(Structure->Index);
+        const u2 Index = static_cast<u2>(Structure.Index);
 
         const s4 Value = Context.GetLocalVariables().Get<s4>(Index);
-        Context.GetLocalVariables().Set(Index, Value + static_cast<s4>(Structure->Constant));
+        Context.GetLocalVariables().Set(Index, Value + static_cast<s4>(Structure.Constant));
     }
     DEFINE_OPCODE_HANDLER(I2L)
     {
@@ -911,75 +934,75 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(IFEQ)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::EQ>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompareIntZero<Util::ECompareOperation::EQ>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IFNE)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::NE>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompareIntZero<Util::ECompareOperation::NE>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IFLT)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::LT>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompareIntZero<Util::ECompareOperation::LT>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IFGE)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::GE>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompareIntZero<Util::ECompareOperation::GE>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IFGT)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::GT>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompareIntZero<Util::ECompareOperation::GT>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IFLE)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompareIntZero<Util::ECompareOperation::LE>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompareIntZero<Util::ECompareOperation::LE>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPEQ)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::EQ>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompare2<s4, Util::ECompareOperation::EQ>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
 
     // 160 - 169
     DEFINE_OPCODE_HANDLER(IF_ICMPNE)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::NE>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompare2<s4, Util::ECompareOperation::NE>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPLT)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::LT>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompare2<s4, Util::ECompareOperation::LT>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPGE)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::GE>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompare2<s4, Util::ECompareOperation::GE>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPGT)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::GT>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompare2<s4, Util::ECompareOperation::GT>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IF_ICMPLE)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompare2<s4, Util::ECompareOperation::LE>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompare2<s4, Util::ECompareOperation::LE>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IF_ACMPEQ)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompare2<oop, Util::ECompareOperation::EQ>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompare2<oop, Util::ECompareOperation::EQ>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(IF_ACMPNE)
     {
-        bool* const ResultPtr = Context.GetConstantParameters().Get<bool>();
-        *ResultPtr = Util::GenericCompare2<oop, Util::ECompareOperation::NE>(Context.GetThreadStack());
+        const bool bResult = Util::GenericCompare2<oop, Util::ECompareOperation::NE>(Context.GetThreadStack());
+        Context.template SetConditionResult<bool>(bResult);
     }
     DEFINE_OPCODE_HANDLER(GOTO)
     {
@@ -994,9 +1017,18 @@ namespace Bytecode::OpcodeHandlers
     // 170 - 179
     DEFINE_OPCODE_HANDLER(TABLESWITCH)
     {
+        // Never skip anything, memory is already aligned
+
+        //ConstantParameters
     }
     DEFINE_OPCODE_HANDLER(LOOKUPSWITCH)
     {
+        const s4 Key = Context.GetThreadStack().Pop<s4>();
+        const s4 Offset = Util::LookupSwitch(Key, ConstantParameters.CreateMemoryReader());
+
+        ASSERT(CMathUtils::IsNumberWithinRangeOfType<u2>(Offset));
+
+        Context.SetConditionResult<u2>(static_cast<u2>(Offset));
     }
     DEFINE_OPCODE_HANDLER(IRETURN)
     {
@@ -1083,12 +1115,12 @@ namespace Bytecode::OpcodeHandlers
     DEFINE_OPCODE_HANDLER(IFNULL)
     {
         const oop Value = Context.GetThreadStack().Pop<oop>();
-        *Context.GetConstantParameters().Get<bool>() = (Value == Null);
+        Context.template SetConditionResult<bool>(Value == Null);
     }
     DEFINE_OPCODE_HANDLER(IFNONNULL)
     {
         const oop Value = Context.GetThreadStack().Pop<oop>();
-        *Context.GetConstantParameters().Get<bool>() = (Value != Null);
+        Context.template SetConditionResult<bool>(Value != Null);
     }
 
     // 200 - 201

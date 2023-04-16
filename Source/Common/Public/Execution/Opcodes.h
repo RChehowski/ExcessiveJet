@@ -13,27 +13,76 @@
 #include "Execution/ExecutionContext.h"
 
 
-typedef void (*COpcodeHandler)(VM::CExecutionContext&);
+typedef void (*COpcodeHandler)(VM::CExecutionContext&, const Util::CAllocationRef);
 
 namespace Bytecode
 {
+    enum class EOpcodeFlags : u2;
+
+    FORCEINLINE constexpr EOpcodeFlags operator| (EOpcodeFlags A, EOpcodeFlags B)
+    {
+        return static_cast<EOpcodeFlags>(static_cast<std::underlying_type_t<EOpcodeFlags>>(A) | static_cast<std::underlying_type_t<EOpcodeFlags>>(B));
+    }
+
+    FORCEINLINE constexpr EOpcodeFlags operator& (EOpcodeFlags A, EOpcodeFlags B)
+    {
+        return static_cast<EOpcodeFlags>(static_cast<std::underlying_type_t<EOpcodeFlags>>(A) & static_cast<std::underlying_type_t<EOpcodeFlags>>(B));
+    }
+
+    enum class EOpcodeFlags : u2
+    {
+        /** The opcode has no side effects */
+        None = 0,
+
+        /** The opcode does integer division (can throw a java.lang.ArithmeticException("divide by zero")) */
+        DoesIntegerDivision = 1 << 0,
+
+        /** This opcode accesses an object reference (can throw a java.lang.NullPointerException) */
+        ReadsObjectReference = 1 << 1,
+
+        /** This opcode reads from an array (can throw a java.lang.ArrayIndexOutOfBoundsException) */
+        ReadsFromArray = 1 << 2,
+
+        /** This opcode allocates memory (can throw a java.lang.OutOfMemoryError) */
+        AllocatesMemory = 1 << 3,
+
+        /** Performs a class cast (can throw a java.lang.ClassCastException) */
+        DoesClassCast = 1 << 4,
+
+        /** Calls method (potential java.lang.StackOverflowError) */
+        InvokesMethod = 1 << 5,
+
+        ChangesControlFlow = 1 << 6,
+
+        EvaluatesCondition = 1 << 7,
+
+
+
+
+
+
+        // === MIX === //
+        InvokesInstanceMethod = ReadsObjectReference | InvokesMethod,
+        Branching = ChangesControlFlow | EvaluatesCondition,
+    };
+
+
+
     class COpcode
     {
-    public:
-        constexpr COpcode() noexcept
-            : ByteCode(-1)
-            , Label("$Invalid")
-            , Handler(nullptr)
-        {
-        }
-
-        constexpr COpcode(const u1 InByteCode, const char *InLabel, COpcodeHandler InHandler) noexcept
+    private:
+        /** Only can be constructed from COpcodes (a friend class below) */
+        constexpr COpcode(const u1 InByteCode, const char *InLabel, COpcodeHandler InHandler, const EOpcodeFlags InOpcodeFlags = EOpcodeFlags::None) noexcept
             : ByteCode(InByteCode)
             , Label(InLabel)
             , Handler(InHandler)
+            , OpcodeFlags(InOpcodeFlags)
         {
         }
 
+        friend class COpcodes;
+
+    public:
         // disallow copy and move construction
         constexpr COpcode(const COpcode&) = delete;
         constexpr COpcode(COpcode&&) = delete;
@@ -59,16 +108,28 @@ namespace Bytecode
             return Label;
         }
 
-        FORCEINLINE void Execute(VM::CExecutionContext& ExecutionContext) const
+        FORCEINLINE void Execute(VM::CExecutionContext& ExecutionContext, const Util::CAllocationRef& ConstantParameters) const
         {
+            ASSERT(!HasAllFlags(EOpcodeFlags::EvaluatesCondition));
+
             ASSERT_MSG(IsValid(), "Can not execute a null handler")
-            Handler(ExecutionContext);
+            Handler(ExecutionContext, ConstantParameters);
         }
 
-        FORCEINLINE bool ExecuteConditional(VM::CExecutionContext& ExecutionContext) const
+        FORCEINLINE bool ExecuteCondition(VM::CExecutionContext& ExecutionContext, const Util::CAllocationRef& ConstantParameters) const
         {
-            Execute(ExecutionContext);
-            return *ExecutionContext.GetConstantParameters().Get<bool>();
+            ASSERT(HasAllFlags(EOpcodeFlags::EvaluatesCondition));
+
+            Execute(ExecutionContext, ConstantParameters);
+            return ExecutionContext.template GetConditionResult<bool>();
+        }
+
+        FORCEINLINE u2 ExecuteSwitch(VM::CExecutionContext& ExecutionContext, const Util::CAllocationRef& ConstantParameters) const
+        {
+            ASSERT(HasAllFlags(EOpcodeFlags::EvaluatesCondition));
+
+            Execute(ExecutionContext, ConstantParameters);
+            return ExecutionContext.template GetConditionResult<u2>();
         }
 
         [[nodiscard]] bool IsValid() const
@@ -89,16 +150,23 @@ namespace Bytecode
         // Debug only. Copies opcode pointers
         static std::vector<const COpcode*> DEBUG_GetOpcodes();
 
+        [[nodiscard]] FORCEINLINE bool HasAllFlags(const EOpcodeFlags InOpcodeFlags) const
+        {
+            return (OpcodeFlags & InOpcodeFlags) != EOpcodeFlags::None;
+        }
+
     private:
         const u1 ByteCode;
         const char* const Label;
         COpcodeHandler Handler;
+
+        const EOpcodeFlags OpcodeFlags;
     };
 
     // Interpreter only
     namespace OpcodeHandlers
     {
-#define DECLARE_OPCODE_HANDLER(Opcode) void Handle_##Opcode(VM::CExecutionContext&);
+#define DECLARE_OPCODE_HANDLER(Opcode) void Handle_##Opcode(VM::CExecutionContext&, Util::CAllocationRef);
 
 #pragma region Opcode handler declaration
         // 0 - 9
@@ -350,11 +418,12 @@ namespace Bytecode
     }
 
 #pragma region Opcode array
-#define DEFINE_OPCODE(Byte, Name) static constexpr COpcode Name\
+#define DEFINE_OPCODE(Byte, Name, ...) static constexpr COpcode Name\
     {\
         static_cast<u1>(Byte),\
         LITERAL_TO_STRING(Name),\
-        OpcodeHandlers::Handle_##Name\
+        OpcodeHandlers::Handle_##Name,\
+        ##__VA_ARGS__\
     }
 
     struct COpcodes
@@ -543,29 +612,29 @@ namespace Bytecode
         DEFINE_OPCODE(150, FCMPG);
         DEFINE_OPCODE(151, DCMPL);
         DEFINE_OPCODE(152, DCMPG);
-        DEFINE_OPCODE(153, IFEQ);
-        DEFINE_OPCODE(154, IFNE);
-        DEFINE_OPCODE(155, IFLT);
-        DEFINE_OPCODE(156, IFGE);
-        DEFINE_OPCODE(157, IFGT);
-        DEFINE_OPCODE(158, IFLE);
-        DEFINE_OPCODE(159, IF_ICMPEQ);
+        DEFINE_OPCODE(153, IFEQ,        EOpcodeFlags::Branching);
+        DEFINE_OPCODE(154, IFNE,        EOpcodeFlags::Branching);
+        DEFINE_OPCODE(155, IFLT,        EOpcodeFlags::Branching);
+        DEFINE_OPCODE(156, IFGE,        EOpcodeFlags::Branching);
+        DEFINE_OPCODE(157, IFGT,        EOpcodeFlags::Branching);
+        DEFINE_OPCODE(158, IFLE,        EOpcodeFlags::Branching);
+        DEFINE_OPCODE(159, IF_ICMPEQ,   EOpcodeFlags::Branching);
 
         // 160 - 169
-        DEFINE_OPCODE(160, IF_ICMPNE);
-        DEFINE_OPCODE(161, IF_ICMPLT);
-        DEFINE_OPCODE(162, IF_ICMPGE);
-        DEFINE_OPCODE(163, IF_ICMPGT);
-        DEFINE_OPCODE(164, IF_ICMPLE);
-        DEFINE_OPCODE(165, IF_ACMPEQ);
-        DEFINE_OPCODE(166, IF_ACMPNE);
-        DEFINE_OPCODE(167, GOTO);
-        DEFINE_OPCODE(168, JSR);
-        DEFINE_OPCODE(169, RET);
+        DEFINE_OPCODE(160, IF_ICMPNE,   EOpcodeFlags::Branching);
+        DEFINE_OPCODE(161, IF_ICMPLT,   EOpcodeFlags::Branching);
+        DEFINE_OPCODE(162, IF_ICMPGE,   EOpcodeFlags::Branching);
+        DEFINE_OPCODE(163, IF_ICMPGT,   EOpcodeFlags::Branching);
+        DEFINE_OPCODE(164, IF_ICMPLE,   EOpcodeFlags::Branching);
+        DEFINE_OPCODE(165, IF_ACMPEQ,   EOpcodeFlags::Branching);
+        DEFINE_OPCODE(166, IF_ACMPNE,   EOpcodeFlags::Branching);
+        DEFINE_OPCODE(167, GOTO,        EOpcodeFlags::ChangesControlFlow);
+        DEFINE_OPCODE(168, JSR,         EOpcodeFlags::ChangesControlFlow);
+        DEFINE_OPCODE(169, RET,         EOpcodeFlags::ChangesControlFlow);
 
         // 170 - 179
-        DEFINE_OPCODE(170, TABLESWITCH);
-        DEFINE_OPCODE(171, LOOKUPSWITCH);
+        DEFINE_OPCODE(170, TABLESWITCH, EOpcodeFlags::Branching);
+        DEFINE_OPCODE(171, LOOKUPSWITCH,EOpcodeFlags::Branching);
         DEFINE_OPCODE(172, IRETURN);
         DEFINE_OPCODE(173, LRETURN);
         DEFINE_OPCODE(174, FRETURN);
@@ -578,19 +647,19 @@ namespace Bytecode
         // 180 - 189
         DEFINE_OPCODE(180, GETFIELD);
         DEFINE_OPCODE(181, PUTFIELD);
-        DEFINE_OPCODE(182, INVOKEVIRTUAL);
-        DEFINE_OPCODE(183, INVOKESPECIAL);
-        DEFINE_OPCODE(184, INVOKESTATIC);
-        DEFINE_OPCODE(185, INVOKEINTERFACE);
-        DEFINE_OPCODE(186, INVOKEDYNAMIC);
-        DEFINE_OPCODE(187, NEW);
-        DEFINE_OPCODE(188, NEWARRAY);
-        DEFINE_OPCODE(189, ANEWARRAY);
+        DEFINE_OPCODE(182, INVOKEVIRTUAL,   EOpcodeFlags::InvokesInstanceMethod);
+        DEFINE_OPCODE(183, INVOKESPECIAL,   EOpcodeFlags::InvokesInstanceMethod);
+        DEFINE_OPCODE(184, INVOKESTATIC,    EOpcodeFlags::InvokesMethod);
+        DEFINE_OPCODE(185, INVOKEINTERFACE, EOpcodeFlags::InvokesInstanceMethod);
+        DEFINE_OPCODE(186, INVOKEDYNAMIC,   EOpcodeFlags::InvokesInstanceMethod);
+        DEFINE_OPCODE(187, NEW,             EOpcodeFlags::AllocatesMemory);
+        DEFINE_OPCODE(188, NEWARRAY,        EOpcodeFlags::AllocatesMemory);
+        DEFINE_OPCODE(189, ANEWARRAY,       EOpcodeFlags::AllocatesMemory);
 
         // 190 - 199
-        DEFINE_OPCODE(190, ARRAYLENGTH);
+        DEFINE_OPCODE(190, ARRAYLENGTH,     EOpcodeFlags::ReadsObjectReference);
         DEFINE_OPCODE(191, ATHROW);
-        DEFINE_OPCODE(192, CHECKCAST);
+        DEFINE_OPCODE(192, CHECKCAST,       EOpcodeFlags::DoesClassCast);
         DEFINE_OPCODE(193, INSTANCEOF);
         DEFINE_OPCODE(194, MONITORENTER);
         DEFINE_OPCODE(195, MONITOREXIT);

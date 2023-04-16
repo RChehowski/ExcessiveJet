@@ -4,14 +4,15 @@
 #include "Execution/ThreadStack.h"
 #include "Execution/LocalVariables.h"
 
+#include <variant>
+
 namespace VM
 {
     struct CExecutionContext
     {
-        CExecutionContext(CThreadStack& InThreadStack, CLocalVariables& InLocalVariables, Util::CAllocation& InConstantParameters)
+        CExecutionContext(CThreadStack& InThreadStack, CLocalVariables& InLocalVariables)
             : ThreadStack(InThreadStack)
             , LocalVariables(InLocalVariables)
-            , ConstantParameters(InConstantParameters)
         {
         }
 
@@ -25,14 +26,25 @@ namespace VM
             return LocalVariables;
         }
 
-        [[nodiscard]] FORCEINLINE Util::CAllocation& GetConstantParameters() const
+        template<typename T>
+        [[nodiscard]] FORCEINLINE T GetConditionResult() const
         {
-            return ConstantParameters;
+            static_assert(std::is_same_v<T, bool> || std::is_same_v<T, u2>);
+            return static_cast<T>(ConditionResult);
+        }
+
+        template<typename T>
+        FORCEINLINE void SetConditionResult(const T InConditionResult)
+        {
+            static_assert(std::is_same_v<T, bool> || std::is_same_v<T, u2>);
+            ConditionResult = static_cast<u2>(InConditionResult);
         }
 
     private:
         CThreadStack& ThreadStack;
         CLocalVariables& LocalVariables;
-        Util::CAllocation& ConstantParameters;
+
+        // May be either a boolean for if() or a unsigned short (u2) offset for switch()
+        u2 ConditionResult = static_cast<u2>(0);
     };
 }

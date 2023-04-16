@@ -5,16 +5,20 @@
 #pragma once
 
 #include "Util/Types.h"
+#include "Util/DisposableMemoryReader.h"
 #include "Compiler/Public/Util/Platform/Memory.h"
+
+#define EXJ_ALLOCATION_REF_SIZE_CHECK (1)
 
 namespace Util
 {
+    template <typename T>
+    using TRefOrValueBySize = typename std::conditional<std::is_trivially_copyable_v<T> && (sizeof(T) <= sizeof(void*)), T, const T&>::type;
+
     class CAllocation
     {
     public:
-        FORCEINLINE CAllocation()
-            : Data(nullptr)
-            , Size(0)
+        FORCEINLINE CAllocation() : Data(nullptr), Size(0)
         {
         }
 
@@ -84,11 +88,12 @@ namespace Util
             return reinterpret_cast<T*>(Data);
         }
 
-        template <typename T = void>
+        template <typename T>
         FORCEINLINE const T* Get() const
         {
-            return reinterpret_cast<const T*>(Data);
+            return reinterpret_cast<const T *>(Data);
         }
+
 
         FORCEINLINE explicit operator void *()
         {
@@ -101,7 +106,46 @@ namespace Util
         }
 
     private:
-        u1* Data;
+        u1* Data = nullptr;
+        usz Size = static_cast<usz>(0);
+    };
+
+    /** The allocation that does not own its memory */
+    class CAllocationRef
+    {
+    public:
+        template<typename T>
+        FORCEINLINE CAllocationRef(const T* const InData, const usz InSize)
+            : Data(reinterpret_cast<const void*>(InData))
+#if EXJ_ALLOCATION_REF_SIZE_CHECK
+            , Size(InSize)
+#endif
+        {
+        }
+
+        template <typename T>
+        FORCEINLINE auto GetAsWhole() const -> TRefOrValueBySize<T>
+        {
+#if EXJ_ALLOCATION_REF_SIZE_CHECK
+            ASSERT_MSG(sizeof(T) == Size, "Allocation size is %llu, but sizeof(T) is %llu. Size mismatch.",
+               (unsigned long long)Size,
+               (unsigned long long)sizeof(T)
+            );
+#endif
+
+            return *reinterpret_cast<const T*>(Data);
+        }
+
+        [[nodiscard]] FORCEINLINE CDisposableMemoryReader CreateMemoryReader() const
+        {
+            return CDisposableMemoryReader{ Data };
+        }
+
+    private:
+        const void* Data;
+
+#if EXJ_ALLOCATION_REF_SIZE_CHECK
         usz Size;
+#endif
     };
 }

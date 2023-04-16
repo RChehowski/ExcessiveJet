@@ -677,7 +677,7 @@ int main()
 
     //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";
 
-    CClassReader ClassReader(R"(C:\Users\rcheh\Downloads\rt\java\nio\Bits.class)");
+    CClassReader ClassReader(R"(C:\Users\rcheh\Downloads\rt\java\lang\String.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;

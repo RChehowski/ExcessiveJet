@@ -180,5 +180,17 @@ namespace Util
         {
             return (Test & Flags) != 0;
         }
+
+        template<typename TRange, typename TNumber>
+        FORCEINLINE static constexpr bool IsNumberWithinRange(const TNumber Number, const TRange RangeMin, const TRange RangeMax)
+        {
+            return (Number >= static_cast<TNumber>(RangeMin)) && (Number <= static_cast<TNumber>(RangeMax));
+        }
+
+        template<typename TRange, typename TNumber>
+        FORCEINLINE static constexpr bool IsNumberWithinRangeOfType(const TNumber Number)
+        {
+            return IsNumberWithinRange<TRange, TNumber>(Number, std::numeric_limits<TRange>::min(), std::numeric_limits<TRange>::max());
+        }
     };
 }

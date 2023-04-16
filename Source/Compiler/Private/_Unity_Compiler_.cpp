@@ -49,7 +49,7 @@
 #include "Compiler/Private/Printer/CppPrinter.cpp"
 
 
-#include "Compiler/Private/Util/MemoryReader.cpp"
+#include "Compiler/Private/Util/DisposableMemoryReader.cpp"
 #include "Compiler/Private/Util/StringUtf8.cpp"
 #include "Compiler/Private/Util/ExcessiveAssert.cpp"
 #include "Compiler/Private/Util/Platform/Memory.cpp"

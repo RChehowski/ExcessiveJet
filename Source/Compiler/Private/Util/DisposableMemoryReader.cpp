@@ -2,7 +2,7 @@
 // Created by ASUS on 29/12/2020.
 //
 
-#include "Util/MemoryReader.h"
+#include "Util/DisposableMemoryReader.h"
 #include "Util/FileUtils.h"
 #include "Util/StringUtf8.h"
 
