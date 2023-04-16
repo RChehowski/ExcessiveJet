@@ -185,7 +185,7 @@ namespace Util
     {
         const s4 Value = ThreadStack.Pop<s4>();
         const double Result = static_cast<double>(Value);
-        ThreadStack.Push<float>(Result);
+        ThreadStack.Push<double>(Result);
     }
 
 
