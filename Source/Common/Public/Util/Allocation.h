@@ -22,7 +22,7 @@ namespace Util
         {
         }
 
-        FORCEINLINE CAllocation(const usz InSize, const usz InAlignment = CMemory::DefaultMallocAlignment)
+        FORCEINLINE explicit CAllocation(const usz InSize, const usz InAlignment = CMemory::DefaultMallocAlignment)
         {
             Allocate(InSize, InAlignment);
         }
@@ -102,7 +102,7 @@ namespace Util
 
         static CAllocation EmptyAllocation()
         {
-            return CAllocation();
+            return {};
         }
 
     private:

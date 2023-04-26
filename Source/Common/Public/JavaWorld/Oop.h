@@ -18,22 +18,43 @@ constexpr usz oopAlignment = static_cast<usz>(1) << oopAlignmentShift;
 
 struct CObjectHeapDimension
 {
+
     static constexpr usz CompressedBitMask = 0xFFFFFFFFULL;
-    static constexpr usz UncompressedBitMask = CompressedBitMask << oopAlignmentShift;
 
-    static constexpr usz Size = UncompressedBitMask + static_cast<usz>(1);
+    static constexpr usz Size = CompressedBitMask + static_cast<usz>(1);
 
-    static constexpr usz Start  = static_cast<usz>(0x4000000000);
-    static constexpr usz End    = Start + Size;
+    static constexpr uintptr_t Start  = static_cast<uintptr_t>(0x400000000);
+    static constexpr uintptr_t End    = Start + Size;
 };
 
+constexpr usz oopSize = 4;
 
-class alignas(4) oop
+/**
+ * Non-typed compressed object pointer that can be converted to any object type.
+ * Does not do any type checks, acts similar to a "void*" pointer in C/C++.
+ *
+ * Stored in memory as a 4 byte value, can be uncompressed to a normal object on demand.
+ */
+class alignas(oopSize) oop
 {
     FORCEINLINE static u4 MemoryAddressToOop(const void* const MemoryAddress)
     {
-        // TODO: Subtract CObjectHeapDimension::Start
-        ASSERT(CMathUtils::IsAligned(MemoryAddress, oopAlignment));
+        ASSERT_MSG
+        (
+            (reinterpret_cast<uintptr_t>(MemoryAddress) >= CObjectHeapDimension::Start) &&
+            (reinterpret_cast<uintptr_t>(MemoryAddress) >= CObjectHeapDimension::End),
+            "Memory address must be located within the object heap dimension: [%llu, %llu). Got: %llu",
+            static_cast<unsigned long long>(CObjectHeapDimension::Start),
+            static_cast<unsigned long long>(CObjectHeapDimension::End),
+            reinterpret_cast<unsigned long long>(MemoryAddress)
+        );
+        ASSERT_MSG
+        (
+            CMathUtils::IsAligned(MemoryAddress, oopAlignment),
+            "Memory address %llu must be aligned by %llu",
+            reinterpret_cast<unsigned long long>(MemoryAddress),
+            static_cast<unsigned long long>(oopAlignment)
+        );
 
         const uintptr_t ShiftedMemoryAddress = reinterpret_cast<uintptr_t>(MemoryAddress) >> oopAlignmentShift;
 
@@ -42,7 +63,6 @@ class alignas(4) oop
 
     FORCEINLINE static void* OopToMemoryAddress(const u4 InOopValue)
     {
-        // TODO: Add CObjectHeapDimension::Start
         const uintptr_t ShiftedMemoryAddress = static_cast<uintptr_t>(InOopValue) << oopAlignmentShift;
 
         return reinterpret_cast<void*>(ShiftedMemoryAddress + CObjectHeapDimension::Start);
@@ -90,8 +110,8 @@ public:
 private:
     u4 Value;
 };
+static_assert(sizeof(oop) == oopSize, "Unexpected oop size");
 
-static_assert(sizeof(oop) == 4);
 
 static constexpr const oop Null{ nullptr };
 

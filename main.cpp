@@ -468,12 +468,12 @@ enum class EClassLoadStatus
 class CClass
 {
 public:
-    void Load()
+    static void Load()
     {
         std::cout << "Loading class..." << std::endl;
     }
 
-    void Unload()
+    static void Unload()
     {
         std::cout << "Unloading class..." << std::endl;
     }
@@ -639,9 +639,35 @@ void Consume(const CZipFileEntry& Entry, std::vector<std::string>& NativeMethods
     }
 }
 
+#include "Util/TemplateUtils.h"
+
 
 int main()
 {
+    constexpr usz sz = sizeof(long double);
+
+offset_1:
+
+    u1* Memory = new u1[256];
+    if (Memory != nullptr)
+    {
+        goto offset_1;
+    }
+
+
+    const usz NumBytes = Util::ConsumeToRawMemory(Memory, (void*)&CClass::Load);
+
+//    struct CAsStruct
+//    {
+//        s4 Ints[3];
+//        float Floats[3];
+//        double Doubles[3];
+//    };
+//    CAsStruct* AsStruct = reinterpret_cast<CAsStruct*>(Memory);
+
+
+    return 0;
+
     std::mutex m;
     int s = sizeof(m);
 
