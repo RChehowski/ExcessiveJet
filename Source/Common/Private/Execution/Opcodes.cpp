@@ -165,23 +165,23 @@ namespace Util
     }
 
     template<typename TFrom, typename TTo>
-    FORCEINLINE void Cast(VM::CThreadStack& ThreadStack);
+    FORCEINLINE void CastOnStack(VM::CThreadStack& ThreadStack);
 
-    template<> FORCEINLINE void Cast<s4, s8>(VM::CThreadStack& ThreadStack)
+    template<> FORCEINLINE void CastOnStack<s4, s8>(VM::CThreadStack& ThreadStack)
     {
         const s4 Value = ThreadStack.Pop<s4>();
         const s8 Result = static_cast<s8>(Value);
         ThreadStack.Push<s8>(Result);
     }
 
-    template<> FORCEINLINE void Cast<s4, float>(VM::CThreadStack& ThreadStack)
+    template<> FORCEINLINE void CastOnStack<s4, float>(VM::CThreadStack& ThreadStack)
     {
         const s4 Value = ThreadStack.Pop<s4>();
         const float Result = static_cast<float>(Value);
         ThreadStack.Push<float>(Result);
     }
 
-    template<> FORCEINLINE void Cast<s4, double>(VM::CThreadStack& ThreadStack)
+    template<> FORCEINLINE void CastOnStack<s4, double>(VM::CThreadStack& ThreadStack)
     {
         const s4 Value = ThreadStack.Pop<s4>();
         const double Result = static_cast<double>(Value);
@@ -190,7 +190,7 @@ namespace Util
 
 
     // Cast to a signed 1byte (java "byte")
-    template<> FORCEINLINE void Cast<s4, s1>(VM::CThreadStack& ThreadStack)
+    template<> FORCEINLINE void CastOnStack<s4, s1>(VM::CThreadStack& ThreadStack)
     {
         const s4 Value = ThreadStack.Pop<s4>();
         const s4 Result = CMathUtils::Clamp
@@ -203,7 +203,7 @@ namespace Util
     }
 
     // Cast to an unsigned 2char (java "char")
-    template<> FORCEINLINE void Cast<s4, u2>(VM::CThreadStack& ThreadStack)
+    template<> FORCEINLINE void CastOnStack<s4, u2>(VM::CThreadStack& ThreadStack)
     {
         const s4 Value = ThreadStack.Pop<s4>();
         const s4 Result = CMathUtils::Clamp
@@ -216,7 +216,7 @@ namespace Util
     }
 
     // Cast to a signed 2short (java "short")
-    template<> FORCEINLINE void Cast<s4, s2>(VM::CThreadStack& ThreadStack)
+    template<> FORCEINLINE void CastOnStack<s4, s2>(VM::CThreadStack& ThreadStack)
     {
         const s4 Value = ThreadStack.Pop<s4>();
         const s4 Result = CMathUtils::Clamp
@@ -226,6 +226,60 @@ namespace Util
             static_cast<s4>(std::numeric_limits<s2>::max())
         );
         ThreadStack.Push<s4>(Result);
+    }
+
+    template<> FORCEINLINE void CastOnStack<s8, s4>(VM::CThreadStack& ThreadStack)
+    {
+        const s8 Value = ThreadStack.Pop<s8>();
+        ThreadStack.Push<s4>(static_cast<s4>(Value));
+    }
+
+    template<> FORCEINLINE void CastOnStack<s8, float>(VM::CThreadStack& ThreadStack)
+    {
+        const s8 Value = ThreadStack.Pop<s8>();
+        ThreadStack.Push<float>(static_cast<float>(Value));
+    }
+
+    template<> FORCEINLINE void CastOnStack<s8, double>(VM::CThreadStack& ThreadStack)
+    {
+        const s8 Value = ThreadStack.Pop<s8>();
+        ThreadStack.Push<double>(static_cast<double >(Value));
+    }
+
+    template<> FORCEINLINE void CastOnStack<float, s4>(VM::CThreadStack& ThreadStack)
+    {
+        const float Value = ThreadStack.Pop<float>();
+        ThreadStack.Push<s4>(static_cast<s4>(Value));
+    }
+
+    template<> FORCEINLINE void CastOnStack<float, s8>(VM::CThreadStack& ThreadStack)
+    {
+        const float Value = ThreadStack.Pop<float>();
+        ThreadStack.Push<s8>(static_cast<s8>(Value));
+    }
+
+    template<> FORCEINLINE void CastOnStack<float, double>(VM::CThreadStack& ThreadStack)
+    {
+        const float Value = ThreadStack.Pop<float>();
+        ThreadStack.Push<double>(static_cast<double>(Value));
+    }
+
+    template<> FORCEINLINE void CastOnStack<double, s4>(VM::CThreadStack& ThreadStack)
+    {
+        const double Value = ThreadStack.Pop<double>();
+        ThreadStack.Push<s4>(static_cast<s4>(Value));
+    }
+
+    template<> FORCEINLINE void CastOnStack<double, s8>(VM::CThreadStack& ThreadStack)
+    {
+        const double Value = ThreadStack.Pop<double>();
+        ThreadStack.Push<s8>(static_cast<s8>(Value));
+    }
+
+    template<> FORCEINLINE void CastOnStack<double, float>(VM::CThreadStack& ThreadStack)
+    {
+        const double Value = ThreadStack.Pop<double>();
+        ThreadStack.Push<float>(static_cast<float>(Value));
     }
 
     template <typename T, ECompareOperation CompareOperation>
@@ -681,26 +735,33 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(DUP)
     {
+        Context.GetThreadStack().Dup();
     }
 
     // 90 - 99
     DEFINE_OPCODE_HANDLER(DUP_X1)
     {
+        Context.GetThreadStack().DupX1();
     }
     DEFINE_OPCODE_HANDLER(DUP_X2)
     {
+        Context.GetThreadStack().DupX1();
     }
     DEFINE_OPCODE_HANDLER(DUP2)
     {
+        Context.GetThreadStack().Dup2();
     }
     DEFINE_OPCODE_HANDLER(DUP2_X1)
     {
+        Context.GetThreadStack().Dup2X1();
     }
     DEFINE_OPCODE_HANDLER(DUP2_X2)
     {
+        Context.GetThreadStack().Dup2X2();
     }
     DEFINE_OPCODE_HANDLER(SWAP)
     {
+        Context.GetThreadStack().Swap();
     }
     DEFINE_OPCODE_HANDLER(IADD)
     {
@@ -864,56 +925,65 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(I2L)
     {
-        Util::Cast<s4, s8>(Context.GetThreadStack());
+        Util::CastOnStack<s4, s8>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(I2F)
     {
-        Util::Cast<s4, float>(Context.GetThreadStack());
+        Util::CastOnStack<s4, float>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(I2D)
     {
-        Util::Cast<s4, double>(Context.GetThreadStack());
+        Util::CastOnStack<s4, double>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(L2I)
     {
+        Util::CastOnStack<s8, s4>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(L2F)
     {
+        Util::CastOnStack<s8, float>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(L2D)
     {
+        Util::CastOnStack<s8, double>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(F2I)
     {
+        Util::CastOnStack<float, s4>(Context.GetThreadStack());
     }
 
     // 140 - 149
     DEFINE_OPCODE_HANDLER(F2L)
     {
+        Util::CastOnStack<float, s8>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(F2D)
     {
+        Util::CastOnStack<float, double>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(D2I)
     {
+        Util::CastOnStack<double, s4>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(D2L)
     {
+        Util::CastOnStack<double, s8>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(D2F)
     {
+        Util::CastOnStack<double, float>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(I2B)
     {
-        Util::Cast<s4, s1>(Context.GetThreadStack());
+        Util::CastOnStack<s4, s1>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(I2C)
     {
-        Util::Cast<s4, u2>(Context.GetThreadStack());
+        Util::CastOnStack<s4, u2>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(I2S)
     {
-        Util::Cast<s4, s2>(Context.GetThreadStack());
+        Util::CastOnStack<s4, s2>(Context.GetThreadStack());
     }
     DEFINE_OPCODE_HANDLER(LCMP)
     {

@@ -4,7 +4,7 @@
 
 namespace VM
 {
-    constexpr usz VariableSlotSize = 4;
+    constexpr usz VariableSlotSize = sizeof(u4);
 
     /**
      * Variable type that can be stored in CLocalVariables or CThreadStack
@@ -72,6 +72,22 @@ namespace VM
     {
         static_assert(VariableCanBeStored<T>());
         return std::is_same_v<T, s8> || std::is_same_v<T, double>;
+    }
+
+    FORCEINLINE bool VariableNeedsTwoSlots(const VM::EVariableSlotType VariableSlotType)
+    {
+        switch (VariableSlotType)
+        {
+            default:
+                return false;
+            case EVariableSlotType::Long:
+            case EVariableSlotType::Double:
+                return true;
+            case EVariableSlotType::Long_2:
+            case EVariableSlotType::Double_2:
+                ASSERT_MSG(false, "Never expected to encounter service types (Long_2 and Double_2) here");
+                return false;
+        }
     }
 
     constexpr const char* ToString(const EVariableSlotType VariableSlotType)

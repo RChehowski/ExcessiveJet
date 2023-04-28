@@ -80,7 +80,7 @@ namespace Bytecode
         {
         }
 
-        friend class COpcodes;
+        friend struct COpcodes;
 
     public:
         // disallow copy and move construction
