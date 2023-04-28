@@ -61,6 +61,8 @@ namespace Compiler
     public:
         CConstantInfo() = delete;
 
+        ~CConstantInfo() = default;
+
         [[nodiscard]]
         FORCEINLINE EConstantPoolInfoTag GetConstantPoolInfoTag() const
         {
