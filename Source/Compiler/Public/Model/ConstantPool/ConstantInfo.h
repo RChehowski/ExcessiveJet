@@ -44,6 +44,7 @@ namespace Compiler
         Phantom
     };
 
+    class CPhantomConstantInfo;
 
     class CConstantInfo
     {
@@ -61,7 +62,7 @@ namespace Compiler
     public:
         CConstantInfo() = delete;
 
-        ~CConstantInfo() = default;
+        virtual ~CConstantInfo() = default;
 
         [[nodiscard]]
         FORCEINLINE EConstantPoolInfoTag GetConstantPoolInfoTag() const
@@ -89,11 +90,34 @@ namespace Compiler
         {
             if constexpr (std::is_base_of_v<CConstantInfo, T>)
             {
-                return IsA(T::StaticTag);
+                if constexpr (std::is_same_v<CConstantInfo, T>)
+                {
+                    // CConstantInfo is always a CConstantInfo. No exceptions!
+                    return true;
+                }
+                else
+                {
+                    return IsA(T::StaticTag);
+                }
             }
             else
             {
+                // It's certainly not an instance if it's base class is not a CConstantInfo.
                 return false;
+            }
+        }
+
+        /** Checks if a constant info must be followed with a phantom constant info */
+        [[nodiscard]] FORCEINLINE bool IsFollowedByPhantomInfo() const
+        {
+            // We cannot do IsA<> because we don't yet know about Long and Double subclasses of a CConstantInfo
+            switch (GetTag())
+            {
+                case EConstantPoolInfoTag::Long:
+                case EConstantPoolInfoTag::Double:
+                    return true;
+                default:
+                    return false;
             }
         }
 

@@ -9,6 +9,76 @@
 
 namespace Util
 {
+    namespace Private
+    {
+        template <typename T>
+        void ToggleEndian(T* ValuePtr);
+
+#ifdef EXJ_ENDIAN_BYTE_SWAP
+    #error EXJ_ENDIAN_BYTE_SWAP
+#endif
+#define EXJ_ENDIAN_BYTE_SWAP(a, b) { u1 _temp = (a); (a) = (b); (b) = _temp; }
+
+        template <>
+        FORCEINLINE void ToggleEndian<u1>(u1* const ValuePtr)
+        {
+            // Nothing to do with the 1 byte value
+        }
+
+        template <>
+        FORCEINLINE void ToggleEndian<u2>(u2* const ValuePtr)
+        {
+            struct CBytes
+            {
+                u1 Byte0;
+                u1 Byte1;
+            };
+            CBytes* const Bytes = reinterpret_cast<CBytes*>(ValuePtr);
+
+            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte0, Bytes->Byte1)
+        }
+
+        template <>
+        FORCEINLINE void ToggleEndian<u4>(u4* const ValuePtr)
+        {
+            struct CBytes
+            {
+                u1 Byte0;
+                u1 Byte1;
+                u1 Byte2;
+                u1 Byte3;
+            };
+            CBytes* const Bytes = reinterpret_cast<CBytes*>(ValuePtr);
+
+            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte0, Bytes->Byte3)
+            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte1, Bytes->Byte2)
+        }
+
+        template <>
+        FORCEINLINE void ToggleEndian<u8>(u8* const ValuePtr)
+        {
+            struct CBytes
+            {
+                u1 Byte0;
+                u1 Byte1;
+                u1 Byte2;
+                u1 Byte3;
+                u1 Byte4;
+                u1 Byte5;
+                u1 Byte6;
+                u1 Byte7;
+            };
+            CBytes* const Bytes = reinterpret_cast<CBytes*>(ValuePtr);
+
+            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte0, Bytes->Byte7)
+            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte1, Bytes->Byte6)
+            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte2, Bytes->Byte5)
+            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte3, Bytes->Byte4)
+        }
+
+#undef EXJ_BYTE_SWAP
+    }
+
     class CMathUtils
     {
     public:
@@ -30,24 +100,11 @@ namespace Util
             return Max<T>(Min<T>(InValue, InMax), InMin);
         }
 
+        /** Toggles the endian (little -> big or big -> little) of a value pointed by the pointer */
         template <typename T>
         FORCEINLINE static void ToggleEndian(T* ValuePtr)
         {
-            const T Original = *ValuePtr;
-            T Result = (T)0;
-
-            for (u1 i = 0; i < (u1)sizeof(T); ++i)
-            {
-                const u1 ReadShift = (sizeof(T) - i - 1) * 8;
-                const u1 WriteShift = i * 8;
-
-                const T ReadMask = (T)0xFF;
-                const T WriteMask = ((T)0xFF) << WriteShift;
-
-                Result |= (T)((T)((T)(Original >> ReadShift) & ReadMask) << WriteShift) & WriteMask;
-            }
-
-            *ValuePtr = Result;
+            Private::ToggleEndian(ValuePtr);
         }
 
         template<typename TTo, typename TFrom /* auto */>
@@ -55,31 +112,6 @@ namespace Util
         {
             static_assert(std::is_integral_v<TTo> && std::is_integral_v<TTo>,
                     "IntegerCast is valid for integral types only");
-
-//            if constexpr (sizeof(TTo) <= sizeof(TFrom))
-//            {
-//                if constexpr (std::is_signed_v<TFrom> != std::is_signed_v<TTo>)
-//                {
-//                    if constexpr (std::is_signed_v<TFrom>)
-//                    {
-//                        // From signed to unsigned. From should be greater or equal to zero.
-//                        ASSERT(From >= (TFrom) 0);
-//                    }
-//                    else
-//                    {
-//                        // From unsigned to signed
-//                        ASSERT(From <= );
-//                    }
-//                }
-//                else if constexpr (sizeof(TTo) < sizeof(TFrom))
-//                {
-//                    // Both TTo and TFrom are either signed or unsigned
-//                    ASSERT(
-//                        (From >= (TFrom) std::numeric_limits<TTo>::min()) &&
-//                        (From <= (TFrom) std::numeric_limits<TTo>::max())
-//                    );
-//                }
-//            }
 
             return (TTo)From;
         }
@@ -182,15 +214,17 @@ namespace Util
         }
 
         template<typename TRange, typename TNumber>
-        FORCEINLINE static constexpr bool IsNumberWithinRange(const TNumber Number, const TRange RangeMin, const TRange RangeMax)
+        FORCEINLINE static constexpr bool IsNumberWithinRange
+        (
+            const TNumber Number,
+            const TRange RangeMin = std::numeric_limits<TRange>::min(),
+            const TRange RangeMax = std::numeric_limits<TRange>::max()
+        )
         {
-            return (Number >= static_cast<TNumber>(RangeMin)) && (Number <= static_cast<TNumber>(RangeMax));
-        }
+            static_assert(std::numeric_limits<TNumber>::min() <= std::numeric_limits<TRange>::min());
+            static_assert(std::numeric_limits<TNumber>::max() >= std::numeric_limits<TRange>::max());
 
-        template<typename TRange, typename TNumber>
-        FORCEINLINE static constexpr bool IsNumberWithinRangeOfType(const TNumber Number)
-        {
-            return IsNumberWithinRange<TRange, TNumber>(Number, std::numeric_limits<TRange>::min(), std::numeric_limits<TRange>::max());
+            return (Number >= static_cast<TNumber>(RangeMin)) && (Number <= static_cast<TNumber>(RangeMax));
         }
     };
 }

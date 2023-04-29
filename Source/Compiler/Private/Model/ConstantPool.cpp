@@ -13,17 +13,6 @@
 
 namespace Compiler
 {
-#pragma region CPhantomConstantInfo
-	namespace Util
-	{
-		/** Checks if a constant info must be succeeded with a phantom constant info */
-		bool NeedsPhantomConstantInfo(const CConstantInfo& ConstantInfo)
-		{
-			return ConstantInfo.IsA<CConstantDoubleInfo>() || ConstantInfo.IsA<CConstantLongInfo>();
-		}
-	}
-#pragma endregion
-
 	CConstantInfo* CConstantPool::operator[] (const usz IndexInConstantPool) const
 	{
 		ASSERT_MSG((IndexInConstantPool >= 1) && (IndexInConstantPool <= ConstantInfos.size()),
@@ -38,17 +27,12 @@ namespace Compiler
 		for (CConstantInfo* ConstantInfo : ConstantInfos)
 		{
 			// Delete everything except phantom infos because they're a singleton
-			if (ConstantInfo != CPhantomConstantInfo::GetInstance())
+			if (ConstantInfo->IsA<CPhantomConstantInfo>())
 			{
 				delete ConstantInfo;
 			}
 		}
 	}
-
-    const CAttributeType* CConstantPool::GetAttributeTypeByIndexInConstantPool(u2 IndexInConstantPool) const
-    {
-        return CAttributeTypes::GetAttributeNameByName(GetChecked<CConstantUtf8Info>((usz) IndexInConstantPool).GetStringUtf8());
-    }
 
     void operator>>(CClassReader& Reader, CConstantPool& Instance)
     {
@@ -58,15 +42,16 @@ namespace Compiler
 	    std::vector<CConstantInfo*>& ConstantInfos = Instance.ConstantInfos;
 
         ConstantInfos.clear();
-        ConstantInfos.reserve((size_t)ConstantPoolCount);
+        ConstantInfos.reserve(static_cast<size_t>(ConstantPoolCount));
 
         for (u2 ConstantPoolIndex = 1; ConstantPoolIndex < ConstantPoolCount; ++ConstantPoolIndex)
         {
-            u1 TagByte { static_cast<u1>(0) };
+            u1 TagByte = static_cast<u1>(0);
             Reader >> TagByte;
 
 	        const EConstantPoolInfoTag ConstantPoolInfoTag = static_cast<EConstantPoolInfoTag>(TagByte);
-            CConstantInfo* ConstantInfo = CConstantInfo::NewConstantInfo(ConstantPoolInfoTag);
+
+            CConstantInfo* const ConstantInfo = CConstantInfo::NewConstantInfo(ConstantPoolInfoTag);
             Reader >> *ConstantInfo;
 
             ConstantInfos.push_back(ConstantInfo);
@@ -76,7 +61,7 @@ namespace Compiler
              * Additionally, two types of constants (longs and doubles) take up two consecutive slots in the table,
              * although the second such slot is a phantom index that is never directly used.
              */
-            if (Util::NeedsPhantomConstantInfo(*ConstantInfo))
+            if (ConstantInfo->IsFollowedByPhantomInfo())
             {
                 ++ConstantPoolIndex;
 

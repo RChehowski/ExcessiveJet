@@ -20,11 +20,6 @@ namespace Compiler
         Reader >> DescriptorIndex;
     }
 
-    void operator>>(CClassReader& Reader, CConstantMethodTypeInfo& Instance)
-    {
-        Instance.DeserializeFrom(Reader);
-    }
-
     std::string CConstantMethodTypeInfo::ToResolvedString(const CConstantPool& ConstantPool) const
     {
         const Compiler::CConstantUtf8Info& Name =

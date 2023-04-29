@@ -198,7 +198,7 @@ namespace Util
             CZipFileEntry ZipFileEntry(
                     ZipArchiveFileStat.m_filename,
                     bDirectory,
-                    ZipArchiveFileStat.m_uncomp_size,
+                    static_cast<usz>(ZipArchiveFileStat.m_uncomp_size),
                     ZipArchive,
                     ZipFileIndex,
                     AllocationForDecompression

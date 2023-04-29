@@ -28,9 +28,7 @@ namespace Util
     }
 
 
-    CMemoryReader::~CMemoryReader()
-    {
-    }
+    CMemoryReader::~CMemoryReader() = default;
 
     const void* CMemoryReader::ReadBytes(void* Memory, usz Size)
     {
@@ -101,11 +99,13 @@ namespace Util
 
     void operator>> (Util::CMemoryReader& Reader, Util::CStringUtf8& StringUtf8)
     {
-        u2 Length = (u2)0;
-        Reader >> Length;
+        u2 RawLength;
+        Reader >> RawLength;
 
-        const void* Content = Reader.ReadBytes(nullptr, (usz)Length);
-        Util::CStringUtf8 DeserializedStringUtf8((const u1*)Content, (usz)Length);
+        const usz Length = static_cast<usz>(RawLength);
+
+        const void* const Content = Reader.ReadBytes(nullptr, Length);
+        Util::CStringUtf8 DeserializedStringUtf8(reinterpret_cast<const u1*>(Content), Length);
 
         StringUtf8 = std::move(DeserializedStringUtf8);
     }

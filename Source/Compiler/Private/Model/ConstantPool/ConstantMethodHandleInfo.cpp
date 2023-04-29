@@ -21,10 +21,4 @@ namespace Compiler
         Reader >> ReferenceKind;
         Reader >> ReferenceIndex;
     }
-
-    void operator>>(CClassReader& Reader, CConstantMethodHandleInfo& Instance)
-    {
-        Instance.DeserializeFrom(Reader);
-    }
-
 }

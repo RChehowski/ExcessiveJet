@@ -18,7 +18,7 @@ namespace Filesystem
         u1 *Data = Allocation.Get<u1>();
 
         std::streambuf *StreamBuffer = Stream.rdbuf();
-        for (int i = 0; i < Allocation.GetSize(); i++)
+        for (usz i = 0; i < Allocation.GetSize(); i++)
         {
             Data[i] = StreamBuffer->sbumpc();
         }

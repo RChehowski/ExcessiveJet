@@ -22,9 +22,4 @@ namespace Compiler
         Reader >> NameAndTypeIndex;
     }
 
-    void operator>>(CClassReader& Reader, CConstantInvokeDynamicInfo& Instance)
-    {
-        Instance.DeserializeFrom(Reader);
-    }
-
 }

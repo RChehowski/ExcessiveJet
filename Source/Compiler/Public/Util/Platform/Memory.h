@@ -82,4 +82,7 @@ namespace Util
 
         static std::optional<CMemoryStatistics> GetStatistics();
     };
+
+    /** Allocates memory from the stack */
+    #define CMemory_Alloca(NumBytes) alloca(NumBytes)
 }

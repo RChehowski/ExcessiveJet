@@ -20,11 +20,6 @@ namespace Compiler
         Reader >> StringIndex;
     }
 
-    void operator>>(CClassReader& Reader, CConstantStringInfo& Instance)
-    {
-        Instance.DeserializeFrom(Reader);
-    }
-
     std::string CConstantStringInfo::ToResolvedString(const CConstantPool &ConstantPool) const
     {
         const Compiler::CConstantUtf8Info& ConstantUtf8Info =

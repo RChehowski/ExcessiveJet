@@ -9,7 +9,7 @@
 
 namespace Util
 {
-    enum class ECompareOperation : u8
+    enum class ECompareOperation : u1
     {
         // Equals (A==B)
         EQ,
@@ -187,7 +187,6 @@ namespace Util
         const double Result = static_cast<double>(Value);
         ThreadStack.Push<double>(Result);
     }
-
 
     // Cast to a signed 1byte (java "byte")
     template<> FORCEINLINE void CastOnStack<s4, s1>(VM::CThreadStack& ThreadStack)
@@ -1096,7 +1095,7 @@ namespace Bytecode::OpcodeHandlers
         const s4 Key = Context.GetThreadStack().Pop<s4>();
         const s4 Offset = Util::LookupSwitch(Key, ConstantParameters.CreateMemoryReader());
 
-        ASSERT(CMathUtils::IsNumberWithinRangeOfType<u2>(Offset));
+        ASSERT(CMathUtils::IsNumberWithinRange<u2>(Offset));
 
         Context.SetConditionResult<u2>(static_cast<u2>(Offset));
     }

@@ -18,25 +18,17 @@ namespace Compiler
         std::string ToResolvedString(const CConstantPool& ConstantPool) const override;
 
         [[nodiscard]]
-        FORCEINLINE u4 GetBytes() const
-        {
-             return Bytes;
-        }
-
-        [[nodiscard]]
         FORCEINLINE s4 GetInteger() const
         {
-            return *reinterpret_cast<const s4*>(&Bytes);
+            return Value;
         }
 
         void DeserializeFrom(CClassReader& Reader) override;
-
-        friend void operator>>(CClassReader& Reader, CConstantIntegerInfo& Instance);
 
     public:
         static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Integer;
 
     private:
-        u4 Bytes = (u4)0;
+        s4 Value = static_cast<s4>(0);
     };
 }

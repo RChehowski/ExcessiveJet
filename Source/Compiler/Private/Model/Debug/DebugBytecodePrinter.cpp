@@ -965,7 +965,7 @@ DEFINE_OPCODE_PRINTER(NEWARRAY)
 {
     const u1 Arg = Context.NextByte();
 
-    enum class ENewArrayElementType
+    enum class ENewArrayElementType : u1
     {
         T_BOOLEAN   = 4,
         T_CHAR      = 5,
@@ -981,14 +981,14 @@ DEFINE_OPCODE_PRINTER(NEWARRAY)
     {
         switch(Arg)
         {
-            case ENewArrayElementType::T_BOOLEAN:   return "T_BOOLEAN";
-            case ENewArrayElementType::T_CHAR:      return "T_CHAR";
-            case ENewArrayElementType::T_FLOAT:     return "T_FLOAT";
-            case ENewArrayElementType::T_DOUBLE:    return "T_DOUBLE";
-            case ENewArrayElementType::T_BYTE:      return "T_BYTE";
-            case ENewArrayElementType::T_SHORT:     return "T_SHORT";
-            case ENewArrayElementType::T_INT:       return "T_INT";
-            case ENewArrayElementType::T_LONG:      return "T_LONG";
+            case ENewArrayElementType::T_BOOLEAN:   return "boolean[]";
+            case ENewArrayElementType::T_CHAR:      return "char[]";
+            case ENewArrayElementType::T_FLOAT:     return "short[]";
+            case ENewArrayElementType::T_DOUBLE:    return "double[]";
+            case ENewArrayElementType::T_BYTE:      return "byte[]";
+            case ENewArrayElementType::T_SHORT:     return "short[]";
+            case ENewArrayElementType::T_INT:       return "int[]";
+            case ENewArrayElementType::T_LONG:      return "long[]";
 
             default: return "<Unknown>";
         }

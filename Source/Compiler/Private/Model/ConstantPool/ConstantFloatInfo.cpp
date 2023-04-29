@@ -10,19 +10,17 @@ namespace Compiler
     {
         std::ostringstream oss;
         oss << "ConstantFloatInfo {" << std::endl;
-        oss << "               Bytes: " << Bytes << std::endl;
+        oss << "               Value: " << Value << std::endl;
         oss << "}" << std::endl;
         return oss.str();
     }
 
     void CConstantFloatInfo::DeserializeFrom(CClassReader& Reader)
     {
+        u4 Bytes;
         Reader >> Bytes;
-    }
 
-    void operator>>(CClassReader& Reader, CConstantFloatInfo& Instance)
-    {
-        Instance.DeserializeFrom(Reader);
+        Value = *reinterpret_cast<const float*>(&Bytes);
     }
 
     std::string CConstantFloatInfo::ToResolvedString(const CConstantPool &ConstantPool) const

@@ -31,9 +31,6 @@ namespace Compiler
 
         void DeserializeFrom(CClassReader& Reader) override;
 
-        friend void operator>>(CClassReader& Reader, CConstantUtf8Info& Instance);
-        friend void operator<<(std::ostream& Os, const CConstantUtf8Info& Instance);
-
     public:
         static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Utf8;
 

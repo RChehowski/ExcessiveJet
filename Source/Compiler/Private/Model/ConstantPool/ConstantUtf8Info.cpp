@@ -23,16 +23,6 @@ namespace Compiler
         StringUtf8 = std::move(LocalStringUtf8);
     }
 
-    void operator>>(CClassReader& Reader, CConstantUtf8Info& Instance)
-    {
-        Instance.DeserializeFrom(Reader);
-    }
-
-    void operator<<(std::ostream& Os, const CConstantUtf8Info& Instance)
-    {
-
-    }
-
     std::string CConstantUtf8Info::ToResolvedString(const CConstantPool &ConstantPool) const
     {
         return static_cast<std::string>(GetStringUtf8());

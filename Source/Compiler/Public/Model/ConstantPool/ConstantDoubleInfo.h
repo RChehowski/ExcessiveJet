@@ -18,33 +18,17 @@ namespace Compiler
         std::string ToResolvedString(const CConstantPool& ConstantPool) const override;
 
         [[nodiscard]]
-        FORCEINLINE u4 GetHighBytes() const
-        {
-             return HighBytes;
-        }
-
-        [[nodiscard]]
-        FORCEINLINE u4 GetLowBytes() const
-        {
-             return LowBytes;
-        }
-
-        [[nodiscard]]
         FORCEINLINE double GetDouble() const
         {
-            const u8 AsUnsigned = (static_cast<u8>(HighBytes) << 32) | LowBytes;
-            return *reinterpret_cast<const double*>(&AsUnsigned);
+            return Value;
         }
 
         void DeserializeFrom(CClassReader& Reader) override;
-
-        friend void operator>>(CClassReader& Reader, CConstantDoubleInfo& Instance);
 
     public:
         static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::Double;
 
     private:
-        u4 HighBytes = (u4)0;
-        u4 LowBytes = (u4)0;
+        double Value = 0.0;
     };
 }

@@ -10,19 +10,17 @@ namespace Compiler
     {
         std::ostringstream oss;
         oss << "ConstantIntegerInfo {" << std::endl;
-        oss << "               Bytes: " << Bytes << std::endl;
+        oss << "               Value: " << Value << std::endl;
         oss << "}" << std::endl;
         return oss.str();
     }
 
     void CConstantIntegerInfo::DeserializeFrom(CClassReader& Reader)
     {
+        u4 Bytes;
         Reader >> Bytes;
-    }
 
-    void operator>>(CClassReader& Reader, CConstantIntegerInfo& Instance)
-    {
-        Instance.DeserializeFrom(Reader);
+        Value = *reinterpret_cast<const s4*>(&Bytes);
     }
 
     std::string CConstantIntegerInfo::ToResolvedString(const CConstantPool& ConstantPool) const

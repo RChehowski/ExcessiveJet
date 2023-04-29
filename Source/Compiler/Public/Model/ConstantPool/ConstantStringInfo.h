@@ -25,8 +25,6 @@ namespace Compiler
 
         void DeserializeFrom(CClassReader& Reader) override;
 
-        friend void operator>>(CClassReader& Reader, CConstantStringInfo& Instance);
-
     public:
         static constexpr EConstantPoolInfoTag StaticTag = EConstantPoolInfoTag::String;
 
