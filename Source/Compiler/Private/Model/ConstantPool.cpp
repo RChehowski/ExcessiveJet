@@ -27,7 +27,7 @@ namespace Compiler
 		for (CConstantInfo* ConstantInfo : ConstantInfos)
 		{
 			// Delete everything except phantom infos because they're a singleton
-			if (ConstantInfo->IsA<CPhantomConstantInfo>())
+			if (!ConstantInfo->IsA<CPhantomConstantInfo>())
 			{
 				delete ConstantInfo;
 			}

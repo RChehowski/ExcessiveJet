@@ -17,7 +17,7 @@ namespace Util
 #ifdef EXJ_ENDIAN_BYTE_SWAP
     #error EXJ_ENDIAN_BYTE_SWAP
 #endif
-#define EXJ_ENDIAN_BYTE_SWAP(a, b) { u1 _temp = (a); (a) = (b); (b) = _temp; }
+#define EXJ_ENDIAN_BYTE_SWAP(A, B, Temp) { (Temp) = (A); (A) = (B); (B) = (Temp); }
 
         template <>
         FORCEINLINE void ToggleEndian<u1>(u1* const ValuePtr)
@@ -28,52 +28,32 @@ namespace Util
         template <>
         FORCEINLINE void ToggleEndian<u2>(u2* const ValuePtr)
         {
-            struct CBytes
-            {
-                u1 Byte0;
-                u1 Byte1;
-            };
-            CBytes* const Bytes = reinterpret_cast<CBytes*>(ValuePtr);
+            u1* const Bytes = reinterpret_cast<u1*>(ValuePtr);
 
-            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte0, Bytes->Byte1)
+            u1 Temp;
+            EXJ_ENDIAN_BYTE_SWAP(Bytes[0], Bytes[1], Temp)
         }
 
         template <>
         FORCEINLINE void ToggleEndian<u4>(u4* const ValuePtr)
         {
-            struct CBytes
-            {
-                u1 Byte0;
-                u1 Byte1;
-                u1 Byte2;
-                u1 Byte3;
-            };
-            CBytes* const Bytes = reinterpret_cast<CBytes*>(ValuePtr);
+            u1* const Bytes = reinterpret_cast<u1*>(ValuePtr);
 
-            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte0, Bytes->Byte3)
-            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte1, Bytes->Byte2)
+            u1 Temp;
+            EXJ_ENDIAN_BYTE_SWAP(Bytes[0], Bytes[3], Temp)
+            EXJ_ENDIAN_BYTE_SWAP(Bytes[1], Bytes[2], Temp)
         }
 
         template <>
         FORCEINLINE void ToggleEndian<u8>(u8* const ValuePtr)
         {
-            struct CBytes
-            {
-                u1 Byte0;
-                u1 Byte1;
-                u1 Byte2;
-                u1 Byte3;
-                u1 Byte4;
-                u1 Byte5;
-                u1 Byte6;
-                u1 Byte7;
-            };
-            CBytes* const Bytes = reinterpret_cast<CBytes*>(ValuePtr);
+            u1* const Bytes = reinterpret_cast<u1*>(ValuePtr);
 
-            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte0, Bytes->Byte7)
-            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte1, Bytes->Byte6)
-            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte2, Bytes->Byte5)
-            EXJ_ENDIAN_BYTE_SWAP(Bytes->Byte3, Bytes->Byte4)
+            u1 Temp;
+            EXJ_ENDIAN_BYTE_SWAP(Bytes[0], Bytes[7], Temp)
+            EXJ_ENDIAN_BYTE_SWAP(Bytes[1], Bytes[6], Temp)
+            EXJ_ENDIAN_BYTE_SWAP(Bytes[2], Bytes[5], Temp)
+            EXJ_ENDIAN_BYTE_SWAP(Bytes[3], Bytes[4], Temp)
         }
 
 #undef EXJ_BYTE_SWAP

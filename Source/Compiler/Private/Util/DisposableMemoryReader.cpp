@@ -17,13 +17,17 @@ namespace Util
                "NewPosition: %llu, SizeInMemory: %llu", (u8)NewPosition, (u8)GetSizeInMemory());
     }
 
-    CMemoryReader::CMemoryReader(const std::string& InFileName) : FileName(InFileName)
+    CMemoryReader::CMemoryReader(const std::string& InFileName, const CByteOrder& InByteOrder)
+        : FileName(InFileName)
+        , ByteOrder(InByteOrder)
     {
         bool bFileOpened;
         Allocation = CFileUtils::ReadFile(FileName, bFileOpened);
     }
 
-    CMemoryReader::CMemoryReader(CAllocation&& InAllocation) : Allocation(std::move(InAllocation))
+    CMemoryReader::CMemoryReader(CAllocation&& InAllocation, const CByteOrder& InByteOrder)
+        : Allocation(std::move(InAllocation))
+        , ByteOrder(InByteOrder)
     {
     }
 

@@ -20,16 +20,14 @@ namespace Compiler
         using Super = Util::CMemoryReader;
 
     public:
-        FORCEINLINE explicit CClassReader(const std::string& InFileName) : Super(InFileName)
+        FORCEINLINE explicit CClassReader(const std::string& InFileName)
+            : Super(InFileName, /* Java classes are serialized using big endian byte order */ CByteOrders::GetBigEndian())
         {
-            // Java classes are serialized using big endian byte order
-            SetByteOrder(CByteOrders::GetBigEndian());
         }
 
-        FORCEINLINE explicit CClassReader(Util::CAllocation&& InAllocation) : Super(std::move(InAllocation))
+        FORCEINLINE explicit CClassReader(Util::CAllocation&& InAllocation)
+            : Super(std::move(InAllocation), /* Java classes are serialized using big endian byte order */ CByteOrders::GetBigEndian())
         {
-            // Java classes are serialized using big endian byte order
-            SetByteOrder(CByteOrders::GetBigEndian());
         }
 
         [[nodiscard]]
@@ -54,7 +52,7 @@ namespace Compiler
         friend void operator>>(CClassReader &Reader, class CClassInfo &Instance);
 
         [[nodiscard]]
-        FORCEINLINE bool IsValid() const
+        bool IsValid() const override
         {
             return bValid;
         }

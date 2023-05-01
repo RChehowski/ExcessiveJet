@@ -645,11 +645,11 @@ int main()
     std::mutex m;
     int s = sizeof(m);
 
-    VM::CVariableSlotStorage<16> Storage{};
-    VM::CLocalVariables LocalVariables { Storage };
+    VM::CLocalVariableSlotStorage<16> Storage_LocalVariables{};
+    VM::CLocalVariables LocalVariables { Storage_LocalVariables };
 
-    VM::CVariableSlotStorage<128 * 1024> StackStorage{};
-    VM::CThreadStack ThreadStack{ StackStorage };
+    VM::CThreadStackSlotStorage<16> Storage_ThreadStack{};
+    VM::CThreadStack ThreadStack { Storage_ThreadStack };
 
     ThreadStack.Push(42.1);
     ThreadStack.Push(404);
@@ -662,7 +662,7 @@ int main()
     const double V3 = ThreadStack.Pop<double>();
 
     LocalVariables.Set(2, 0.1);
-    LocalVariables.Set(1, oop{ (void*)64 });
+   // LocalVariables.Set(1, oop{ (void*)64 });
 
 
     /*
@@ -677,27 +677,27 @@ int main()
 
     //std::string rtJarPath = "C:\\jet15.0-std-x86\\profile1.8.0_144\\jre\\lib\\rt.jar";
 
-    CClassReader ClassReader(R"(C:\Users\rcheh\Downloads\rt\java\lang\String.class)");
+    CClassReader ClassReader(R"(C:\Users\rcheh\Downloads\rt\java\lang\Class.class)");
 
     CClassInfo ClassInfo;
     ClassReader >> ClassInfo;
-
-    std::shared_ptr<const Compiler::CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
-
-    for (const Compiler::CMethodInfo& MethodInfo : ClassInfo.GetMethods())
-    {
-        if (MethodInfo.IsNative())
-        {
-            std::shared_ptr<Compiler::CCodeAttributeInfo> CodeAttribute =
-                MethodInfo.GetAttribute<Compiler::CCodeAttributeInfo>();
-
-            const TSerializedArray<u4, u1>& Code = CodeAttribute->GetCode();
-
-            
-        }
-
-        //DebugBreakOrExit();
-    }
+//
+//    std::shared_ptr<const Compiler::CConstantPool> ConstantPool = ClassInfo.GetConstantPool();
+//
+//    for (const Compiler::CMethodInfo& MethodInfo : ClassInfo.GetMethods())
+//    {
+//        if (MethodInfo.IsNative())
+//        {
+//            std::shared_ptr<Compiler::CCodeAttributeInfo> CodeAttribute =
+//                MethodInfo.GetAttribute<Compiler::CCodeAttributeInfo>();
+//
+//            const TSerializedArray<u4, u1>& Code = CodeAttribute->GetCode();
+//
+//
+//        }
+//
+//        //DebugBreakOrExit();
+//    }
 
     ClassInfo.Debug_PrintClass();
 

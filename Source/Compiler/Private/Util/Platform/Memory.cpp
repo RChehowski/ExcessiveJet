@@ -80,9 +80,45 @@ namespace Util
 #endif // WITH_RPMALLOC
     }
 
-    void CMemory::MemZero(void* Ptr, usz Size)
+    void CMemory::Memset(void* const Ptr, const usz Size, const int Value)
     {
-        memset(Ptr, 0, Size);
+        const u1 ByteValue = static_cast<u1>(Value);
+
+        u1* const BeginPtr = reinterpret_cast<u1*>(Ptr);
+        u1* const EndPtr = BeginPtr + Size;
+
+        u1* const BulkBeginPtr = CMathUtils::Align(BeginPtr, sizeof(u8));
+
+        // Head
+        for (u1* Cursor = BeginPtr; Cursor < BulkBeginPtr; ++Cursor)
+        {
+            *Cursor = ByteValue;
+        }
+
+        // Body
+        // Looks like the easiest and the most readable way to make a 8 byte value from 8 identical bytes
+        union
+        {
+            const u1 ArrayValue[8];
+            const u8 BulkValue;
+        } U { ByteValue, ByteValue, ByteValue, ByteValue, ByteValue, ByteValue, ByteValue, ByteValue };
+
+        u1* const BulkEndPtr = CMathUtils::AlignDown(EndPtr, sizeof(u8));
+        for
+        (
+            u8* Cursor = reinterpret_cast<u8*>(BulkBeginPtr), *End = reinterpret_cast<u8*>(BulkEndPtr);
+            Cursor < End;
+            ++Cursor
+        )
+        {
+            *Cursor = U.BulkValue;
+        }
+
+        // Tail
+        for (u1* Cursor = BulkEndPtr; Cursor < EndPtr; ++Cursor)
+        {
+            *Cursor = ByteValue;
+        }
     }
 
     std::optional<CMemoryStatistics> CMemory::GetStatistics()

@@ -51,21 +51,12 @@ using f8 = double;
     #error Unexpected bitness
 #endif
 
-// Determine endian
-namespace PrivateEndian
+FORCEINLINE bool IsNativeLittleEndian()
 {
     constexpr u4 _u4 = 0x01000002UL;
-    constexpr u1 _u1 = (const u1&)_u4;
-}
+    const u1 _u1 = (const u1&)_u4;
 
-constexpr bool IsNativeLittleEndian()
-{
-    return (u4)PrivateEndian::_u1 == (u4)2;
-}
-
-constexpr bool IsNativeBigEndian()
-{
-    return (u4)PrivateEndian::_u1 == (u4)1;
+    return _u1 == (u1)2;
 }
 
 
@@ -77,3 +68,9 @@ namespace Util
 template<bool bFlag = false> void ConditionalStaticAssert() { static_assert(bFlag, "Conditional static_assert"); }
 
 #define EXJ_STATIC_ASSERT_CONDITIONAL() ConditionalStaticAssert<true>()
+
+template <typename T>
+constexpr T GetBit(const s4 Bit)
+{
+    return static_cast<T>(1) << static_cast<T>(Bit);
+}

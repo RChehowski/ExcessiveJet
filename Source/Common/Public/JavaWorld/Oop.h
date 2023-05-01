@@ -43,7 +43,7 @@ class alignas(oopSize) oop
         (
             (reinterpret_cast<uintptr_t>(MemoryAddress) >= CObjectHeapDimension::Start) &&
             (reinterpret_cast<uintptr_t>(MemoryAddress) >= CObjectHeapDimension::End),
-            "Memory address must be located within the object heap dimension: [%llu, %llu). Got: %llu",
+            "Memory address must be located within the object heap dimension: [0x%llx, 0x%llx). Got: 0x%llx",
             static_cast<unsigned long long>(CObjectHeapDimension::Start),
             static_cast<unsigned long long>(CObjectHeapDimension::End),
             reinterpret_cast<unsigned long long>(MemoryAddress)

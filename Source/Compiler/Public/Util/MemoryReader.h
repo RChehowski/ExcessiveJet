@@ -33,13 +33,13 @@ namespace Util
         void RangeCheck(usz AddOffset) const;
 
     public:
-        explicit CMemoryReader(const std::string& InFileName);
-        explicit CMemoryReader(Util::CAllocation&& InAllocation);
+        explicit CMemoryReader(const std::string& InFileName, const CByteOrder& InByteOrder);
+        explicit CMemoryReader(Util::CAllocation&& InAllocation, const CByteOrder& InByteOrder);
 
         ~CMemoryReader();
 
         [[nodiscard]]
-        FORCEINLINE bool IsValid() const
+        virtual bool IsValid() const
         {
             return Allocation.IsPresent();
         }
@@ -48,17 +48,6 @@ namespace Util
         FORCEINLINE usz GetSizeInMemory() const
         {
             return Allocation.GetSize();
-        }
-
-        [[nodiscard]]
-        FORCEINLINE const CByteOrder* GetByteOrder() const
-        {
-            return ByteOrder;
-        }
-
-        FORCEINLINE void SetByteOrder(const CByteOrder* InByteOrder)
-        {
-            ByteOrder = InByteOrder;
         }
 
         const void* ReadBytes(void* Memory, usz Size);
@@ -75,7 +64,7 @@ namespace Util
             T ReadValue;
             ReadBytes((void*)&ReadValue, sizeof(T));
 
-            if (!ByteOrder->IsNative())
+            if (!ByteOrder.IsNative())
             {
                 CMathUtils::ToggleEndian(&ReadValue);
             }
@@ -116,6 +105,6 @@ namespace Util
 
         usz Position = (usz)0;
 
-        const CByteOrder* ByteOrder = CByteOrders::GetNativeEndian();
+        const CByteOrder& ByteOrder = CByteOrders::GetNativeEndian();
     };
 }

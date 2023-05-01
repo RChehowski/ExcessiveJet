@@ -37,7 +37,7 @@ namespace Util
 
         static s4 Memcmp(const void* const A, const void* const B, const usz NumBytes);
 
-        static void* MallocImpl(usz Size, usz Alignment = 1);
+        static void* MallocImpl(usz Size, usz Alignment);
 
     public:
         static constexpr usz DefaultMallocAlignment = sizeof(void*);
@@ -52,18 +52,24 @@ namespace Util
 
         static void Free(const void* Ptr);
 
-        static void MemZero(void* Ptr, usz Size);
+        static void Memset(void* Ptr, usz Size, int Value);
+
+        static FORCEINLINE void MemZero(void* Ptr, usz Size)
+        {
+            Memset(Ptr, Size, 0);
+        }
 
         template<class T>
-        static void MemZero(T& Item)
+        static FORCEINLINE void MemZero(T& Item)
         {
-            MemZero((void*)&Item, sizeof(T));
+            Memset(reinterpret_cast<void*>(&Item), sizeof(T), 0);
         }
 
         template<typename TDst, typename TSrc>
-        static void Memcpy(TDst* const Dst, const TSrc* const Src, const usz NumBytes)
+        static FORCEINLINE void Memcpy(TDst* const Dst, const TSrc* const Src, const usz NumBytes)
         {
-            Memcpy(
+            Memcpy
+            (
                 reinterpret_cast<void*>(Dst),
                 reinterpret_cast<const void*>(Src),
                 NumBytes
@@ -71,9 +77,10 @@ namespace Util
         }
 
         template<typename TA, typename TB>
-        static s4 Memcmp(const TA* const A, const TB* const B, const usz NumBytes)
+        static FORCEINLINE s4 Memcmp(const TA* const A, const TB* const B, const usz NumBytes)
         {
-            return Memcmp(
+            return Memcmp
+            (
                 reinterpret_cast<const void*>(A),
                 reinterpret_cast<const void*>(B),
                 NumBytes

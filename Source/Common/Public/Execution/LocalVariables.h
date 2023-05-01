@@ -53,12 +53,12 @@ namespace VM
 
     public:
         template<usz NumSlots>
-        explicit CLocalVariables(CVariableSlotStorage<NumSlots>& LocalVariablesStorage)
-            : RawMemory(LocalVariablesStorage.GetValueStorage())
+        explicit CLocalVariables(CLocalVariableSlotStorage<NumSlots>& InLocalVariablesStorage)
+            : RawMemory(InLocalVariablesStorage.GetValueStorage())
 #if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
-            , DebugRamMemory(LocalVariablesStorage.GetTypeStorage())
+            , DebugRamMemory(InLocalVariablesStorage.GetTypeStorage())
 #endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
-            , NumElements(LocalVariablesStorage.GetNumSlots())
+            , NumElements(InLocalVariablesStorage.GetNumSlots())
         {
         }
 

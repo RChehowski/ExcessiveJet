@@ -22,8 +22,16 @@ namespace Util
         constexpr explicit CByteOrder(const char* InName) : Name(InName) {}
 
     public:
+        // non-copyable
+        CByteOrder(const CByteOrder&) = delete;
+        CByteOrder(CByteOrder&&) = delete;
+
+        // non-assignable
+        CByteOrder& operator=(const CByteOrder&) = delete;
+        CByteOrder& operator=(CByteOrder&&) = delete;
+
         [[nodiscard]]
-        constexpr bool IsNative() const;
+        bool IsNative() const;
 
         [[nodiscard]]
         constexpr const char* GetName() const
@@ -39,17 +47,17 @@ namespace Util
     class CByteOrders
     {
     public:
-        static constexpr const CByteOrder* GetBigEndian()
+        static constexpr const CByteOrder& GetBigEndian()
         {
-            return &BigEndian;
+            return BigEndian;
         }
 
-        static constexpr const CByteOrder* GetLittleEndian()
+        static constexpr const CByteOrder& GetLittleEndian()
         {
-            return &LittleEndian;
+            return LittleEndian;
         }
 
-        static constexpr const CByteOrder* GetNativeEndian()
+        static const CByteOrder& GetNativeEndian()
         {
             return IsNativeLittleEndian() ? GetLittleEndian() : GetBigEndian();
         }
@@ -59,8 +67,8 @@ namespace Util
         static constexpr const CByteOrder LittleEndian { "Little Endian" };
     };
 
-    constexpr bool CByteOrder::IsNative() const
+    FORCEINLINE bool CByteOrder::IsNative() const
     {
-        return this == CByteOrders::GetNativeEndian();
+        return this == &CByteOrders::GetNativeEndian();
     }
 }

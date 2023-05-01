@@ -132,11 +132,11 @@ namespace VM
         }
 
         template<usz NumSlots>
-        explicit CThreadStack(CVariableSlotStorage<NumSlots>& LocalVariablesStorage)
-            : ValueMemory(LocalVariablesStorage.GetValueStorage())
-            , TypeMemory(LocalVariablesStorage.GetTypeStorage())
+        explicit CThreadStack(CThreadStackSlotStorage<NumSlots>& InThreadStackSlotStorage)
+            : ValueMemory(InThreadStackSlotStorage.GetValueStorage())
+            , TypeMemory(InThreadStackSlotStorage.GetTypeStorage())
             , Size(0UL)
-            , Capacity(LocalVariablesStorage.GetStorageSize())
+            , Capacity(InThreadStackSlotStorage.GetNumSlots())
         {
         }
 
@@ -179,7 +179,6 @@ namespace VM
 
             *reinterpret_cast<T*>(GetTopValue()) = Value;
 
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             constexpr VM::EVariableSlotType SlotType = GetSlotType<T>();
 
             VM::EVariableSlotType* TopType = GetTopType();
@@ -195,7 +194,6 @@ namespace VM
             }
 
             *TopType = SlotType;
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             Size += NumSlots;
         }
@@ -210,7 +208,6 @@ namespace VM
 
             RangeCheck_Read(NumSlots);
 
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             constexpr VM::EVariableSlotType SlotType = GetSlotType<T>();
 
             const VM::EVariableSlotType ActualType = *(GetTopType() - 1);
@@ -227,10 +224,9 @@ namespace VM
                 const VM::EVariableSlotType ActualType2 = *(GetTopType() - 2);
                 ASSERT_MSG((ActualType2 == VM::EVariableSlotType::Double_2), "Actual type: %s, expected Double_2", VM::ToString(SlotType));
             }
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
-            const T* const Data = reinterpret_cast<T*>(GetTopValue() - NumSlots);
             Size -= NumSlots;
+            const T* const Data = reinterpret_cast<T*>(GetTopValue());
 
             return *Data;
         }
@@ -252,10 +248,7 @@ namespace VM
             RangeCheck_Write(NumSlotsWrite);
 
             GenericDup<u4>(GetTopValue());
-
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             GenericDup<VM::EVariableSlotType>(GetTopType());
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             Size += NumSlotsWrite;
         }
@@ -269,10 +262,7 @@ namespace VM
             RangeCheck_Write(NumSlotsWrite);
 
             GenericDupX1<u4>(GetTopValue());
-
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             GenericDupX1<VM::EVariableSlotType>(GetTopType());
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             Size += NumSlotsWrite;
         }
@@ -286,10 +276,7 @@ namespace VM
             RangeCheck_Write(NumSlotsWrite)
 
             GenericDup2(GetTopValue());
-
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             GenericDup2(GetTopType());
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             Size += NumSlotsWrite;
         }
@@ -303,10 +290,7 @@ namespace VM
             RangeCheck_Write(NumSlotsWrite)
 
             Generic_Dup2X1(GetTopValue());
-
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             Generic_Dup2X1(GetTopType());
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             Size += NumSlotsWrite;
         }
@@ -320,10 +304,7 @@ namespace VM
             RangeCheck_Write(NumSlotsWrite)
 
             Generic_Dup2X2(GetTopValue());
-
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             Generic_Dup2X2(GetTopType());
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
 
             Size += NumSlotsWrite;
         }
@@ -334,28 +315,18 @@ namespace VM
             RangeCheck_Read(NumSlotsRead)
 
             Generic_Swap(GetTopValue());
-
-#if EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
             Generic_Swap(GetTopType());
-#endif // EXJ_WITH_LOCAL_VARIABLES_DEBUG_INFO
         }
 
-        template<typename T>
-        FORCEINLINE void ForEach(std::function<void(T)>&& Function)
+        FORCEINLINE void ForEachOop(std::function<void(oop)>&& Consumer)
         {
-            constexpr VM::EVariableSlotType VariableSlotType = VM::GetSlotType<T>();
-            static_assert
-            (
-                VariableSlotType != EVariableSlotType::Double_2 && VariableSlotType != EVariableSlotType::Long_2,
-                "Double_2 and Long_2 are service slot types, they should not be used in this scenario"
-            );
-
             for (u4 Index = 0; Index < Size; Index++)
             {
                 const VM::EVariableSlotType CurrentVariableSlotType = TypeMemory[Index];
-                if (VariableSlotType == CurrentVariableSlotType)
+                if (VM::EVariableSlotType::Reference == CurrentVariableSlotType)
                 {
-                    Function(*reinterpret_cast<T*>(ValueMemory + Index));
+                    const oop CurrentOop = *reinterpret_cast<oop*>(ValueMemory + Index);
+                    Consumer(CurrentOop);
                 }
             }
         }
@@ -365,8 +336,8 @@ namespace VM
         // Stores values
         u4* const ValueMemory;
 
-        // Used for validation and for Dup2 family of instruction that do care about types (such a shame)
-        VM::EVariableSlotType* TypeMemory;
+        // Used for type checks
+        VM::EVariableSlotType* const TypeMemory;
 
         u4 Size;
         u4 Capacity;
