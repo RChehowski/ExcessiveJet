@@ -18,9 +18,6 @@ namespace Util
         CDisposableMemoryReader(const CDisposableMemoryReader&) = delete;
         CDisposableMemoryReader(CDisposableMemoryReader&&) = delete;
 
-        //CMemoryReader& operator= CMemoryReader(const CMemoryReader&) = delete;
-        //CMemoryReader& operator= CMemoryReader(CMemoryReader&&) = delete;
-
         template<typename T>
         explicit FORCEINLINE CDisposableMemoryReader(const T* InMemory) : Memory(reinterpret_cast<const u1*>(InMemory)) {}
 
@@ -38,6 +35,12 @@ namespace Util
             const T* ValuePtr = reinterpret_cast<const T*>(Memory);
             Memory += sizeof(T);
             return *ValuePtr;
+        }
+
+        template<typename T = void>
+        [[nodiscard]] const T* GetMemory() const
+        {
+            return reinterpret_cast<const T*>(Memory);
         }
 
     private:

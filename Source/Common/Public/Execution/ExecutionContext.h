@@ -8,6 +8,12 @@
 
 namespace VM
 {
+    enum class EFastException : u1
+    {
+        // java.lang.ArithmeticException("/ by zero");
+        DivisionByZero,
+    };
+
     struct CExecutionContext
     {
         CExecutionContext(CThreadStack& InThreadStack, CLocalVariables& InLocalVariables)
@@ -38,6 +44,16 @@ namespace VM
         {
             static_assert(std::is_same_v<T, bool> || std::is_same_v<T, u2>);
             ConditionResult = static_cast<u2>(InConditionResult);
+        }
+
+        /**
+         * Quickly throw pre-defined exception
+         *
+         * @param FastException Exception type
+         */
+        void ThrowException(const EFastException FastException)
+        {
+
         }
 
     private:

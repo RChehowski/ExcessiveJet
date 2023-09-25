@@ -31,6 +31,7 @@ namespace Util
     template<typename T>
     FORCEINLINE void GenericAdd(VM::CThreadStack& ThreadStack)
     {
+        // TODO: Here and later - fix arg order
         const T Value1 = ThreadStack.Pop<T>();
         const T Value2 = ThreadStack.Pop<T>();
 
@@ -42,6 +43,7 @@ namespace Util
     template<typename T>
     FORCEINLINE void GenericSub(VM::CThreadStack& ThreadStack)
     {
+        // TODO: Here and later - fix arg order
         const T Value1 = ThreadStack.Pop<T>();
         const T Value2 = ThreadStack.Pop<T>();
 
@@ -53,6 +55,7 @@ namespace Util
     template<typename T>
     FORCEINLINE void GenericMul(VM::CThreadStack& ThreadStack)
     {
+        // TODO: Here and later - fix arg order
         const T Value1 = ThreadStack.Pop<T>();
         const T Value2 = ThreadStack.Pop<T>();
 
@@ -62,40 +65,68 @@ namespace Util
     }
 
     template<typename T>
-    FORCEINLINE void GenericDiv(VM::CThreadStack& ThreadStack)
+    FORCEINLINE void GenericDiv(VM::CExecutionContext& Context)
     {
-        const T Value1 = ThreadStack.Pop<T>();
-        const T Value2 = ThreadStack.Pop<T>();
+        VM::CThreadStack& ThreadStack = Context.GetThreadStack();
 
-        const T Result = Value1 * Value2;
+        const T Value2 = ThreadStack.Pop<T>();
+        const T Value1 = ThreadStack.Pop<T>();
+
+        const T Result = Value1 / Value2;
+
+        if constexpr (std::is_integral_v<T>)
+        {
+            // Integral division throws an arithmetic exception if divided by zero
+            if (Value2 == static_cast<T>(0))
+            {
+                Context.ThrowException(VM::EFastException::DivisionByZero);
+                return;
+            }
+        }
 
         ThreadStack.Push<T>(Result);
     }
 
 #pragma region Rem
     template<typename T, typename = std::enable_if<std::is_integral_v<T>>>
-    FORCEINLINE void GenericRem(VM::CThreadStack& ThreadStack)
+    FORCEINLINE void GenericRem(VM::CExecutionContext& Context)
     {
-        const T Value1 = ThreadStack.Pop<T>();
-        const T Value2 = ThreadStack.Pop<T>();
+        VM::CThreadStack& ThreadStack = Context.GetThreadStack();
 
-        ThreadStack.template Push<T>(Value1 % Value2);
+        const T Value2 = ThreadStack.Pop<T>();
+        const T Value1 = ThreadStack.Pop<T>();
+
+        // Integral division throws an arithmetic exception if divided by zero
+        if (Value2 == static_cast<T>(0))
+        {
+            Context.ThrowException(VM::EFastException::DivisionByZero);
+            return;
+        }
+
+        const T Result = Value1 % Value2;
+        ThreadStack.template Push<T>(Result);
     }
 
     template <>
-    FORCEINLINE void GenericRem<float>(VM::CThreadStack& ThreadStack)
+    FORCEINLINE void GenericRem<float>(VM::CExecutionContext& Context)
     {
-        const float Value1 = ThreadStack.Pop<float>();
+        VM::CThreadStack& ThreadStack = Context.GetThreadStack();
+
+        // TODO: Here and later - fix arg order
         const float Value2 = ThreadStack.Pop<float>();
+        const float Value1 = ThreadStack.Pop<float>();
 
         ThreadStack.template Push<float>(fmodf(Value1, Value2));
     }
 
     template <>
-    FORCEINLINE void GenericRem<double>(VM::CThreadStack& ThreadStack)
+    FORCEINLINE void GenericRem<double>(VM::CExecutionContext& Context)
     {
-        const double Value1 = ThreadStack.Pop<double>();
+        VM::CThreadStack& ThreadStack = Context.GetThreadStack();
+
+        // TODO: Here and later - fix arg order
         const double Value2 = ThreadStack.Pop<double>();
+        const double Value1 = ThreadStack.Pop<double>();
 
         ThreadStack.template Push<double>(fmod(Value1, Value2));
     }
@@ -342,17 +373,25 @@ namespace Util
     FORCEINLINE s4 LookupSwitch(s4 Key, CDisposableMemoryReader&& Reader)
     {
         // There's no padding here now
-        const u4 DefaultOffset = Reader.ReadNextCopy<u4>();
-        const u4 NumPairs = Reader.ReadNextCopy<u4>();
+        const s4 DefaultOffset = Reader.ReadNextCopy<s4>();
+        const s4 NumPairs = Reader.ReadNextCopy<s4>();
 
+        struct FMatchAndOffset
+        {
+            const s4 Match;
+            const s4 Offset;
+        };
+
+        const FMatchAndOffset* const MatchesAndOffsets = Reader.GetMemory<FMatchAndOffset>();
+
+        // TODO: Implement binary search
         for (u4 Index = 0; Index < NumPairs; ++Index)
         {
-            const s4 Match = Reader.ReadNextCopy<u4>();
-            const s4 Offset = Reader.ReadNextCopy<u4>();
+            const FMatchAndOffset& MatchAndOffset = MatchesAndOffsets[Index];
 
-            if (Key == Match)
+            if (Key == MatchAndOffset.Match)
             {
-                return Offset;
+                return MatchAndOffset.Offset;
             }
         }
 
@@ -814,37 +853,37 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(IDIV)
     {
-        Util::GenericDiv<s4>(Context.GetThreadStack());
+        Util::GenericDiv<s4>(Context);
     }
     DEFINE_OPCODE_HANDLER(LDIV)
     {
-        Util::GenericDiv<s8>(Context.GetThreadStack());
+        Util::GenericDiv<s8>(Context);
     }
 
     // 110 - 119
     DEFINE_OPCODE_HANDLER(FDIV)
     {
-        Util::GenericDiv<float>(Context.GetThreadStack());
+        Util::GenericDiv<float>(Context);
     }
     DEFINE_OPCODE_HANDLER(DDIV)
     {
-        Util::GenericDiv<double>(Context.GetThreadStack());
+        Util::GenericDiv<double>(Context);
     }
     DEFINE_OPCODE_HANDLER(IREM)
     {
-        Util::GenericRem<s4>(Context.GetThreadStack());
+        Util::GenericRem<s4>(Context);
     }
     DEFINE_OPCODE_HANDLER(LREM)
     {
-        Util::GenericRem<s8>(Context.GetThreadStack());
+        Util::GenericRem<s8>(Context);
     }
     DEFINE_OPCODE_HANDLER(FREM)
     {
-        Util::GenericRem<float>(Context.GetThreadStack());
+        Util::GenericRem<float>(Context);
     }
     DEFINE_OPCODE_HANDLER(DREM)
     {
-        Util::GenericRem<double>(Context.GetThreadStack());
+        Util::GenericRem<double>(Context);
     }
     DEFINE_OPCODE_HANDLER(INEG)
     {
@@ -986,9 +1025,33 @@ namespace Bytecode::OpcodeHandlers
     }
     DEFINE_OPCODE_HANDLER(LCMP)
     {
+        VM::CThreadStack& ThreadStack = Context.GetThreadStack();
+
+        const s8 Value1 = ThreadStack.Pop<s8>();
+        const s8 Value2 = ThreadStack.Pop<s8>();
+
+        if (Value1 > Value2)
+        {
+            ThreadStack.Push<s4>(1);
+        }
+        else if (Value1 < Value2)
+        {
+            ThreadStack.Push<s4>(-1);
+        }
+        else
+        {
+            ASSERT(Value1 == Value2);
+            ThreadStack.Push(0);
+        }
     }
     DEFINE_OPCODE_HANDLER(FCMPL)
     {
+        VM::CThreadStack& ThreadStack = Context.GetThreadStack();
+
+        const float Value1 = ThreadStack.Pop<float>();
+        const float Value2 = ThreadStack.Pop<float>();
+
+        // TODO: Finish
     }
 
     // 150 - 159
