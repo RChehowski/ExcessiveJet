@@ -50,17 +50,23 @@ namespace Compiler
         const u2 AddedInMinorVersion;
     };
 
-    #define DEFINE_ATTRIBUTE_NAME(Name, AddedInVersion, AddedInMinorVersion) \
-        static constexpr CAttributeType Name                                 \
-        {                                                                    \
-            LITERAL_TO_STRING(Name),                                         \
-            AddedInVersion,                                                  \
-            AddedInMinorVersion                                              \
-        }
+
 
     class CAttributeTypes
     {
     public:
+#ifdef DEFINE_ATTRIBUTE_NAME
+    #error DEFINE_ATTRIBUTE_NAME is already defined
+#endif // DEFINE_ATTRIBUTE_NAME
+
+#define DEFINE_ATTRIBUTE_NAME(_Name, _AddedInVersion, _AddedInMinorVersion) \
+        static constexpr CAttributeType _Name                               \
+        {                                                                   \
+            LITERAL_TO_STRING(_Name),                                       \
+            _AddedInVersion,                                                \
+            _AddedInMinorVersion                                            \
+        }
+
         DEFINE_ATTRIBUTE_NAME(ConstantValue,                          45, 3);
         DEFINE_ATTRIBUTE_NAME(Code,                                   45, 3);
         DEFINE_ATTRIBUTE_NAME(StackMapTable,                          50, 0);
@@ -82,10 +88,9 @@ namespace Compiler
         DEFINE_ATTRIBUTE_NAME(AnnotationDefault,                      49, 0);
         DEFINE_ATTRIBUTE_NAME(BootstrapMethods,                       51, 0);
 
-        static constexpr usz GetNumAttributeNames();
+#undef DEFINE_ATTRIBUTE_NAME
 
+        static constexpr usz GetNumAttributeNames();
         static const CAttributeType* GetAttributeNameByName(const Util::IStringUtf8& String);
     };
-
-    #undef DEFINE_ATTRIBUTE_NAME
 }

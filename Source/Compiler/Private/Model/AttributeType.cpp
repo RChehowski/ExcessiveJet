@@ -38,7 +38,7 @@ namespace Compiler
 
     constexpr usz CAttributeTypes::GetNumAttributeNames()
     {
-        return (usz)(sizeof(G_AttributeNamesArray) / sizeof(void*));
+        return ARRAY_COUNT(G_AttributeNamesArray);
     }
 
     const CAttributeType* CAttributeTypes::GetAttributeNameByName(const Util::IStringUtf8& String)

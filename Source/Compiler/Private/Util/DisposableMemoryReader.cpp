@@ -54,24 +54,20 @@ namespace Util
         ssz OriginatedOffset;
         switch (Origin)
         {
-            case EMemoryFileOrigin::Set:
-            {
-                OriginatedOffset = 0;
-                break;
-            }
+            default:
             case EMemoryFileOrigin::Cur:
             {
                 OriginatedOffset = CMathUtils::IntegerCast<ssz>(Position);
                 break;
             }
+            case EMemoryFileOrigin::Set:
+            {
+                OriginatedOffset = 0;
+                break;
+            }
             case EMemoryFileOrigin::End:
             {
                 OriginatedOffset = CMathUtils::IntegerCast<ssz>(GetSizeInMemory());
-                break;
-            }
-            default:
-            {
-                OriginatedOffset = CMathUtils::IntegerCast<ssz>(-1);
                 break;
             }
         }

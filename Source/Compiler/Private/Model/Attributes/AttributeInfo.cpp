@@ -27,15 +27,6 @@
 using Util::CLiteralStringUtf8;
 
 
-#define ADD_ATTRIBUTE_INFO_SPAWNER(ATTRIBUTE_NAME)                  \
-{                                                                   \
-    CLiteralStringUtf8(LITERAL_TO_STRING(ATTRIBUTE_NAME)),          \
-    []()                                                            \
-    {                                                               \
-        return std::make_shared<C##ATTRIBUTE_NAME##AttributeInfo>();\
-    }                                                               \
-}
-
 namespace Compiler
 {
 #pragma region CAttributeInfoHeader
@@ -76,14 +67,87 @@ namespace Compiler
     };
 #pragma endregion
 
+    CSharedAttributeInfo NewAttributeInfo_Code()
+    {
+        return std::make_shared<CCodeAttributeInfo>();
+    }
 
-    using CAttributeInfoSpawner = std::function<CSharedAttributeInfo()>;
-    using CAttributeInfoSpawners = std::unordered_map<Util::IStringUtf8, CAttributeInfoSpawner>;
+    CSharedAttributeInfo NewAttributeInfo_Synthetic()
+    {
+        return std::make_shared<CSyntheticAttributeInfo>();
+    }
 
+    CSharedAttributeInfo NewAttributeInfo_Signature()
+    {
+        return std::make_shared<CSignatureAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_Exceptions()
+    {
+        return std::make_shared<CExceptionsAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_Deprecated()
+    {
+        return std::make_shared<CDeprecatedAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_SourceFile()
+    {
+        return std::make_shared<CSourceFileAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_InnerClasses()
+    {
+        return std::make_shared<CInnerClassesAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_ConstantValue()
+    {
+        return std::make_shared<CConstantValueAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_LineNumberTable()
+    {
+        return std::make_shared<CLineNumberTableAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_EnclosingMethod()
+    {
+        return std::make_shared<CEnclosingMethodAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_LocalVariableTable()
+    {
+        return std::make_shared<CLocalVariableTableAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_LocalVariableTypeTable()
+    {
+        return std::make_shared<CLocalVariableTypeTableAttributeInfo>();
+    }
+
+    CSharedAttributeInfo NewAttributeInfo_RuntimeVisibleAnnotations()
+    {
+        return std::make_shared<CRuntimeVisibleAnnotationsAttributeInfo>();
+    }
+
+    //using CAttributeInfoSpawner = std::function<CSharedAttributeInfo()>;
+    typedef CSharedAttributeInfo (*CAttributeInfoSpawner)();
 
     CSharedAttributeInfo NewAttributeInfo(const Util::IStringUtf8& AttributeNameString)
     {
-        static const CAttributeInfoSpawners G_AttributeInfoSpawners
+#ifndef ADD_ATTRIBUTE_INFO_SPAWNER
+    #define ADD_ATTRIBUTE_INFO_SPAWNER(ATTRIBUTE_NAME)                  \
+    {                                                                   \
+        CLiteralStringUtf8(LITERAL_TO_STRING(ATTRIBUTE_NAME)),          \
+        NewAttributeInfo_##ATTRIBUTE_NAME                               \
+    }
+#else
+    #error ADD_ATTRIBUTE_INFO_SPAWNER should not been defined yet
+#endif // #ifndef ADD_ATTRIBUTE_INFO_SPAWNER
+
+        static const std::unordered_map<Util::IStringUtf8, CAttributeInfoSpawner> G_AttributeInfoSpawners
         {
             ADD_ATTRIBUTE_INFO_SPAWNER(Code),
             ADD_ATTRIBUTE_INFO_SPAWNER(Synthetic),
@@ -100,6 +164,8 @@ namespace Compiler
             ADD_ATTRIBUTE_INFO_SPAWNER(RuntimeVisibleAnnotations),
             // TODO: Support all of them!
         };
+
+#undef ADD_ATTRIBUTE_INFO_SPAWNER
 
         const auto It = G_AttributeInfoSpawners.find(AttributeNameString);
 
