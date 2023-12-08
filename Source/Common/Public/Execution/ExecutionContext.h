@@ -11,7 +11,10 @@ namespace VM
     enum class EFastException : u1
     {
         // java.lang.ArithmeticException("/ by zero");
-        DivisionByZero,
+        ArithmeticException_DivisionByZero,
+
+        // java.lang.NullPointerException("null");
+        NullPointerException,
     };
 
     struct CExecutionContext

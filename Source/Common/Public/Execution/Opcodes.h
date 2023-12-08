@@ -12,7 +12,9 @@
 #include "Util/ExcessiveAssert.h"
 #include "Execution/ExecutionContext.h"
 
-
+/**
+ * The signature of a "script" function that executes an opcode. All opcodes are using the same function signature.
+ */
 typedef void (*COpcodeHandler)(VM::CExecutionContext&, const Util::CAllocationRef);
 
 namespace Bytecode
@@ -34,6 +36,7 @@ namespace Bytecode
         /** The opcode has no side effects */
         None = 0,
 
+#pragma region Exception flags
         /** The opcode does integer division (can throw a java.lang.ArithmeticException("divide by zero")) */
         DoesIntegerDivision = 1 << 0,
 
@@ -51,19 +54,22 @@ namespace Bytecode
 
         /** Calls method (potential java.lang.StackOverflowError) */
         InvokesMethod = 1 << 5,
+#pragma endregion Exception flags
+
 
         ChangesControlFlow = 1 << 6,
 
         EvaluatesCondition = 1 << 7,
 
-
+        /** Calls Context.SetConditionResult() that will be later used to change the execution control flow */
+        SetsConditionResult = 1 << 8,
 
 
 
 
         // === MIX === //
         InvokesInstanceMethod = ReadsObjectReference | InvokesMethod,
-        Branching = ChangesControlFlow | EvaluatesCondition,
+        Branching = SetsConditionResult | EvaluatesCondition,
     };
 
 
@@ -71,6 +77,7 @@ namespace Bytecode
     class COpcode
     {
     private:
+        // TODO: Make InOpcodeFlags argument REQUIRED (not optional)
         /** Only can be constructed from COpcodes (a friend class below) */
         constexpr COpcode(const u1 InByteCode, const char *InLabel, COpcodeHandler InHandler, const EOpcodeFlags InOpcodeFlags = EOpcodeFlags::None) noexcept
             : ByteCode(InByteCode)
@@ -157,7 +164,10 @@ namespace Bytecode
 
     private:
         const u1 ByteCode;
+
+        /** A pointer to the globally statically allocated C string, the content is not stored here */
         const char* const Label;
+
         COpcodeHandler Handler;
 
         const EOpcodeFlags OpcodeFlags;
@@ -557,14 +567,14 @@ namespace Bytecode
         DEFINE_OPCODE(105, LMUL);
         DEFINE_OPCODE(106, FMUL);
         DEFINE_OPCODE(107, DMUL);
-        DEFINE_OPCODE(108, IDIV);
-        DEFINE_OPCODE(109, LDIV);
+        DEFINE_OPCODE(108, IDIV,        EOpcodeFlags::DoesIntegerDivision);
+        DEFINE_OPCODE(109, LDIV,        EOpcodeFlags::DoesIntegerDivision);
 
         // 110 - 119
         DEFINE_OPCODE(110, FDIV);
         DEFINE_OPCODE(111, DDIV);
-        DEFINE_OPCODE(112, IREM);
-        DEFINE_OPCODE(113, LREM);
+        DEFINE_OPCODE(112, IREM,        EOpcodeFlags::DoesIntegerDivision);
+        DEFINE_OPCODE(113, LREM,        EOpcodeFlags::DoesIntegerDivision);
         DEFINE_OPCODE(114, FREM);
         DEFINE_OPCODE(115, DREM);
         DEFINE_OPCODE(116, INEG);
